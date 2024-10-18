@@ -1,5 +1,5 @@
 {
-  "xsec": 1.0,
+  "xsec": 47.8111646191976,
   "year": "2018",
   "treeName": "Events",
   "histAxisName": "TT01j2l-SMEFT-mtt-0to700-UL18",
@@ -25,6 +25,6 @@
   "files": [
     "/cms/cephfs/data/store/user/hnelson2/mc/central_mini2nano_test/v9/nanoAOD_TTto2L2Nu_1Jets_smeft_MTT_0to700_UL18/NAOD-00000_4.root"
   ],
-  "nSumOfWeights": 1.0,
+  "nSumOfWeights": 4411.91155684,
   "isData": false
 }
