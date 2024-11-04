@@ -16,7 +16,7 @@ from topcoffea.modules import utils
 import topcoffea.modules.remote_environment as remote_environment
 
 LST_OF_KNOWN_EXECUTORS = ["futures", "work_queue"]
-proc_options = ["net_disc", "kinematics_processor", "weight_processor", "analysis_processor"]
+proc_options = ["genDNNDisc", "kinematics_processor", "weight_processor", "analysis_processor"]
 
 def main():
     parser = argparse.ArgumentParser(description='You can customize your run')
@@ -67,8 +67,8 @@ def main():
         hist_lst = ['Lep1_pt', 'Lep2_pt', 'Lep1_eta',
                     'Lep2_eta', 'Lep1_phi', 'Lep2_phi', 
                     'nJet30', 'jet1_pt', 'jet2_pt']
-    elif args.hist_list == ["net_disc"]:
-        hist_lst = ['net_disc']
+    elif args.hist_list == ["genDNNDisc"]:
+        hist_lst = ['genDNNDisc']
     elif args.hist_list == ["kinematics"]:
         hist_lst = ["tops_pt", "avg_top_pt", "l0pt", 
                     "dr_leps", "ht", "jets_pt", 
@@ -180,9 +180,9 @@ def main():
     elif proc == 'weight_processor':
         import weight_processor
         processor_instance = weight_processor.AnalysisProcessor(samplesdict, wc_lst, hist_lst, lnet=lnet) 
-    elif proc == 'net_disc':
-        import net_disc
-        processor_instance = net_disc.AnalysisProcessor(samplesdict, wc_lst, hist_lst)
+    elif proc == 'genDNNDisc':
+        import genDNNDisc
+        processor_instance = genDNNDisc.AnalysisProcessor(samplesdict, wc_lst, hist_lst)
     elif proc == 'analysis_processor':
         analysis_processor = importlib.import_module(proc_name)
         processor_instance = analysis_processor.AnalysisProcessor(samplesdict,wc_lst,hist_lst)

@@ -29,13 +29,12 @@ class TensorAccumulator(AccumulatorABC):
         return TensorAccumulator(torch.concat([self._tensor, tensor], axis=0).type(self._dtype))
 
 
-def is_clean(obj_A, obj_B, drmin=0.4):
+def isClean(obj_A, obj_B, drmin=0.4):
     objB_near, objB_DR = obj_A.nearest(obj_B, return_metric=True)
     mask = ak.fill_none(objB_DR > drmin, True)
     return (mask)
 
-def event_selection(events):
-
+def genObjectSelection(events):
     ######## Initialize objets ########
     leps  = events.GenDressedLepton
     jets  = events.GenJet
@@ -47,14 +46,17 @@ def event_selection(events):
     el    = el[(el.pt>20) & (abs(el.eta)<2.5)]
     mu    = mu[(mu.pt>20) & (abs(mu.eta)<2.5)]
     leps  = ak.concatenate([el,mu],axis=1)
-    nleps = ak.num(leps)
 
     ######## Jet selection ########
     jets  = jets[(jets.pt>30) & (abs(jets.eta)<2.5)]
-    jets  = jets[is_clean(jets, leps, drmin=0.4) & is_clean(jets, nu, drmin=0.4)]
+    jets  = jets[isClean(jets, leps, drmin=0.4) & isClean(jets, nu, drmin=0.4)]
+
+    return leps, jets
+
+def genEventSelection(leps, jets):
+    nleps = ak.num(leps)
     njets = ak.num(jets)
 
-    ######## Event selections ########
     at_least_two_leps = ak.fill_none(nleps>=2,False)
     at_least_two_jets = ak.fill_none(njets>=2, False)
     
@@ -63,12 +65,4 @@ def event_selection(events):
     selections.add('2j', at_least_two_jets)
     event_selection_mask = selections.all('2l', '2j')
     
-    leps  = leps[event_selection_mask]
-    jets  = jets[event_selection_mask]
-    njets = njets[event_selection_mask]
-
-    eft_coeffs = ak.to_numpy(events['EFTfitCoefficients']) if hasattr(events, "EFTfitCoefficients") else None
-    eft_coeffs = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
-
-
-    return leps, jets, njets, eft_coeffs
+    return event_selection_mask
