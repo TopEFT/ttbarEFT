@@ -16,7 +16,7 @@ from topcoffea.modules import utils
 import topcoffea.modules.remote_environment as remote_environment
 
 LST_OF_KNOWN_EXECUTORS = ["futures", "work_queue"]
-proc_options = ["genDNNDisc", "kinematics_processor", "weight_processor", "analysis_processor"]
+proc_options = ["genDNNDisc", "kinematics_processor", "weight_processor", "analysis_processor", "leading_lep"]
 
 def main():
     parser = argparse.ArgumentParser(description='You can customize your run')
@@ -186,6 +186,9 @@ def main():
     elif proc == 'analysis_processor':
         analysis_processor = importlib.import_module(proc_name)
         processor_instance = analysis_processor.AnalysisProcessor(samplesdict,wc_lst,hist_lst)
+    elif proc == 'leading_lep':
+        import leading_lep
+        processor_instance = leading_lep.AnalysisProcessor(samplesdict, wc_lst, hist_lst)
 
     output = runner(flist, treename, processor_instance)
     
