@@ -41,10 +41,7 @@ class AnalysisProcessor(processor.ProcessorABC):
                                                                     [njets.to_numpy()], 
                                                                     [jets.pt[:,0].to_numpy()], 
                                                                     [jets.pt[:,1].to_numpy()],
-                                                                    #[jets.eta[:,0].to_numpy()],
-                                                                    #[jets.eta[:,1].to_numpy()],
-                                                                    #[ak.sum(jets.pt, axis=1).to_numpy()]
-                                                                    ]).T))
+                                                                   ]]).T))
     
         fit_coefs = fit_coefs.concat(torch.from_numpy(eft_coeffs))
 
