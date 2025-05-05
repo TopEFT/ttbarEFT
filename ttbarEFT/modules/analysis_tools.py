@@ -66,3 +66,16 @@ def genEventSelection(leps, jets):
     event_selection_mask = selections.all('2l', '2j')
     
     return event_selection_mask
+
+# Get the lumi for the given year
+def get_lumi(year):
+    lumi_dict = {
+        "2016APV": 19.52,
+        "2016": 16.81,
+        "2017": 41.48,
+        "2018": 59.83
+    }
+    if year not in lumi_dict.keys():
+        raise Exception(f"(ERROR: Unknown year \"{year}\".")
+    else:
+        return(lumi_dict[year])
