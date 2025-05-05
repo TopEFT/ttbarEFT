@@ -79,3 +79,26 @@ def get_lumi(year):
         raise Exception(f"(ERROR: Unknown year \"{year}\".")
     else:
         return(lumi_dict[year])
+
+def make_mt2(l0, l1, met):
+    nevents = len(np.zeros_like(met))
+    misspart = ak.zip(
+        {
+            "pt": met.pt,
+            "eta": 0,
+            "phi": met.phi,
+            "mass": np.full(nevents, 0),
+        },
+        with_name="PtEtaPhiMLorentzVector",
+        behavior=vector.behavior,
+    )
+
+    # switch to mt2_val = mt2(...) after updating mt2 version
+    mt2_val = mt2_arxiv(
+        l0.mass, l0.px, l0.py,                          # visible particle #1
+        l1.mass, l1.px, l1.py,                          # visible particle #2 
+        misspart.px, misspart.py,                       # missing transverse momentum
+        np.zeros_like(met.pt), np.zeros_like(met.pt)    # invisible masses
+    )
+
+    return mt2_val
