@@ -29,6 +29,8 @@ if __name__ == '__main__':
     parser.add_argument('--nchunks','-c'  , default=None  , help = 'You can choose to run only a number of chunks')
     parser.add_argument('--outname','-o'  , default='histos', help = 'Name of the output file with histograms')
     parser.add_argument('--treename'      , default='Events', help = 'Name of the tree inside the files')
+    parser.add_argument('--do-errors'      , action='store_true', help = 'Save the w**2 coefficients')
+    parser.add_argument('--do-systs', action='store_true', help = 'Compute systematic variations')
     parser.add_argument('--wc-list', action='extend', nargs='+', help = 'Specify a list of Wilson coefficients to use in filling histograms.')
     parser.add_argument('--hist-list', action='extend', nargs='+', help = 'Specify a list of histograms to fill.')
     parser.add_argument('--port', default='9123-9130', help = 'Specify the Work Queue port. An integer PORT or an integer range PORT_MIN-PORT_MAX.')
@@ -44,7 +46,9 @@ if __name__ == '__main__':
     nchunks     = int(args.nchunks) if not args.nchunks is None else args.nchunks
     outname     = args.outname
     treename    = args.treename
-    wc_lst = args.wc_list if args.wc_list is not None else []
+    do_errors   = args.do_errors
+    do_systs    = args.do_systs
+    wc_lst      = args.wc_list if args.wc_list is not None else []
     proc_file   = args.processor
     proc_name   = args.processor[:-3]
 
@@ -180,7 +184,7 @@ if __name__ == '__main__':
         print('No Wilson coefficients specified')
 
     # Run the processor and get the output
-    processor_instance = analysis_processor.AnalysisProcessor(samplesdict,wc_lst,hist_lst)
+    processor_instance = analysis_processor.AnalysisProcessor(samplesdict,wc_lst,hist_lst, do_errors=do_errors, do_systs=do_systs)
 
     if executor == "work_queue":
         executor_args = {
