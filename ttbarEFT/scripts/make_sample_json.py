@@ -50,7 +50,7 @@ def main():
 
     # loop through files to get nevents and sow, check is_data
     for f in files: 
-        i_events, i_gen_events, i_sum_of_weights, is_data = utils.get_info(f, treeName)
+        i_events, i_gen_events, i_sum_of_weights, i_sow_lhe_weights, is_data = utils.get_info(f, treeName)
         nevents += i_events
         n_gen_events += i_gen_events
         n_sum_of_weights += i_sum_of_weights

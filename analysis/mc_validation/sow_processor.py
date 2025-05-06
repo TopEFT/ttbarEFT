@@ -67,8 +67,8 @@ class AnalysisProcessor(processor.ProcessorABC):
         if isData: raise Exception("Why are you running this over data?")
 
         hist_axis_name = self._samples[dataset]["histAxisName"]
-        sow = self._samples[dataset]['nSumOfWeights']
         xsec = self._samples[dataset]['xsec']
+        nsow = self._samples[dataset]['nSumOfWeights']
 
         # Extract the EFT quadratic coefficients and optionally use them to calculate the coefficients on the w**2 quartic function
         # eft_coeffs is never Jagged so convert immediately to numpy for ease of use.
@@ -84,8 +84,8 @@ class AnalysisProcessor(processor.ProcessorABC):
         if eft_coeffs is None:
             # Basically any central MC samples
             wgts = events["genWeight"]
-        norm = xsec/sow
 
+        norm = xsec/nsow
 
         ####### Fill Histogram #######
         hout = self._histo_dict
