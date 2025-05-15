@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import copy
 import coffea
 import numpy as np
 import awkward as ak
@@ -10,7 +11,7 @@ from mt2 import mt2_arxiv
 
 from coffea import processor
 from coffea.analysis_tools import PackedSelection
-from coffea.nanoevents.methods import vector
+# from coffea.nanoevents.methods import vector
 
 # silence warnings due to using NanoGEN instead of full NanoAOD
 from coffea.nanoevents import NanoEventsFactory, NanoAODSchema
@@ -99,7 +100,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         dataset         = events.metadata['dataset']
         # isEFT             = self._samples[dataset]["WCnames"] != []
         isData          = self._samples[dataset]["isData"]
-        hist_axis_name  = self._samples[dataset]["histAxisName"]
+        histAxisName  = self._samples[dataset]["histAxisName"]
         year            = self._samples[dataset]['year']
         xsec            = self._samples[dataset]['xsec']
         sow             = self._samples[dataset]['nSumOfWeights']
@@ -160,7 +161,8 @@ class AnalysisProcessor(processor.ProcessorABC):
         met = events.GenMET
 
         # An array of length events that is just 1 for each event
-        events.nom = ak.ones_like(events.GenMET)
+        # events.nom = ak.ones_like(events.GenMET)
+        events.nom = np.ones_like(events['event'])
 
 
         ########## EFT Coefficients ##########
@@ -213,16 +215,16 @@ class AnalysisProcessor(processor.ProcessorABC):
             weights_obj_base.add("norm",(xsec/sow)*genw*lumi)
 
             # Attach PS weights (ISR/FSR) and scale weights (renormalization/factorization) and PDF weights
-            tc_cor.AttachPSWeights(events)
+            # tc_cor.AttachPSWeights(events)
             tc_cor.AttachScaleWeights(events)
 
             # FSR/ISR weights -- corrections come from AttachPSWeights
-            weights_obj_base.add('ISR', events.nom, events.ISRUp*(sow/sow_ISRUp), events.ISRDown*(sow/sow_ISRDown))
-            weights_obj_base.add('FSR', events.nom, events.FSRUp*(sow/sow_FSRUp), events.FSRDown*(sow/sow_FSRDown))
+            # weights_obj_base.add('ISR', events.nom, events.ISRUp*(sow/sow_ISRUp), events.ISRDown*(sow/sow_ISRDown))
+            # weights_obj_base.add('FSR', events.nom, events.FSRUp*(sow/sow_FSRUp), events.FSRDown*(sow/sow_FSRDown))
             # renorm/fact scale  -- corrections come from AttachScaleWeights
-            weights_obj_base.add('renorm', events.nom, events.renormUp*(sow/sow_renormUp), events.renormDown*(sow/sow_renormDown))
-            weights_obj_base.add('fact', events.nom, events.factUp*(sow/sow_factUp), events.factDown*(sow/sow_factDown))
-            weights_obj_base.add('renormfact', events.nom, events.renormfactUp*(sow/sow_renormfactUp), events.renormfactDown*(sow/sow_renormfactDown))
+            weights_obj_base.add('renorm', events.nom, events.renormUp*(1), events.renormDown*(1))
+            weights_obj_base.add('fact', events.nom, events.factUp*(1), events.factDown*(1))
+            weights_obj_base.add('renormfact', events.nom, events.renormUp_factUp*(1), events.renormDown_factDown*(1))
 
 
         ########## The rest of the processor is inside this loop over systs that affect object kinematics ##########
@@ -252,7 +254,7 @@ class AnalysisProcessor(processor.ProcessorABC):
 
             weights_dict={} #in the TOP-22-006 processor, the weights_dict has a different entry for each channel, and the following section is in a loop over channels
 
-            weights_dict['tW'].copy.deepcopy(weights_obj_base_for_kinematic_syst)
+            weights_dict['tW']=copy.deepcopy(weights_obj_base_for_kinematic_syst)
 
 
             ########## Event Selection Masks ##########
@@ -283,7 +285,7 @@ class AnalysisProcessor(processor.ProcessorABC):
             varnames["nleps"] = nleps 
             varnames["ntops"] = ntops
             varnames["top_pt"] = gen_top.pt
-            varnames["l0pt"] = ak.flatten(l0.pt) 
+            varnames["l0pt"] = l0.pt
             varnames["dr_leps"] = dr_leps
             varnames["mll"] = mll
             varnames["mt2"] = mt2_var
@@ -291,7 +293,9 @@ class AnalysisProcessor(processor.ProcessorABC):
 
             ########## Fill Histos ##########
 
-            for dense_axis_name, dense_axis_vals in varnmaes.items():
+            hout = self.accumulator
+
+            for dense_axis_name, dense_axis_vals in varnames.items():
                 if dense_axis_name not in self._hist_lst: continue
 
                 wgt_var_lst = ["nominal"]
@@ -323,8 +327,8 @@ class AnalysisProcessor(processor.ProcessorABC):
                             # Note in this case there is no up/down fluct for this cateogry, so we don't want to fill a hist for it
                             continue
 
-                    weights_flat = weight[all_cuts_mask]
-                    eft_coeffs_cut = eft_coeffs[all_cuts_mask] if eft_coeffs is not None else None
+                    weights_flat = weight[event_selection_mask]
+                    eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
 
                     # Fill the histos
                     axes_fill_info_dict = {
@@ -338,16 +342,16 @@ class AnalysisProcessor(processor.ProcessorABC):
                     hout[dense_axis_name].fill(**axes_fill_info_dict)
 
 
-                    axes_sumw2_fill_info_dict = {
-                        dense_axis_name+"_sumw2" : dense_axis_vals[all_cuts_mask],
-                        "process"       : histAxisName,
-                        "systematic"    : wgt_fluct,
-                        "weight"        : np.square(weights_flat),
-                        "eft_coeff"     : eft_coeffs_cut,
-                    }
-                    hout[dense_axis_name+"_sumw2"].fill(**axes_sumw2_fill_info_dict)
+                    # axes_sumw2_fill_info_dict = {
+                    #     dense_axis_name+"_sumw2" : dense_axis_vals[event_selection_mask],
+                    #     "process"       : histAxisName,
+                    #     "systematic"    : wgt_fluct,
+                    #     "weight"        : np.square(weights_flat),
+                    #     "eft_coeff"     : eft_coeffs_cut,
+                    # }
+                    # hout[dense_axis_name+"_sumw2"].fill(**axes_sumw2_fill_info_dict)
 
-            hout = self.accumulator
+        return hout
 
     def postprocess(self, accumulator):
         return accumulator

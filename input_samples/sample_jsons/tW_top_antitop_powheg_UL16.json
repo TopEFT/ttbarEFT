@@ -1,0 +1,15 @@
+{
+  "xsec":19.47,
+  "xsec_total": 1.0,
+  "year": "2016",
+  "treeName": "Events",
+  "histAxisName": "UL16-tWpowheg",
+  "options": "",
+  "WCnames": [],
+  "files": [
+    "/cms/cephfs/data/store/user/hnelson2/mc/RunIISummer16NanoAODv6/ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_PSweights_13TeV-powheg-pythia8/15F67CF8-4FA2-424C-ADA6-4A1065BDBB1D.root",
+    "/cms/cephfs/data/store/user/hnelson2/mc/RunIISummer16NanoAODv6/ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_PSweights_13TeV-powheg-pythia8/14C309A5-B90E-6B45-B781-50BFB07A71D5.root"
+  ],
+  "nSumOfWeights": 57107079.3254,
+  "isData": false
+}

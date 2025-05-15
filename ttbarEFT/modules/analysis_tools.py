@@ -1,9 +1,12 @@
-from coffea.analysis_tools import PackedSelection
-from coffea.processor import AccumulatorABC
-
 import awkward as ak
 import numpy as np
 import torch
+
+from coffea.analysis_tools import PackedSelection
+from coffea.processor import AccumulatorABC
+from coffea.nanoevents.methods import vector
+
+from mt2 import mt2
 
 class TensorAccumulator(AccumulatorABC):
     def __init__(self, tensor: torch.Tensor, dtype=torch.float64):
@@ -94,7 +97,7 @@ def make_mt2(l0, l1, met):
     )
 
     # switch to mt2_val = mt2(...) after updating mt2 version
-    mt2_val = mt2_arxiv(
+    mt2_val = mt2(
         l0.mass, l0.px, l0.py,                          # visible particle #1
         l1.mass, l1.px, l1.py,                          # visible particle #2 
         misspart.px, misspart.py,                       # missing transverse momentum

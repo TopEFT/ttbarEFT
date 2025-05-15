@@ -1,0 +1,31 @@
+{
+    "xsec": 5.9556309186,
+    "year": "UL17",
+    "treeName": "Events",
+    "histAxisName": "tW_new1",
+    "options": "",
+    "era": "",
+    "WCnames": [
+        "cHtbRe",
+        "ctGRe",
+        "ctGIm",
+        "cHQ3",
+        "cbWRe",
+        "cQl3",
+        "cleQt3Re",
+        "ctWRe",
+        "cleQt1Re"
+    ],
+    "files": [
+        "/cms/cephfs/data/store/user/hnelson2/mc/NanoGen/tW_April8/NanoGen_tW_new1/nanoGen_210.root",
+        "/cms/cephfs/data/store/user/hnelson2/mc/NanoGen/tW_April8/NanoGen_tW_new1/nanoGen_220.root",
+        "/cms/cephfs/data/store/user/hnelson2/mc/NanoGen/tW_April8/NanoGen_tW_new1/nanoGen_215.root",
+        "/cms/cephfs/data/store/user/hnelson2/mc/NanoGen/tW_April8/NanoGen_tW_new1/nanoGen_221.root",
+        "/cms/cephfs/data/store/user/hnelson2/mc/NanoGen/tW_April8/NanoGen_tW_new1/nanoGen_213.root",
+        "/cms/cephfs/data/store/user/hnelson2/mc/NanoGen/tW_April8/NanoGen_tW_new1/nanoGen_216.root",
+        "/cms/cephfs/data/store/user/hnelson2/mc/NanoGen/tW_April8/NanoGen_tW_new1/nanoGen_212.root"
+    ],
+    "nEvents": 100000,
+    "nSumOfWeights": 595.56309186,
+    "isData": false
+}
