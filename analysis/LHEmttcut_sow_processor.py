@@ -62,14 +62,9 @@ class AnalysisProcessor(processor.ProcessorABC):
                             hist.axis.Regular(bins=1, start=0, stop=2, name="nEvents", label="number of events"), 
                             wc_names=wc_names_lst, 
                             label="Events"),
-            "gen_mtt":   HistEFT(
-                            proc_axis,
-                            hist.axis.Regular(bins=65, start=0, stop=1300, name='gen_mtt', label='GEN invariant mass of tops [GeV]'),
-                            wc_names=wc_names_lst,
-                            label="Events"),
             "lhe_mtt":   HistEFT(
                             proc_axis,
-                            hist.axis.Regular(bins=65, start=0, stop=1300, name='lhe_mtt', label='LHE invariant mass of tops [GeV]'),
+                            hist.axis.Regular(bins=75, start=0, stop=1500, name='lhe_mtt', label='LHE invariant mass of tops [GeV]'),
                             wc_names=wc_names_lst,
                             label="Events"),
             "sow_0_700" :HistEFT(
@@ -138,9 +133,9 @@ class AnalysisProcessor(processor.ProcessorABC):
         lhe_mtt = (lhepart[:,0]+lhepart[:,1]+lhepart[:,2]+lhepart[:,3]+lhepart[:,4]+lhepart[:,5]+lhepart[:,6]+lhepart[:,7]).mass
 
         mtt_less700 = ak.fill_none(lhe_mtt<700, False)
-        mtt_more700 = ak.fill_none(lhe_mtt >=700, False)
-        mtt_less900 = ak.fill_none(lhe_mtt <=900, False)
-        mtt_more900 = ak.fill_none(lhe_mtt > 900, False)
+        mtt_more700 = ak.fill_none(lhe_mtt>=700, False)
+        mtt_less900 = ak.fill_none(lhe_mtt<=900, False)
+        mtt_more900 = ak.fill_none(lhe_mtt> 900, False)
 
         mtt_0_700 = PackedSelection()
         mtt_0_700.add('less700', mtt_less700)
@@ -175,7 +170,7 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         variables_to_fill = {
             "sow"     : counts,
-            "gen_mtt"  : gen_mtt,
+            # "gen_mtt"  : gen_mtt,
             "lhe_mtt" : lhe_mtt,
         }
 
@@ -193,38 +188,38 @@ class AnalysisProcessor(processor.ProcessorABC):
 
             hout[var_name].fill(**fill_info)
 
-        # fill_nevents = {
-        #     "nEvents"   : counts,
-        #     "process"   : hist_axis_name,
-        #     "weight"    : event_weights,
-        #     "eft_coeff" : None,
-        # }
+        fill_nevents = {
+            "nEvents"   : counts,
+            "process"   : hist_axis_name,
+            "weight"    : event_weights,
+            "eft_coeff" : None,
+        }
 
-        # fill_sow_0_700 = {
-        #     "sow_0_700" : counts[mask_0_700],
-        #     "process"   : hist_axis_name,
-        #     "weight"    : event_weights[mask_0_700],
-        #     "eft_coeff" : eft_coeffs[mask_0_700],
-        # }
+        fill_sow_0_700 = {
+            "sow_0_700" : counts[mask_0_700],
+            "process"   : hist_axis_name,
+            "weight"    : event_weights[mask_0_700],
+            "eft_coeff" : None,
+        }
 
-        # fill_sow_700_900 = {
-        #     "sow_700_900" : counts[mask_700_900],
-        #     "process"   : hist_axis_name,
-        #     "weight"    : event_weights[mask_700_900],
-        #     "eft_coeff" : eft_coeffs[mask_700_900],
-        # }
+        fill_sow_700_900 = {
+            "sow_700_900" : counts[mask_700_900],
+            "process"   : hist_axis_name,
+            "weight"    : event_weights[mask_700_900],
+            "eft_coeff" : None,
+        }
 
-        # fill_sow_900_Inf = {
-        #     "sow_900_Inf" : counts[mask_900_Inf],
-        #     "process"   : hist_axis_name,
-        #     "weight"    : event_weights[mask_900_Inf],
-        #     "eft_coeff" : eft_coeffs[mask_900_Inf],
-        # }
+        fill_sow_900_Inf = {
+            "sow_900_Inf" : counts[mask_900_Inf],
+            "process"   : hist_axis_name,
+            "weight"    : event_weights[mask_900_Inf],
+            "eft_coeff" : None,
+        }
 
-        # hout['nEvents'].fill(**fill_nevents)
-        # hout['sow_0_700'].fill(**fill_sow_0_700)
-        # hout['sow_700_900'].fill(**fill_sow_700_900)
-        # hout['sow_900_Inf'].fill(**fill_sow_900_Inf)
+        hout['nEvents'].fill(**fill_nevents)
+        hout['sow_0_700'].fill(**fill_sow_0_700)
+        hout['sow_700_900'].fill(**fill_sow_700_900)
+        hout['sow_900_Inf'].fill(**fill_sow_900_Inf)
 
         return hout
 
