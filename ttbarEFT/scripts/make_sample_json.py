@@ -51,6 +51,7 @@ def main():
     # loop through files to get nevents and sow, check is_data
     for f in files: 
         i_events, i_gen_events, i_sum_of_weights, is_data = utils.get_info(f, treeName)
+        #i_events, i_gen_events, i_sum_of_weights, sow_lhe_wgts, is_data = utils.get_info(f, treeName)
         nevents += i_events
         n_gen_events += i_gen_events
         n_sum_of_weights += i_sum_of_weights
@@ -72,7 +73,7 @@ def main():
         json.dump(sampdic, outfile, indent=4)
         print(f"\n New json file: {outputFile}") 
 
-    print("remember to check if the nEvents and sow is correct for EFT files")
+    print("If this is an EFT sample, the sow is incorrect and needs to be replaced with the sum of event weights at the SM")
 
 if __name__ == '__main__':
     main()

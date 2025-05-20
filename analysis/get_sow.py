@@ -13,15 +13,10 @@ import topcoffea.modules.utils as utils
 import mplhep as hep
 import matplotlib.pyplot as plt
 
-def get_sow(hists):
-	h_EFT = hists['sow'].as_hist({})
-	sow = h_EFT.values()
-	return sow, h_EFT.axes[0]
-
-def get_values_SM(hists, name):
-    h_EFT = hists[name].as_hist({})
+def get_sow_SM(h):
+    h_EFT = h.as_hist({})
     vals = h_EFT.values()
-    return vals, h_EFT.axes[0]
+    return vals
 
 
 if __name__ == '__main__':
@@ -33,10 +28,15 @@ if __name__ == '__main__':
     files = args.files
         
     for file in files: 
-        print("filename: ", file)
+        print(f"FILENAME: {file} \n")
         hists = utils.get_hist_from_pkl(file, allow_empty=False)
-    	# sow, hist_names = get_sow(hists)
         for name in hists.keys():
-            vals, hist_names = get_values_SM(hists, name)
-            print("hist name: ", name)
-            print("values: ", vals, '\n')
+            h_main=hists[name]
+            axes=h_main.axes[0]
+            print(f"HISTOGRAM: {name}")
+            for ax in axes: 
+                h_temp = h_main[ax]
+                vals = get_sow_SM(h_temp)
+                print(f"    {ax}={vals}")
+            print("\n")
+
