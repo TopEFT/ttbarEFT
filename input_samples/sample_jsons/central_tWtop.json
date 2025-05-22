@@ -1,0 +1,13 @@
+{
+  "xsec":19.47,
+  "year": "2016",
+  "treeName": "Events",
+  "histAxisName": "UL16-tWtop",
+  "options": "",
+  "WCnames": [],
+  "files": [
+    "/cms/cephfs/data/store/user/hnelson2/mc/RunIISummer16NanoAODv6/ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_PSweights_13TeV-powheg-pythia8/14C309A5-B90E-6B45-B781-50BFB07A71D5.root"
+  ],
+  "nSumOfWeights": 29785604.64870834,
+  "isData": false
+}
