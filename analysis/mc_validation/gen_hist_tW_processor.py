@@ -24,7 +24,19 @@ SM_pt = {"ctGIm": 0.0, "ctGRe":0.0, "cHQ3": 0.0, "ctWRe": 0.0, "cbWRe": 0.0, "cH
          "cleQt3Re11": 0.0, "cleQt3Re22": 0.0, "cleQt3Re33": 0.0,
          "cleQt1Re11": 0.0, "cleQt1Re22": 0.0, "cleQt1Re33": 0.0}
 
-rwgt_choice = SM_pt
+# starting point of tWLO_rwgt1 sample
+rwgt1 = {"ctGIm": -0.2, "ctGRe":-0.2, "cHQ3": 1.5, "ctWRe": -1.0, "cbWRe": -10.0, "cHtbRe": 4.0,
+         "cQl311": 4.0, "cQl322": 4.1, "cQl333": 4.2,
+         "cleQt3Re11": 12.0, "cleQt3Re22": 12.1, "cleQt3Re33": 12.2,
+         "cleQt1Re11": 15.0, "cleQt1Re22": 15.1, "cleQt1Re33": 15.2}
+
+# starting point of tWLO_rwgt2 sample
+rwgt2 = {"ctGIm": -0.5, "ctGRe":-0.5, "cHQ3": 1.5, "ctWRe": -1.0, "cbWRe": -8.0, "cHtbRe": 4.0,
+         "cQl311": 8.0, "cQl322": 8.0, "cQl333": 8.0,
+         "cleQt3Re11": 12.0, "cleQt3Re22": 12.0, "cleQt3Re33": 12.0,
+         "cleQt1Re11": 15.0, "cleQt1Re22": 15.0, "cleQt1Re33": 15.0}
+
+rwgt_choice = rwgt2
 
 # Get the lumi for the given year (in fb^-1)
 # Ref: https://twiki.cern.ch/twiki/bin/view/CMS/LumiRecommendationsRun2#Luminosity_for_pp_13_TeV_data
@@ -249,7 +261,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         tWLO_stpt2_const = 1.88947
 
 
-        norm = (xsec/sow)
+        norm = (xsec/sow)*lumi
         # norm = (xsec/sow)*(1/tW_yukawa_const)*lumi
         # norm = (xsec/sow)*(1/tW_new1_const)
         # norm = (xsec/sow)*(1/tW_powheg_const)

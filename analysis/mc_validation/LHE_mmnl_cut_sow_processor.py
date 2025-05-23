@@ -57,29 +57,29 @@ class AnalysisProcessor(processor.ProcessorABC):
                             hist.axis.Regular(bins=1, start=0, stop=2, name="sow", label="sum of weights for all events"), 
                             wc_names=wc_names_lst, 
                             label="Events"),
+            "sow_norm": HistEFT(
+                            proc_axis,
+                            hist.axis.Regular(bins=1, start=0, stop=2, name="sow_norm", label="normalized sum of weights for all events"), 
+                            wc_names=wc_names_lst, 
+                            label="Events"), 
             "nEvents":  HistEFT(
                             proc_axis,
                             hist.axis.Regular(bins=1, start=0, stop=2, name="nEvents", label="number of events"), 
                             wc_names=wc_names_lst, 
                             label="Events"),
-            "lhe_mtt":   HistEFT(
+            "lhe_mmnl":   HistEFT(
                             proc_axis,
-                            hist.axis.Regular(bins=75, start=0, stop=1500, name='lhe_mtt', label='LHE invariant mass of tops [GeV]'),
+                            hist.axis.Regular(bins=20, start=0, stop=200, name='lhe_mmnl', label='LHE invariant mass of initial leptons[GeV]'),
                             wc_names=wc_names_lst,
                             label="Events"),
-            "sow_0_700" :HistEFT(
+            "lhe_mmnl_100":   HistEFT(
                             proc_axis,
-                            hist.axis.Regular(bins=1, start=0, stop=2, name="sow_0_700", label="sum of weights for all events"), 
-                            wc_names=wc_names_lst, 
+                            hist.axis.Regular(bins=20, start=0, stop=200, name='lhe_mmnl_100', label='LHE invariant mass of initial leptons[GeV]'),
+                            wc_names=wc_names_lst,
                             label="Events"),
-            "sow_700_900" :HistEFT(
+            "sow_mmnl_100" :HistEFT(
                             proc_axis,
-                            hist.axis.Regular(bins=1, start=0, stop=2, name="sow_700_900", label="sum of weights for all events"), 
-                            wc_names=wc_names_lst, 
-                            label="Events"),
-            "sow_900_Inf" :HistEFT(
-                            proc_axis,
-                            hist.axis.Regular(bins=1, start=0, stop=2, name="sow_900_Inf", label="sum of weights for all events"), 
+                            hist.axis.Regular(bins=1, start=0, stop=2, name="sow_mmnl_100", label="sum of weights for events mmnl>100"), 
                             wc_names=wc_names_lst, 
                             label="Events"),
         }
@@ -126,100 +126,81 @@ class AnalysisProcessor(processor.ProcessorABC):
         ######## Top selection ########
 
         # mttbar calculation using gen particles 
-        gen_top = ak.pad_none(genpart[is_final_mask & (abs(genpart.pdgId) == 6)],2)
-        gen_mtt = (gen_top[:,0] + gen_top[:,1]).mass
 
         # mttbar calculation using LHE particles. This is identical to the filter used in the central sample production
-        lhe_mtt = (lhepart[:,0]+lhepart[:,1]+lhepart[:,2]+lhepart[:,3]+lhepart[:,4]+lhepart[:,5]+lhepart[:,6]+lhepart[:,7]).mass
+        lhe_mmnl = (lhepart[:,2]+lhepart[:,3]).mass
 
-        mtt_less700 = ak.fill_none(lhe_mtt<700, False)
-        mtt_more700 = ak.fill_none(lhe_mtt>=700, False)
-        mtt_less900 = ak.fill_none(lhe_mtt<=900, False)
-        mtt_more900 = ak.fill_none(lhe_mtt> 900, False)
+        mmnl_more100 = ak.fill_none(lhe_mmnl>100, False)
 
-        mtt_0_700 = PackedSelection()
-        mtt_0_700.add('less700', mtt_less700)
-
-        mtt_700_900 = PackedSelection()
-        mtt_700_900.add('more700', mtt_more700)
-        mtt_700_900.add('less900', mtt_less900)
-
-        mtt_900_Inf = PackedSelection()
-        mtt_900_Inf.add('more900', mtt_more900)
-
-        mask_0_700 = mtt_0_700.all('less700')
-        mask_700_900 = mtt_700_900.all('more700', 'less900')
-        mask_900_Inf = mtt_900_Inf.all('more900')
+        selections = PackedSelection()
+        selections.add('mmnl', mmnl_more100)
+        event_selection_mask = selections.all('mmnl')
 
         ######## Normalization ########
 
-        norm = 1
+        norm = (xsec/sow)
 
         if eft_coeffs is None:
             genw = events["genWeight"]
         else:
             genw = np.ones_like(events['event'])
 
-        event_weights = norm*genw
-
         counts = np.ones_like(events['event'])
+        event_weights = genw*norm
 
         ######## Fill histos ########
 
         hout = self._histo_dict
 
-        variables_to_fill = {
-            "sow"     : counts,
-            # "gen_mtt"  : gen_mtt,
-            "lhe_mtt" : lhe_mtt,
+        sow_fill_info = {
+            "sow"       : counts, 
+            "process"   : hist_axis_name, 
+            "weight"    : genw, 
+            "eft_coeff" : eft_coeffs,
         }
 
-        for var_name, var_values in variables_to_fill.items():
-            if var_name not in self._hist_lst:
-                print(f"Skipping \"{var_name}\", it is not in the list of hists to include")
-                continue
+        sow_norm_fill_info = {
+            "sow_norm"  : counts, 
+            "process"   : hist_axis_name, 
+            "weight"    : event_weights*norm, 
+            "eft_coeff" : eft_coeffs,
+        }
 
-            fill_info = {
-                var_name    : var_values,
-                "process"   : hist_axis_name,
-                "weight"    : event_weights,
-                "eft_coeff" : eft_coeffs,
-            }
+        sow_mmnl_100_fill_info = {
+            "sow_mmnl_100"  : lhe_mmnl[event_selection_mask],
+            "process"       : hist_axis_name,
+            "weight"        : event_weights[event_selection_mask],
+            "eft_coeff"     : eft_coeffs[event_selection_mask],
+        }
 
-            hout[var_name].fill(**fill_info)
-
-        fill_nevents = {
-            "nEvents"   : counts,
+        lhe_mmnl_fill_info = {
+            "lhe_mmnl" : lhe_mmnl,
             "process"   : hist_axis_name,
+            "weight"    : event_weights,
+            "eft_coeff" : eft_coeffs,
+        }
+
+        lhe_mmnl100_fill_info = {
+            "lhe_mmnl_100" : lhe_mmnl[event_selection_mask],
+            "process"   : hist_axis_name,
+            "weight"    : event_weights[event_selection_mask],
+            "eft_coeff" : eft_coeffs[event_selection_mask],
+        }
+
+        # Here, weight = counts instead of wgts because this hist is just counting the number
+        # of raw events in the file, not effected by the weighting of the event
+        nevents_fill_info = {
+            "nEvents"   : counts, 
+            "process"   : hist_axis_name, 
             "weight"    : counts,
             "eft_coeff" : None,
         }
 
-        fill_sow_0_700 = {
-            "sow_0_700" : counts[mask_0_700],
-            "process"   : hist_axis_name,
-            "weight"    : event_weights[mask_0_700],
-            "eft_coeff" : None,
-        }
-
-        fill_sow_700_900 = {
-            "sow_700_900" : counts[mask_700_900],
-            "process"   : hist_axis_name,
-            "weight"    : event_weights[mask_700_900],
-            "eft_coeff" : None,
-        }
-
-        fill_sow_900_Inf = {
-            "sow_900_Inf" : counts[mask_900_Inf],
-            "process"   : hist_axis_name,
-            "weight"    : event_weights[mask_900_Inf],
-            "eft_coeff" : None,
-        }
-
-        hout['nEvents'].fill(**fill_nevents)
-        hout['sow_0_700'].fill(**fill_sow_0_700)
-        hout['sow_700_900'].fill(**fill_sow_700_900)
-        hout['sow_900_Inf'].fill(**fill_sow_900_Inf)
+        hout['sow'].fill(**sow_fill_info)
+        hout['sow_norm'].fill(**sow_norm_fill_info)
+        hout['sow_mmnl_100'].fill(**sow_mmnl_100_fill_info)
+        hout['lhe_mmnl'].fill(**lhe_mmnl_fill_info)
+        hout['lhe_mmnl_100'].fill(**lhe_mmnl100_fill_info)
 
         return hout
 
