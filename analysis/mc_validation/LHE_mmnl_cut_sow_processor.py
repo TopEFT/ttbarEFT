@@ -167,7 +167,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         }
 
         sow_mmnl_100_fill_info = {
-            "sow_mmnl_100"  : lhe_mmnl[event_selection_mask],
+            "sow_mmnl_100"  : counts[event_selection_mask],
             "process"       : hist_axis_name,
             "weight"        : event_weights[event_selection_mask],
             "eft_coeff"     : eft_coeffs[event_selection_mask],
@@ -190,12 +190,13 @@ class AnalysisProcessor(processor.ProcessorABC):
         # Here, weight = counts instead of wgts because this hist is just counting the number
         # of raw events in the file, not effected by the weighting of the event
         nevents_fill_info = {
-            "nEvents"   : counts, 
+            "nEvents"   : counts[event_selection_mask], 
             "process"   : hist_axis_name, 
-            "weight"    : counts,
+            "weight"    : counts[event_selection_mask],
             "eft_coeff" : None,
         }
 
+        hout['nEvents'].fill(**nevents_fill_info)
         hout['sow'].fill(**sow_fill_info)
         hout['sow_norm'].fill(**sow_norm_fill_info)
         hout['sow_mmnl_100'].fill(**sow_mmnl_100_fill_info)
