@@ -1,0 +1,27 @@
+# Temporary and binary files
+*.log
+.*.swp
+*/.ipynb_checkpoints/*
+*__pycache__/
+.cache/*
+*.ipynb_checkpoints/
+
+# User generated files from running code
+analysis/*/wq-executor-tmp-*
+analysis/*/wq-*.summary
+analysis/*/envs
+analysis/*.png
+analysis/tmp*-tmp-*/
+analysis/*.pkl.gz
+analysis/__pycache__/
+analysis/*/*.pkl.gz
+
+# Distribution / packaging
+*.egg
+*.egg-info
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
