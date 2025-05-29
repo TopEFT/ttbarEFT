@@ -121,15 +121,18 @@ class AnalysisProcessor(processor.ProcessorABC):
         lhepart = events.LHEPart
 
         genpart = events.GenPart
-        is_final_mask = genpart.hasFlags(["fromHardProcess","isLastCopy"])
 
-        ######## Top selection ########
+        ######## mmnl cut #######
+        '''invariant mass of the initial leptons (not from the top decay)
+        the tW samples were produced using the MG process definitions: 
+          p p > t l- vl~, (t > l+ vl b) 
+          p p > t~ l+ vl, (t~ > l- vl~ b~
+        when this was used to make the nanogen samples, lhepart[:,5]+lhepart[:,6] are always the lv pair NOT from the top decay 
+        confirmation of this can be found in ttbarEFT/analysis/mc_validation/check_tW_LHEordering.ipynb
+        '''
+        lhe_mmnl = (lhepart[:,5]+lhepart[:,6]).mass
 
-        # mttbar calculation using gen particles 
-
-        # mttbar calculation using LHE particles. This is identical to the filter used in the central sample production
-        lhe_mmnl = (lhepart[:,2]+lhepart[:,3]).mass
-
+        # mask of just inv mass > 100 to match 100 = mmnl used in MG standalone xsec calculation
         mmnl_more100 = ak.fill_none(lhe_mmnl>100, False)
 
         selections = PackedSelection()
