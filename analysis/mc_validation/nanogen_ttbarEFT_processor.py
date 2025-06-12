@@ -255,7 +255,7 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         ######## Normalization ########
 
-        lumi = 1000.0*get_lumi(year)
+        lumi = 1000.0*get_lumi(year) #lumi is in fb^-1 but xsec is in pb
         norm = (xsec/sow)*lumi
         # norm = 1
 
