@@ -1,0 +1,32 @@
+{
+    "xsec": 77.0803,
+    "year": "2017",
+    "treeName": "Events",
+    "histAxisName": "TT01j2l_UL17_mtt_0to700",
+    "options": "",
+    "era": "",
+    "WCnames": [
+        "cQd1",
+        "ctj1",
+        "cQj31",
+        "ctj8",
+        "ctd1",
+        "ctd8",
+        "ctGRe",
+        "ctGIm",
+        "cQj11",
+        "cQj18",
+        "ctu8",
+        "cQd8",
+        "ctu1",
+        "cQu1",
+        "cQj38",
+        "cQu8"
+    ],
+    "files": [
+        "/cms/cephfs/data/store/user/hnelson2/mc/central_ttbar_nanoAOD/UL17/nanoAOD_TTto2L2Nu_1Jets_smeft_MTT_0to700/NAOD-00000_2262.root"
+    ],
+    "nEvents": 1.0,
+    "nSumOfWeights": 1.0,
+    "isData": false
+}
