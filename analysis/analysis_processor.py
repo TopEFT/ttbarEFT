@@ -129,17 +129,17 @@ class AnalysisProcessor(processor.ProcessorABC):
         leptonSelection = tt_os.Run2LeptonSelection()
 
         ######### Leptons  ##########
-        # ele['isPres']=leptonSelection.is_pres_ele(ele)
-        # mu['isPres']=leptonSelection.is_pres_muon(mu)
+        ele['isPres']=leptonSelection.is_pres_ele(ele)
+        mu['isPres']=leptonSelection.is_pres_muon(mu)
 
-        # ele_good = ele[ele.isPres]
-        # mu_good = mu[mu.isPres]
+        ele_good = ele[ele.isPres]
+        mu_good = mu[mu.isPres]
 
-        # leps = ak.concatenate([ele_good, mu_good], axis=1)
-        # nleps = ak.num(leps)
-
-        leps = ak.concatenate([ele,mu],axis=1)
+        leps = ak.concatenate([ele_good, mu_good], axis=1)
         nleps = ak.num(leps)
+
+        # leps = ak.concatenate([ele,mu],axis=1)
+        # nleps = ak.num(leps)
 
 
         ######### EFT coefficients ##########
@@ -174,8 +174,7 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         good_events = events[event_selection_mask]
 
-        # fname = 'output_lep_selec'
-        fname = 'output_trg'
+        fname = 'output_lep_selec'
         with open(f'{fname}.txt', 'w') as output:
             for i in range(len(good_events)):
                 output.write(f"{good_events[i].run}:{get_lumi(year)}:{good_events[i].event}\n")
