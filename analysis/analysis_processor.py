@@ -23,6 +23,7 @@ import topcoffea.modules.event_selection as tc_es
 from ttbarEFT.modules.analysis_tools import make_mt2, get_lumi
 from ttbarEFT.modules.axes import info as axes_info
 import ttbarEFT.modules.event_selection as tt_es
+import ttbarEFT.modules.object_selection as tt_os
 
 NanoAODSchema.warn_missing_crossrefs = False
 np.seterr(divide='ignore', invalid='ignore', over='ignore')
@@ -125,11 +126,21 @@ class AnalysisProcessor(processor.ProcessorABC):
         # An array of lenght events that is just 1 for each event
         events.nom = ak.ones_like(events.MET.pt)
 
-        pass_trg = tc_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict)
+        leptonSelection = tt_os.Run2LeptonSelection()
 
         ######### Leptons  ##########
+        # ele['isPres']=leptonSelection.is_pres_ele(ele)
+        # mu['isPres']=leptonSelection.is_pres_muon(mu)
+
+        # ele_good = ele[ele.isPres]
+        # mu_good = mu[mu.isPres]
+
+        # leps = ak.concatenate([ele_good, mu_good], axis=1)
+        # nleps = ak.num(leps)
+
         leps = ak.concatenate([ele,mu],axis=1)
         nleps = ak.num(leps)
+
 
         ######### EFT coefficients ##########
 
@@ -144,24 +155,32 @@ class AnalysisProcessor(processor.ProcessorABC):
         # Initialize the out object
         hout = self.accumulator
 
+
+        ######### Selection Masks #########
+
+        # create trigger mask
+        pass_trg = tc_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict)
+
+
         ######### Store boolean masks with PackedSelection ##########
 
         selections = PackedSelection(dtype='uint64')
         
         at_least_two_leps = ak.fill_none(nleps>=2, False)
         selections.add("2l", at_least_two_leps) 
-
         selections.add("trg", pass_trg)
 
         event_selection_mask = selections.all('2l', 'trg')
 
         good_events = events[event_selection_mask]
 
-        with open('output_newtrg.txt', 'w') as output:
+        # fname = 'output_lep_selec'
+        fname = 'output_trg'
+        with open(f'{fname}.txt', 'w') as output:
             for i in range(len(good_events)):
                 output.write(f"{good_events[i].run}:{get_lumi(year)}:{good_events[i].event}\n")
 
-        print(f"run:lumi:event info saved to output.txt")
+        print(f"\n\n run:lumi:event info saved to {fname}.txt\n\n ")
 
         return hout
 
