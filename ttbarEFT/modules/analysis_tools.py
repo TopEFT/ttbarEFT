@@ -40,16 +40,17 @@ def genObjectSelection(events):
     jets  = events.GenJet
     el    = leps[abs(leps.pdgId) == 11]
     mu    = leps[abs(leps.pdgId) == 13]
-    nu    = leps[(abs(leps.pdgId) == 12) | (abs(leps.pdgId) == 14)]
 
     ######## Lep selection ########
     el    = el[(el.pt>20) & (abs(el.eta)<2.5)]
     mu    = mu[(mu.pt>20) & (abs(mu.eta)<2.5)]
     leps  = ak.concatenate([el,mu],axis=1)
+    leps  = leps[ak.argsort(leps.pt, axis=-1, ascending=False)]
 
     ######## Jet selection ########
     jets  = jets[(jets.pt>30) & (abs(jets.eta)<2.5)]
-    jets  = jets[isClean(jets, leps, drmin=0.4) & isClean(jets, nu, drmin=0.4)]
+    jets  = jets[isClean(jets, leps, drmin=0.4)]
+    jets  = jets[ak.argsort(jets.pt, axis=-1, ascending=False)]
 
     return leps, jets
 

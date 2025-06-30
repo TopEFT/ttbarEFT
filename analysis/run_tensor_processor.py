@@ -1,21 +1,12 @@
 #!/usr/bin/env python
-import argparse
-import json
-import time
-import os
-import cProfile
-import argparse
-import torch
-import ml_data
+import argparse, json, os, time
 
-import numpy as np
 from coffea import processor
 from coffea.nanoevents import NanoAODSchema
+from torch import float64, save
 
 from topcoffea.modules import utils
 import topcoffea.modules.remote_environment as remote_environment
-
-LST_OF_KNOWN_EXECUTORS = ["futures", "work_queue"]
 
 def main():
     parser = argparse.ArgumentParser(description='You can customize your run')
@@ -28,8 +19,8 @@ def main():
     parser.add_argument('--outname','-o'  , default='/scratch365/cmcgrad2/data', help = 'Name of the output file')
     parser.add_argument('--treename'      , default='Events', help = 'Name of the tree inside the files')
     parser.add_argument('--port', default='9123-9130', help = 'Specify the Work Queue port. An integer PORT or an integer range PORT_MIN-PORT_MAX.')
-    parser.add_argument('--processor', '-p', default='ml_data', help='Specify processor name (without .py)')
-    parser.add_argument('--dtype', '-d', default=torch.float64, help='dtype used to build tensors')
+    parser.add_argument('--processor', '-p', default='centralGen', help='Specify processor name (without .py)')
+    parser.add_argument('--dtype', '-d', default=float64, help='dtype used to build tensors')
     
     args        = parser.parse_args()
     jsonFiles   = args.jsonFiles
@@ -45,9 +36,6 @@ def main():
 
     proc_file = proc+'.py'
     print("\n running with processor: ", proc_file, '\n')
-
-    if executor not in LST_OF_KNOWN_EXECUTORS:
-        raise Exception(f"The \"{executor}\" executor is not known. Please specify an executor from the known executors ({LST_OF_KNOWN_EXECUTORS}). Exiting.")
 
     if executor == "work_queue":
         port = list(map(int, args.port.split('-')))
@@ -72,6 +60,7 @@ def main():
         jsonFiles = jsonFiles.replace(' ', '').split(',')
     elif isinstance(jsonFiles, str):
         jsonFiles = [jsonFiles]
+
     for jsonFile in jsonFiles:
         if os.path.isdir(jsonFile):
             if not jsonFile.endswith('/'): jsonFile+='/'
@@ -79,12 +68,13 @@ def main():
                 if f.endswith('.json'): allInputFiles.append(jsonFile+f)
         else:
             allInputFiles.append(jsonFile)
-
+        
     for f in allInputFiles:
         if not os.path.isfile(f):
             raise Exception(f'[ERROR] Input file {f} not found!')
         if f.endswith('.json'):
             LoadJsonToSampleName(f, prefix)
+         # Open cfg files
         else:
             with open(f) as fin:
                 print(' >> Reading json from cfg file...')
@@ -110,12 +100,15 @@ def main():
     flist = {}
     for sname in samplesdict.keys():
         redirector = samplesdict[sname]['redirector']
-        flist[sname] = [(redirector+f) for f in samplesdict[sname]['files']]
-        
+        flist[sname] = [f'{prefix}{f}' for f in samplesdict[sname]['files']]
+
     wc_set = ()
     for item in samplesdict:
         for i, file_name in enumerate(samplesdict[item]['files']):
-            wc_lst = utils.get_list_of_wc_names(file_name)
+            if prefix:
+                wc_lst = utils.get_list_of_wc_names(f'{prefix}/{file_name}')
+            else:
+                wc_lst = utils.get_list_of_wc_names(file_name)
             if i==0:
                 wc_set = set(wc_lst)
             else:
@@ -132,8 +125,7 @@ def main():
             'tasks_accum_log': 'tasks.log',
             'environment_file': remote_environment.get_environment(
                 extra_conda=["pytorch=2.3.0", "numpy=1.23.5", "pyyaml=6.0.1"],
-                extra_pip_local = {"EFTmva": ["models", "net.py"], 
-                                  },
+                extra_pip_local = {"ttbarEFT": ["ttbarEFT", "setup.py"]},
             ),
             'extra_input_files' : [proc_file],
             'retries': 5,
@@ -144,7 +136,7 @@ def main():
             'chunks_accum_in_mem': 2,
             'fast_terminate_workers': 0,
             'verbose': True,
-            'print_stdout': False,
+            'print_stdout': True,
         }
 
     tstart = time.time()
@@ -156,11 +148,18 @@ def main():
         executor = processor.WorkQueueExecutor(**executor_args)
         runner = processor.Runner(executor, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks, skipbadfiles=False, xrootdtimeout=180)
 
-    
-    processor_instance = ml_data.AnalysisProcessor(samplesdict, dtype=dtype)
+    if proc == 'ml_data':
+        import ml_data
+        processor_instance = ml_data.AnalysisProcessor(samplesdict, dtype=dtype)
+    elif proc == 'centralGen':
+        import centralGen
+        processor_instance = centralGen.AnalysisProcessor(samplesdict, dtype)
+    elif proc == 'shellProc':
+        import shellProc
+        processor_instance = shellProc.AnalysisProcessor(samplesdict, dtype)
 
     output = runner(flist, treename, processor_instance)
-    
+
     dt = time.time() - tstart
 
     if executor == "work_queue":
@@ -169,14 +168,18 @@ def main():
         print(f'Processing time: {dt:.2f} with {nworkers} ({dt*nworkers:.2f} cpu overall)')
 
     if not os.path.isdir(outname): os.system("mkdir -p %s"%outname)
-    out_features  = os.path.join(outname,"features.p")
-    out_fit_coefs = os.path.join(outname,"fit_coefs.p")
-    print(f"\nSaving output in {out_features}...")
-    torch.save(output['features'].get(), out_features)
-    torch.save(output['fit_coefs'].get(), out_fit_coefs)
-    
-    print("Done!")
+    out_train_features  = os.path.join(outname,"train_features.p")
+#    out_train_fit_coefs = os.path.join(outname,"train_fit_coefs.p")
+#    out_test_features  = os.path.join(outname,"test_features.p")
+#    out_test_fit_coefs = os.path.join(outname,"test_fit_coefs.p")
+    print(f"\nSaving output in {outname}...")
+    save(output['train_features'].get(), out_features)
+#    save(output['train_fit_coefs'].get(), out_fit_coefs)
+#    save(output['test_features'].get(), out_features)
+#    save(output['test_fit_coefs'].get(), out_fit_coefs)
 
+    print("Done!")
+    
 if __name__ == '__main__':
     profile = False
     if profile:
