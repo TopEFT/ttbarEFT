@@ -17,7 +17,7 @@ class AnalysisProcessor(processor.ProcessorABC):
     def accumulator(self):
         return self._accumulator
         
-    def process(self, events):  
+    def process(self, events):
         dataset = events.metadata['dataset']
         xsec    = self._samples[dataset]['xsec']
         sow     = self._samples[dataset]['nSumOfWeights']
@@ -41,7 +41,6 @@ class AnalysisProcessor(processor.ProcessorABC):
         eft_coeffs = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
         eft_coeffs *= factor if eft_coeffs is not None else None
 
-
         features = from_numpy(np.concatenate([[leps.pt[:,0].to_numpy()], 
                                               [leps.pt[:,1].to_numpy()], 
                                               [leps.eta[:,0].to_numpy()], 
@@ -60,6 +59,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         fit_coefs = from_numpy(eft_coeffs)
 
         train, test, _ = random_split(TensorDataset(features, fit_coefs), [0.10, 0.05, 0.85], generator=Generator().manual_seed(42))
+        _ = None
 
         train_features  = train_features.concat(train[:][0])
         train_fit_coefs = train_fit_coefs.concat(train[:][1])

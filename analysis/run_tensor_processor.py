@@ -3,7 +3,8 @@ import argparse, json, os, time
 
 from coffea import processor
 from coffea.nanoevents import NanoAODSchema
-from torch import float64, save
+from torch import cat, float64, Generator, save, tensor
+from torch.utils.data import random_split, TensorDataset
 
 from topcoffea.modules import utils
 import topcoffea.modules.remote_environment as remote_environment
@@ -14,7 +15,7 @@ def main():
     parser.add_argument('--executor','-x'  , default='work_queue', help = 'Which executor to use')
     parser.add_argument('--prefix', '-r'   , nargs='?', default='', help = 'Prefix or redirector to look for the files')
     parser.add_argument('--nworkers','-n' , default=8  , help = 'Number of workers')
-    parser.add_argument('--chunksize','-s', default=100000  , help = 'Number of events per chunk')
+    parser.add_argument('--chunksize','-s', default=400000  , help = 'Number of events per chunk')
     parser.add_argument('--nchunks','-c'  , default=None  , help = 'You can choose to run only a number of chunks')
     parser.add_argument('--outname','-o'  , default='/scratch365/cmcgrad2/data', help = 'Name of the output file')
     parser.add_argument('--treename'      , default='Events', help = 'Name of the tree inside the files')
@@ -154,9 +155,6 @@ def main():
     elif proc == 'centralGen':
         import centralGen
         processor_instance = centralGen.AnalysisProcessor(samplesdict, dtype)
-    elif proc == 'shellProc':
-        import shellProc
-        processor_instance = shellProc.AnalysisProcessor(samplesdict, dtype)
 
     output = runner(flist, treename, processor_instance)
 
@@ -167,17 +165,21 @@ def main():
     elif executor == "futures":
         print(f'Processing time: {dt:.2f} with {nworkers} ({dt*nworkers:.2f} cpu overall)')
 
-    if not os.path.isdir(outname): os.system("mkdir -p %s"%outname)
-    out_train_features  = os.path.join(outname,"train_features.p")
-#    out_train_fit_coefs = os.path.join(outname,"train_fit_coefs.p")
-#    out_test_features  = os.path.join(outname,"test_features.p")
-#    out_test_fit_coefs = os.path.join(outname,"test_fit_coefs.p")
-    print(f"\nSaving output in {outname}...")
-    save(output['train_features'].get(), out_features)
-#    save(output['train_fit_coefs'].get(), out_fit_coefs)
-#    save(output['test_features'].get(), out_features)
-#    save(output['test_fit_coefs'].get(), out_fit_coefs)
+    trainTotal = int(output['train_features'].get().shape[0])
+    trainTruth, _ = random_split(cat([tensor([1]).repeat(trainTotal), tensor([0]).repeat(trainTotal)]), 
+                                 [0.5,0.5], generator=Generator().manual_seed(42))
 
+    testTotal = int(output['test_features'].get().shape[0])
+    testTruth, _ = random_split(cat([tensor([1]).repeat(testTotal), tensor([0]).repeat(testTotal)]), 
+                                [0.5,0.5], generator=Generator().manual_seed(42))
+
+    
+
+    if not os.path.isdir(outname): os.system("mkdir -p %s"%outname)
+    print(f"\nSaving output in {outname}...")
+    save(TensorDataset(output['train_features'].get(), output['train_fit_coefs'].get(), trainTruth[:]),  os.path.join(outname,"train.p"))
+    save(TensorDataset(output['test_features'].get(), output['test_fit_coefs'].get(), testTruth[:]),  os.path.join(outname,"test.p"))
+    
     print("Done!")
     
 if __name__ == '__main__':
