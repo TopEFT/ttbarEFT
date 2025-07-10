@@ -36,3 +36,46 @@ info = {
         "label": r"sun of weights",
     },
 }
+
+CR_axes = {
+    "njets": {
+        "regular": (10, 0, 10),
+        "label": r"njets",
+    },
+    "nleps":{
+        "regular": (10, 0, 10),
+        "label": r"nleps",
+    },
+    "nbjets":{
+        "regular": (10, 0, 10),
+        "label": r"nbjets",
+    },
+    "l0pt":{
+        "regular": (8, 0, 400),
+        "label":r"leading lepton $p_T$ [GeV]",
+    },
+    "l0eta":{
+        "regular": (30, -3, 3),
+        "label":r"leading lepton $\eta$",
+    },
+    "l0phi":{
+        "regular": (30, -3, 3),
+        "label":r"leading lepton $phi$",
+    },
+    "l1pt":{
+        "regular": (8, 0, 400),
+        "label":r"subleading lepton $p_T$ [GeV]",
+    },
+    "l1eta":{
+        "regular": (30, -3, 3),
+        "label":r"subleading lepton $\eta$",
+    },
+    "l1phi":{
+        "regular": (30, -3, 3),
+        "label":r"subleading lepton $phi$",
+    },
+    "j0pt": {
+        "regular": (10, 0, 500),
+        "label": r"leading jet $p_T$ [GeV]" 
+    }
+}
