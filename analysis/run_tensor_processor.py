@@ -126,7 +126,7 @@ def main():
             'tasks_accum_log': 'tasks.log',
             'environment_file': remote_environment.get_environment(
                 extra_conda=["pytorch=2.3.0", "numpy=1.23.5", "pyyaml=6.0.1"],
-                extra_pip_local = {"ttbarEFT": ["ttbarEFT", "setup.py"]},
+#                extra_pip_local = {"ttbarEFT": ["ttbarEFT", "setup.py"]},
             ),
             'extra_input_files' : [proc_file],
             'retries': 5,
@@ -151,7 +151,7 @@ def main():
 
     if proc == 'ml_data':
         import ml_data
-        processor_instance = ml_data.AnalysisProcessor(samplesdict, dtype=dtype)
+        processor_instance = ml_data.AnalysisProcessor(samplesdict, dtype)
     elif proc == 'centralGen':
         import centralGen
         processor_instance = centralGen.AnalysisProcessor(samplesdict, dtype)

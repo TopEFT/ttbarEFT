@@ -1,7 +1,7 @@
 from ttbarEFT.modules.analysis_tools import genEventSelection, genObjectSelection, TensorAccumulator, get_lumi
 from coffea.nanoevents import NanoAODSchema
 from coffea import processor
-from torch import from_numpy, Generator, tensor
+from torch import from_numpy, Generator, tensor, save
 from torch.utils.data import random_split, TensorDataset
 
 import awkward as ak
@@ -35,18 +35,20 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         leps  = leps[event_selection_mask]
         jets  = jets[event_selection_mask]
+        pMask = leps.pdgId > 0
+        nMask = leps.pdgId < 0
         njets = ak.num(jets)
     
         eft_coeffs = ak.to_numpy(events['EFTfitCoefficients']) if hasattr(events, "EFTfitCoefficients") else None
         eft_coeffs = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
         eft_coeffs *= factor if eft_coeffs is not None else None
 
-        features = from_numpy(np.concatenate([[leps.pt[:,0].to_numpy()], 
-                                              [leps.pt[:,1].to_numpy()], 
-                                              [leps.eta[:,0].to_numpy()], 
-                                              [leps.eta[:,1].to_numpy()], 
-                                              [leps.phi[:,0].to_numpy()], 
-                                              [leps.phi[:,1].to_numpy()],  
+        features = from_numpy(np.concatenate([[leps.pt[pMask][:,0].to_numpy()], 
+                                              [leps.pt[nMask][:,1].to_numpy()], 
+                                              [leps.eta[pMask][:,0].to_numpy()], 
+                                              [leps.eta[nMask][:,1].to_numpy()], 
+                                              [leps.phi[pMask][:,0].to_numpy()], 
+                                              [leps.phi[nMask][:,1].to_numpy()],  
                                               [njets.to_numpy()], 
                                               [jets.pt[:,0].to_numpy()], 
                                               [jets.pt[:,1].to_numpy()],
