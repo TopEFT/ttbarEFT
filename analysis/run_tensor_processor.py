@@ -6,9 +6,6 @@ from coffea.nanoevents import NanoAODSchema
 from torch import cat, float64, Generator, save, tensor
 from torch.utils.data import random_split, TensorDataset
 
-from topcoffea.modules import utils
-import topcoffea.modules.remote_environment as remote_environment
-
 def main():
     parser = argparse.ArgumentParser(description='You can customize your run')
     parser.add_argument('jsonFiles'        , nargs='?', help = 'Json file(s) containing files and metadata')
@@ -103,19 +100,6 @@ def main():
         redirector = samplesdict[sname]['redirector']
         flist[sname] = [f'{prefix}{f}' for f in samplesdict[sname]['files']]
 
-    wc_set = ()
-    for item in samplesdict:
-        for i, file_name in enumerate(samplesdict[item]['files']):
-            if prefix:
-                wc_lst = utils.get_list_of_wc_names(f'{prefix}/{file_name}')
-            else:
-                wc_lst = utils.get_list_of_wc_names(file_name)
-            if i==0:
-                wc_set = set(wc_lst)
-            else:
-                if set(wc_lst) != wc_set:
-                   raise Exception("ERROR: Not all files have same WC list")
-
     if executor == "work_queue":
         executor_args = {
             'master_name': '{}-workqueue-coffea'.format(os.environ['USER']),
@@ -124,10 +108,7 @@ def main():
             'transactions_log': 'tr.log',
             'stats_log': 'stats.log',
             'tasks_accum_log': 'tasks.log',
-            'environment_file': remote_environment.get_environment(
-                extra_conda=["pytorch=2.3.0", "numpy=1.23.5", "pyyaml=6.0.1"],
-#                extra_pip_local = {"ttbarEFT": ["ttbarEFT", "setup.py"]},
-            ),
+            'environment_file': '/scratch365/cmcgrad2/environments/ttbarEFT.tar.gz',
             'extra_input_files' : [proc_file],
             'retries': 5,
             'compression': 9,

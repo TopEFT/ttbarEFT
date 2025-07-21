@@ -55,16 +55,17 @@ def genObjectSelection(events):
     return leps, jets
 
 def genEventSelection(leps, jets):
-    nleps = ak.num(leps)
+    pMask = leps.pdgId > 0
+    nMask = leps.pdgId < 0
     njets = ak.num(jets)
-
-    at_least_two_leps = ak.fill_none(nleps>=2,False)
-    at_least_two_jets = ak.fill_none(njets>=2, False)
     
+    os_leps = ak.fill_none(ak.any(pMask, 1) & ak.any(nMask, 1), False)
+    at_least_two_jets = ak.fill_none(njets>=2, False)
+
     selections = PackedSelection()
-    selections.add('2l', at_least_two_leps)
+    selections.add('osl', os_leps)
     selections.add('2j', at_least_two_jets)
-    event_selection_mask = selections.all('2l', '2j')
+    event_selection_mask = selections.all('osl', '2j')
     
     return event_selection_mask
 
