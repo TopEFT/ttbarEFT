@@ -44,11 +44,11 @@ class AnalysisProcessor(processor.ProcessorABC):
         eft_coeffs *= factor if eft_coeffs is not None else None
 
         features = from_numpy(np.concatenate([[leps.pt[pMask][:,0].to_numpy()], 
-                                              [leps.pt[nMask][:,1].to_numpy()], 
+                                              [leps.pt[nMask][:,0].to_numpy()], 
                                               [leps.eta[pMask][:,0].to_numpy()], 
-                                              [leps.eta[nMask][:,1].to_numpy()], 
+                                              [leps.eta[nMask][:,0].to_numpy()], 
                                               [leps.phi[pMask][:,0].to_numpy()], 
-                                              [leps.phi[nMask][:,1].to_numpy()],  
+                                              [leps.phi[nMask][:,0].to_numpy()],  
                                               [njets.to_numpy()], 
                                               [jets.pt[:,0].to_numpy()], 
                                               [jets.pt[:,1].to_numpy()],
