@@ -11,6 +11,9 @@
 		},
 		"em":{
 			"jet_lst":["=1", "=2", ">2"]
-		},	
+		}	
+	},
+	"CR_CHANNELS":{
+		"lep_flav_lst": ["ee", "mm"]	
 	}
 }

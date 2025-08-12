@@ -5,7 +5,7 @@ class Run2LeptonSelection:
     def __init__(self):
         pass
 
-    def is_pres_ele(self, ele):
+    def is_sel_ele(self, ele):
         # apply eta, HEEP cuts
         pt_mask = ele.pt > 35
         eta_mask = ((abs(ele.eta) < 1.4442) | (abs(ele.eta) > 1.556)) & (abs(ele.eta) < 2.4)
@@ -13,7 +13,7 @@ class Run2LeptonSelection:
 
         return (pt_mask & eta_mask & HEEP_mask)
 
-    def is_pres_muon(self, muon):
+    def is_sel_muon(self, muon):
         # apply eta, highPtId and tkIsoId cuts
         pt_mask = muon.pt > 53
         eta_mask = (abs(muon.eta) < 2.4)

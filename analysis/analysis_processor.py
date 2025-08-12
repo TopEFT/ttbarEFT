@@ -30,6 +30,8 @@ import ttbarEFT.modules.event_selection as tt_es
 from ttbarEFT.modules.corrections import ApplyJetVetoMaps
 
 from topcoffea.modules.get_param_from_jsons import GetParam
+
+get_tc_param = GetParam(topcoffea_path("params/params.json"))
 get_tt_param = GetParam(ttbarEFT_path("params/params.json"))
 
 NanoAODSchema.warn_missing_crossrefs = False
@@ -44,8 +46,8 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         proc_axis = hist.axis.StrCategory([], name="process", growth=True)
         chan_axis = hist.axis.StrCategory([], name="channel", growth=True)
-        syst_axis = hist.axis.StrCategory([], name="systematic", label=r"Systematic Uncertainty", growth=True)
-        appl_axis = hist.axis.StrCategory([], name="appl", label=r"AR/SR", growth=True)
+        # syst_axis = hist.axis.StrCategory([], name="systematic", label=r"Systematic Uncertainty", growth=True)
+        # appl_axis = hist.axis.StrCategory([], name="appl", label=r"AR/SR", growth=True)
 
         # Set the booleans
         self._do_errors = do_errors # Whether to calculate and store the w**2 coefficients
@@ -94,19 +96,20 @@ class AnalysisProcessor(processor.ProcessorABC):
 
             histograms[name] = HistEFT(
                 proc_axis, 
-                syst_axis,
+                chan_axis,
+                # syst_axis,
                 dense_axis,
                 wc_names = wc_names_lst, 
                 label=r'Events',
             )
 
-            histograms[name+'_sumw2'] = HistEFT(
-                proc_axis, 
-                syst_axis,
-                sum2w_axis,
-                wc_names = wc_names_lst, 
-                label=r'Events',
-            )
+            # histograms[name+'_sumw2'] = HistEFT(
+            #     proc_axis, 
+            #     syst_axis,
+            #     sum2w_axis,
+            #     wc_names = wc_names_lst, 
+            #     label=r'Events',
+            # )
 
         self._accumulator = histograms
 
@@ -151,7 +154,6 @@ class AnalysisProcessor(processor.ProcessorABC):
 
 
         ######### EFT coefficients ##########
-
         # Extract the EFT quadratic coefficients and optionally use them to calculate the coefficients on the w**2 quartic function
         # eft_coeffs is never Jagged so convert immediately to numpy for ease of use.
         eft_coeffs = ak.to_numpy(events['EFTfitCoefficients']) if hasattr(events, 'EFTfitCoefficients') else None
@@ -160,12 +162,12 @@ class AnalysisProcessor(processor.ProcessorABC):
             if self._samples[dataset]['WCnames'] != self._wc_names_lst:
                 eft_coeffs = efth.remap_coeffs(self._samples[dataset]['WCnames'], self._wc_names_lst, eft_coeffs)
         eft_w2_coeffs = efth.calc_w2_coeffs(eft_coeffs,self._dtype) if (self._do_errors and eft_coeffs is not None) else None
+
         # Initialize the out object
         hout = self.accumulator
 
         
         ######### Initialize Objects #########
-
         met  = events.MET
         ele  = events.Electron
         mu   = events.Muon
@@ -188,36 +190,36 @@ class AnalysisProcessor(processor.ProcessorABC):
 
 
         ######### Lepton Selection ##########
-
         leptonSelection = tt_os.Run2LeptonSelection()
 
-        ele['isPres']=leptonSelection.is_pres_ele(ele)
-        mu['isPres']=leptonSelection.is_pres_muon(mu)
+        ele['isSelE']=leptonSelection.is_sel_ele(ele)
+        mu['isSelM']=leptonSelection.is_sel_muon(mu)
 
-        ele_good = ele[ele.isPres]
-        mu_good = mu[mu.isPres]
+        ele_good = ele[ele.isSelE]
+        mu_good = mu[mu.isSelM]
 
         leps = ak.concatenate([ele_good, mu_good], axis=1)
-        nleps = ak.num(leps)
+        leps_sorted = leps[ak.argsort(leps.pt, axis=-1,ascending=False)] 
+        leps_sorted = ak.pad_none(leps_sorted, 2)
+        l0 = leps_sorted[:,0]
+        l1 = leps_sorted[:,1]
 
-        # leps = ak.concatenate([ele,mu],axis=1)
         # nleps = ak.num(leps)
 
 
         ######### Systematics #########
+        # wgt_correction_syst_lst = [
+            # 'FSRUp', 'FSRDown', 'ISRUp', 'ISRDown', 'renormUp', 'renormDown', 'factUp', 'factDown', # Theory systs
+            # ]
 
-        wgt_correction_syst_lst = [
-            'FSRUp', 'FSRDown', 'ISRUp', 'ISRDown', 'renormUp', 'renormDown', 'factUp', 'factDown', # Theory systs
-            ]
-
-        data_syst_lst = []
+        # data_syst_lst = []
 
         # These weights can go outside of the outside sys loop since they do not depend on pt of mu or jets
         # We only calculate these values if not isData
         # Note: add() will generally modify up/down weights, so if these are needed for any reason after this point, we should instead pass copies to add()
         # Note: Here we will add to the weights object the SFs that do not depend on any of the forthcoming loops
 
-        weights_obj_base = coffea.analysis_tools.Weights(len(events),storeIndividual=True)
+        # weights_obj_base = coffea.analysis_tools.Weights(len(events),storeIndividual=True)
 
         if not isData: 
             # If this is no an eft sample, get the genWeight
@@ -229,40 +231,164 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         ######### Jet Selections #########
         jets['isPres'] = tt_os.is_pres_jet(jets) 
-        jets_good = jets[jets.isPres] 
+        goodJets = jets[jets.isPres] 
 
-        njets = ak.num(jets_good)
-        ht = ak.sum(jets_good.pt,axis=-1)
-        j0 = jets_good[ak.argmax(jets_good.pt,axis=-1,keepdims=True)]
+        njets = ak.num(goodJets)
+        ht = ak.sum(goodJets.pt,axis=-1)
+        j0 = goodJets[ak.argmax(goodJets.pt,axis=-1,keepdims=True)]
 
-        veto_map_array = ApplyJetVetoMaps(jets_good, year)
+
+        # Medium DeepJet WP
+        medium_tag = "btag_wp_medium_" + year.replace("201", "UL1")
+        btagwpm = get_tc_param(medium_tag)
+        isBtagJetsMedium = (goodJets.btagDeepFlavB > btagwpm)
+        isNotBtagJetsMedium = np.invert(isBtagJetsMedium)
+        nbtagsm = ak.num(goodJets[isBtagJetsMedium])
+
+        # JetVetoMaps applied
+        veto_map_array = ApplyJetVetoMaps(goodJets, year)
         veto_map_mask = (veto_map_array == 0)
 
-        ######### Selection Masks #########
 
+        ######### Add variables into event object so that they persist #########
+        events['njets'] = njets 
+        events['leps_pt_sorted'] = leps_sorted
+
+        # events['nbtagsm'] = nbtagsm 
+
+        tt_es.addLepCatMasks(events)
+
+        ######### Create Lepton Categories ##########
+        select_cat_dict = None
+        with open(ttbarEFT_path("params/channels.json"), "r") as ch_json_test:
+            select_cat_dict = json.load(ch_json_test)
+
+        CR_cat_dict = select_cat_dict['CR_CHANNELS'] 
+
+
+        ######### Selection Masks #########
         # create trigger mask
         pass_trg = tc_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict)
+        # at_least_two_leps = ak.fill_none(nleps>=2, False)
+
+        # b jet masks
+        # bmask_exactly0med = (nbtagsm==0) 
+        # bmask_exactly1med = (nbtagsm==1) 
+        # bmask_exactly2med = (nbtagsm==2) 
+        # bmask_atleast2med = (nbtagsm>=2) 
+
+        # Charge masks
+        chargel0_p = ak.fill_none(((l0.charge)>0),False)
+        chargel0_m = ak.fill_none(((l0.charge)<0),False)
+        charge2l_os = ak.fill_none(((l0.charge+l1.charge)==0),False)
+        charge2l_ss = ak.fill_none(((l0.charge+l1.charge)!=0),False)
+
 
 
         ######### Store boolean masks with PackedSelection ##########
-
         selections = PackedSelection(dtype='uint64')
         
-        at_least_two_leps = ak.fill_none(nleps>=2, False)
-        selections.add('2l', at_least_two_leps) 
         selections.add('trg', pass_trg)
         selections.add('jetvetomap', veto_map_mask)
 
-        event_selection_mask = selections.all('2l', 'trg', 'jetvetomap')
+        # selections.add('2l', at_least_two_leps) 
+        selections.add('2los', charge2l_os)
 
-        good_events = events[event_selection_mask]
+        selections.add("ee",  events.is_ee)
+        selections.add("em",  events.is_em)
+        selections.add("mm",  events.is_mm)
 
-        fname='output_jetvetomap'
-        with open(f"{fname}.txt", 'w') as output:
-            for i in range(len(good_events)):
-                output.write(f"{good_events[i].run}:{good_events[i].luminosityBlock}:{good_events[i].event}\n")
+        selections.add('bmask_exactly0med', (nbtagsm==0))
+        selections.add('bmask_exactly1med', (nbtagsm==1))
+        selections.add('bmask_exactly2med', (nbtagsm==2))
+        selections.add('bmask_atleast2med', (nbtagsm>=2))
 
-        print(f"\n\n run:lumi:event info saved to {fname}.txt\n\n ")
+        selections.add("exactly_0j", (njets==0))
+        selections.add("exactly_1j", (njets==1))
+        selections.add("exactly_2j", (njets==2))
+
+
+        ######### Variables for the dense axes of the hists ##########
+
+        ptll = (l0+l1).pt
+        mll = (l0+l1).mass
+
+        dense_axis_variables = {}
+        dense_axis_variables['njets'] = njets
+        dense_axis_variables['nbjets'] = nbtagsm
+        dense_axis_variables['mll'] = mll
+        dense_axis_variables['ptll'] = ptll
+        dense_axis_variables['l0pt'] = l0.pt
+        dense_axis_variables['l0eta'] = l0.eta 
+        dense_axis_variables['l0phi'] = l0.phi 
+        dense_axis_variables['l1pt'] = l1.pt
+        dense_axis_variables['l1eta'] = l1.eta 
+        dense_axis_variables['l1phi'] = l1.phi
+        # dense_axis_variables['j0pt'] = ak.flatten(j0.pt) 
+        # dense_axis_variables['j0eta'] = ak.flatten(j0.eta)
+        # dense_axis_variables['j0phi'] = ak.flatten(j0.phi)
+        dense_axis_variables['MET'] = met.pt
+
+
+        ######## Normalizations ########
+        if not isData: 
+            lumi = 1000.0*get_lumi(year)
+            norm = (xsec/sow)*lumi
+
+            if eft_coeffs is None:
+                genw = events["genWeight"]
+            else:
+                genw = np.ones_like(events['event'])
+
+            weights = norm*genw
+
+        else: 
+            weights = np.ones_like(events['event'])
+
+
+        ########## Fill the histograms ##########
+
+        # selections used by all categories
+        cuts_list = ['trg', 'jetvetomap', 'bmask_exactly0med']
+
+        # loop through categories adding selections for each
+        for lep_flav in CR_cat_dict['lep_flav_lst']:
+
+            cuts_list.append(lep_flav)
+
+            ch_name = lep_flav
+
+            print(f"\n\n lepton channel: {ch_name} \n\n")
+
+            event_selection_mask = selections.all(*(cuts_list))
+            weights_cut = weights[event_selection_mask]
+            eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
+
+            for dense_axis_name, dense_axis_vals in dense_axis_variables.items():
+                if dense_axis_name not in self._hist_lst:
+                    print(f"Skipping \"{dense_axis_name}\", it is not in the list of hists to include")
+                    continue 
+
+                # Fill the histos
+                axes_fill_info_dict = {
+                    dense_axis_name : dense_axis_vals[event_selection_mask],
+                    "channel"       : ch_name,
+                    "process"       : histAxisName,
+                    "weight"        : weights_cut,
+                    "eft_coeff"     : eft_coeffs_cut,
+                }
+
+                hout[dense_axis_name].fill(**axes_fill_info_dict)
+
+        # event_selection_mask = selections.all('2l', 'trg', 'jetvetomap')
+        # good_events = events[event_selection_mask]
+
+        # fname='output_jetvetomap'
+        # with open(f"{fname}.txt", 'w') as output:
+        #     for i in range(len(good_events)):
+        #         output.write(f"{good_events[i].run}:{good_events[i].luminosityBlock}:{good_events[i].event}\n")
+
+        # print(f"\n\n run:lumi:event info saved to {fname}.txt\n\n ")
 
         return hout
 
