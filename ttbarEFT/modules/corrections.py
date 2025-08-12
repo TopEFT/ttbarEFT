@@ -10,23 +10,37 @@ from coffea import lookup_tools
 from topcoffea.modules.paths import topcoffea_path
 from ttbarEFT.modules.paths import ttbarEFT_path
 
+clib_year_map = {
+    "2016APV": "2016preVFP_UL",
+    "2016preVFP": "2016preVFP_UL",
+    "2016": "2016postVFP_UL",
+    "2017": "2017_UL",
+    "2018": "2018_UL",
+    "2022": "2022_Summer22",
+    "2022EE": "2022_Summer22EE",
+    "2023": "2023_Summer23",
+    "2023BPix": "2023_Summer23BPix",
+}
+
 def ApplyJetVetoMaps(jets, year):
 
-    if year == "2016APV": 
-        fname = ttbarEFT_path("data/POG/JME/2016preVFP_UL/jetvetomaps.json.gz")
-        key = "Summer19UL16_V1"
-    elif year == "2016": 
-        fname = ttbarEFT_path("data/POG/JME/2016postVFP_UL/jetvetomaps.json.gz")
-        key = "Summer19UL16_V1"
-    elif year == "2017": 
-        fname = ttbarEFT_path("data/POG/JME/2017_UL/jetvetomaps.json.gz")
-        key = "Summer19UL17_V1"
-    elif year == "2018":
-        fname = ttbarEFT_path("data/POG/JME/2018_UL/jetvetomaps.json.gz")
-        key = "Summer19UL18_V1"
+    jet_veto_dict = {
+        "2016APV": "Summer19UL16_V1",
+        "2016": "Summer19UL16_V1",
+        "2017": "Summer19UL17_V1",
+        "2018": "Summer19UL18_V1",
+        "2022": "Summer22_23Sep2023_RunCD_V1",
+        "2022EE": "Summer22EE_23Sep2023_RunEFG_V1",
+        "2023": "Summer23Prompt23_RunC_V1",
+        "2023BPix": "Summer23BPixPrompt23_RunD_V1"
+    }
+
+    jme_year = clib_year_map[year]
+    key = jet_veto_dict[year]
+    json_path = ttbarEFT_path(f"data/POG/JME/{jme_year}/jetvetomaps.json.gz")
 
     # Grab the json
-    ceval = correctionlib.CorrectionSet.from_file(fname)
+    ceval = correctionlib.CorrectionSet.from_file(json_path)
 
     # Flatten the inputs
     eta_flat = ak.flatten(jets.eta)
@@ -46,4 +60,3 @@ def ApplyJetVetoMaps(jets, year):
     veto_map_event = ak.sum(jet_vetomap_score, axis=-1)
 
     return veto_map_event
-

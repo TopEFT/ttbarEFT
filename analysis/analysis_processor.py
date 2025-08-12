@@ -166,7 +166,27 @@ class AnalysisProcessor(processor.ProcessorABC):
         # Initialize the out object
         hout = self.accumulator
 
-        
+
+        ######### Lumi Mask for Data #########        
+        golden_json_path = {
+            "2016": topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
+            "2016APV": topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
+            "2017": topcoffea_path("data/goldenJsons/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"),
+            "2018": topcoffea_path("data/goldenJsons/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"),
+        }
+        lumi_mask = LumiMask(golden_json_path[year])(events.run,events.luminosityBlock)
+
+        # if year == "2016" or year == "2016APV":
+        #     golden_json_path = topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt")
+        # elif year == "2017":
+        #     golden_json_path = topcoffea_path("data/goldenJsons/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt")
+        # elif year == "2018":
+        #     golden_json_path = topcoffea_path("data/goldenJsons/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt")
+        # else:
+        #     raise ValueError(f"Error: Unknown year \"{year}\".")
+        # lumi_mask = LumiMask(golden_json_path)(events.run,events.luminosityBlock)
+
+
         ######### Initialize Objects #########
         met  = events.MET
         ele  = events.Electron
@@ -177,16 +197,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         # An array of lenght events that is just 1 for each event
         events.nom = ak.ones_like(events.MET.pt)
 
-        # Get the lumi mask for data
-        if year == "2016" or year == "2016APV":
-            golden_json_path = topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt")
-        elif year == "2017":
-            golden_json_path = topcoffea_path("data/goldenJsons/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt")
-        elif year == "2018":
-            golden_json_path = topcoffea_path("data/goldenJsons/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt")
-        else:
-            raise ValueError(f"Error: Unknown year \"{year}\".")
-        lumi_mask = LumiMask(golden_json_path)(events.run,events.luminosityBlock)
+
 
 
         ######### Lepton Selection ##########
@@ -263,7 +274,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         with open(ttbarEFT_path("params/channels.json"), "r") as ch_json_test:
             select_cat_dict = json.load(ch_json_test)
 
-        CR_cat_dict = select_cat_dict['CR_CHANNELS'] 
+        CR_cat_dict = select_cat_dict['CR_CHANNELS_JETS'] 
 
 
         ######### Selection Masks #########
@@ -288,15 +299,16 @@ class AnalysisProcessor(processor.ProcessorABC):
         ######### Store boolean masks with PackedSelection ##########
         selections = PackedSelection(dtype='uint64')
         
-        selections.add('trg', pass_trg)
+        selections.add('is_good_lumi', lumi_mask)
+        selections.add('pass_trg', pass_trg)
         selections.add('jetvetomap', veto_map_mask)
 
         # selections.add('2l', at_least_two_leps) 
         selections.add('2los', charge2l_os)
 
-        selections.add("ee",  events.is_ee)
-        selections.add("em",  events.is_em)
-        selections.add("mm",  events.is_mm)
+        selections.add("ee",  (events.is_ee & pass_trg))
+        selections.add("em",  (events.is_em & pass_trg))
+        selections.add("mm",  (events.is_mm))
 
         selections.add('bmask_exactly0med', (nbtagsm==0))
         selections.add('bmask_exactly1med', (nbtagsm==1))
@@ -306,6 +318,8 @@ class AnalysisProcessor(processor.ProcessorABC):
         selections.add("exactly_0j", (njets==0))
         selections.add("exactly_1j", (njets==1))
         selections.add("exactly_2j", (njets==2))
+
+        selections.add("atleast_1j", (njets>=1))
 
 
         ######### Variables for the dense axes of the hists ##########
@@ -324,11 +338,12 @@ class AnalysisProcessor(processor.ProcessorABC):
         dense_axis_variables['l1pt'] = l1.pt
         dense_axis_variables['l1eta'] = l1.eta 
         dense_axis_variables['l1phi'] = l1.phi
-        # dense_axis_variables['j0pt'] = ak.flatten(j0.pt) 
-        # dense_axis_variables['j0eta'] = ak.flatten(j0.eta)
-        # dense_axis_variables['j0phi'] = ak.flatten(j0.phi)
+        dense_axis_variables['j0pt'] = ak.flatten(j0.pt) 
+        dense_axis_variables['j0eta'] = ak.flatten(j0.eta)
+        dense_axis_variables['j0phi'] = ak.flatten(j0.phi)
         dense_axis_variables['MET'] = met.pt
 
+        jet_variables = ['j0pt', 'j0eta', 'j0phi']
 
         ######## Normalizations ########
         if not isData: 
@@ -349,46 +364,44 @@ class AnalysisProcessor(processor.ProcessorABC):
         ########## Fill the histograms ##########
 
         # selections used by all categories
-        cuts_list = ['trg', 'jetvetomap', 'bmask_exactly0med']
+        # base_cuts_list = ['pass_trg', 'jetvetomap', 'bmask_exactly0med']
 
         # loop through categories adding selections for each
-        for lep_flav in CR_cat_dict['lep_flav_lst']:
+        for lep_cat in CR_cat_dict.keys():
 
-            cuts_list.append(lep_flav)
+            for jet_cat in CR_cat_dict[lep_cat]['jet_list']: 
+                cuts_list = ['jetvetomap', '2los', 'bmask_exactly0med']
 
-            ch_name = lep_flav
+                if isData:
+                    cuts_list.append('is_good_lumi')
+                
+                cuts_list.append(lep_cat)
+                cuts_list.append(jet_cat)
 
-            print(f"\n\n lepton channel: {ch_name} \n\n")
+                ch_name = lep_cat
 
-            event_selection_mask = selections.all(*(cuts_list))
-            weights_cut = weights[event_selection_mask]
-            eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
+                event_selection_mask = selections.all(*(cuts_list))
+                weights_cut = weights[event_selection_mask]
+                eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
 
-            for dense_axis_name, dense_axis_vals in dense_axis_variables.items():
-                if dense_axis_name not in self._hist_lst:
-                    print(f"Skipping \"{dense_axis_name}\", it is not in the list of hists to include")
-                    continue 
+                for dense_axis_name, dense_axis_vals in dense_axis_variables.items():
+                    # if the category requires zero bjets, don't fill jet histograms
+                    if (jet_cat == 'exactly_0j') and (dense_axis_name in jet_variables):
+                        continue
+                    if dense_axis_name not in self._hist_lst:
+                        print(f"Skipping \"{dense_axis_name}\", it is not in the list of hists to include")
+                        continue 
 
-                # Fill the histos
-                axes_fill_info_dict = {
-                    dense_axis_name : dense_axis_vals[event_selection_mask],
-                    "channel"       : ch_name,
-                    "process"       : histAxisName,
-                    "weight"        : weights_cut,
-                    "eft_coeff"     : eft_coeffs_cut,
-                }
+                    # Fill the histos
+                    axes_fill_info_dict = {
+                        dense_axis_name : dense_axis_vals[event_selection_mask],
+                        "channel"       : ch_name,
+                        "process"       : histAxisName,
+                        "weight"        : weights_cut,
+                        "eft_coeff"     : eft_coeffs_cut,
+                    }
 
-                hout[dense_axis_name].fill(**axes_fill_info_dict)
-
-        # event_selection_mask = selections.all('2l', 'trg', 'jetvetomap')
-        # good_events = events[event_selection_mask]
-
-        # fname='output_jetvetomap'
-        # with open(f"{fname}.txt", 'w') as output:
-        #     for i in range(len(good_events)):
-        #         output.write(f"{good_events[i].run}:{good_events[i].luminosityBlock}:{good_events[i].event}\n")
-
-        # print(f"\n\n run:lumi:event info saved to {fname}.txt\n\n ")
+                    hout[dense_axis_name].fill(**axes_fill_info_dict)
 
         return hout
 
