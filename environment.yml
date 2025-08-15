@@ -1,4 +1,4 @@
-name: ttbarEFT
+name: ttbarEFT-new
 channels:
   - pytorch
   - conda-forge

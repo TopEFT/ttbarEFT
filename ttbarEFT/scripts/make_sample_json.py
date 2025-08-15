@@ -11,7 +11,7 @@ def main():
     parser.add_argument('--treename'        , default='Events'     , help = 'Name of the tree')
     parser.add_argument('--histAxisName'    , default=''           , help = 'Name for the samples axis of the coffea hist', required=True)
     parser.add_argument('--era'             , default=''           , help = 'Era Name') #Needed for Era dependency in Run3
-    parser.add_argument('--outname','-o'    , default=''           , help = 'Out name of the json file', required=True)
+    parser.add_argument('--outname','-o'    , default='temp'       , help = 'Out name of the json file', required=True)
     parser.add_argument('--options'         , default=''           , help = 'Sample-dependent options to pass to your analysis')
 
     args = parser.parse_args()
@@ -50,8 +50,8 @@ def main():
 
     # loop through files to get nevents and sow, check is_data
     for f in files: 
-        i_events, i_gen_events, i_sum_of_weights, is_data = utils.get_info(f, treeName)
-        #i_events, i_gen_events, i_sum_of_weights, sow_lhe_wgts, is_data = utils.get_info(f, treeName)
+        # i_events, i_gen_events, i_sum_of_weights, is_data = utils.get_info(f, treeName)
+        i_events, i_gen_events, i_sum_of_weights, sow_lhe_wgts, is_data = utils.get_info(f, treeName)
         nevents += i_events
         n_gen_events += i_gen_events
         n_sum_of_weights += i_sum_of_weights
@@ -67,6 +67,10 @@ def main():
     sampdic['nEvents'] = nevents
     sampdic['nSumOfWeights'] = n_sum_of_weights
     sampdic['isData'] = is_data
+    sampdic['path'] = path
+
+    if not outname.endswith('.json'): 
+        outname += '.json'
 
     # save sampdic in json file
     with open(outputFile, "w") as outfile:

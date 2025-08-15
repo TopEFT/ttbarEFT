@@ -5,63 +5,63 @@
 	        "label": "njets"
 	    },
 	    "nleps": {
-	    	"regular": [10, 0, 10],
+	    	"regular": [5, 0, 5],
 	    	"label": "nleps"
 	    },
 	    "nbjets": {
-	    	"regular": [10, 0, 10],
+	    	"regular": [5, 0, 5],
 	    	"label": "nbjets"
 	    },
 	    "mll": {
-	    	"regular": [10, 0, 200],
+	    	"regular": [50, 0, 1000],
 	    	"label": "mll [GeV]"
 	    },
 	    "ptll": {
-	    	"regular": [10, 0, 200],
-	    	"label": "$p_T^{(ll)} [GeV] $"
+	    	"regular": [30, 0, 600],
+	    	"label": "$p_T(ll)$ [GeV]"
 	    },
 	    "l0pt": {
-        	"regular": [8, 0, 400],
-        	"label": "leading lepton $p_T$ [GeV]"
+        	"regular": [30, 0, 600],
+        	"label": "$p_T$ (leading lepton) [GeV]"
     	},
     	"l0eta": {
     		"regular": [30, -3, 3],
-    		"label": "leading lepton $\\eta$"
+    		"label": "$\\eta$ (leading lepton)"
     	},
     	"l0phi": {
-    		"regular": [30, -3, 3],
-    		"label": "leading lepton $\\phi$"
+    		"regular": [40, -4, 4],
+    		"label": "$\\phi$ (leading lepton)"
     	},
    	    "l1pt": {
-        	"regular": [8, 0, 400],
-        	"label": "subleading lepton $p_T$ [GeV]"
+        	"regular": [30, 0, 600],
+        	"label": "$p_T$ (subleading lepton) [GeV]"
     	},
     	"l1eta": {
     		"regular": [30, -3, 3],
-    		"label": "subleading lepton $\\eta$"
+    		"label": "$\\eta$ (subleading lepton)"
     	},
     	"l1phi": {
-    		"regular": [30, -3, 3],
-    		"label": "subleading lepton $\\phi$"
+    		"regular": [40, -4, 4],
+    		"label": "$\\phi$ (subleading lepton)"
     	},
     	"j0pt": {
-    		"regular": [10, 0, 500],
-    		"label": "leading lepton $p_T$ [GeV]"
+    		"regular": [40, 0, 800],
+    		"label": "$p_T$ (leading jet) [GeV]"
     	},
     	"j0eta": {
-    		"regular": [50, -5, 5],
-    		"label": "leading jet $\\eta$"
+    		"regular": [30, -3, 3],
+    		"label": "$\\eta$ (leading jet)"
     	},
     	"j0phi": {
     		"regular": [40, -4, 4],
-    		"label": "leading jet $\\phi$"
+    		"label": "$\\phi$ (leading jet)"
     	},	
 	    "mt2":{
        		"variable": [0,10,20,30,40,50,60,70,80,90,100,110,120,140,160,180,220,500],
         	"label": "$m_{T2}$ [GeV]"
     	}, 
     	"MET": {
-    		"regular": [10, 0, 100],
+    		"regular": [25, 0, 500],
     		"label": "MET [GeV]"
     	}
 	}

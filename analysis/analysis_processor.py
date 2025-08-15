@@ -56,32 +56,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         self._skip_signal_regions = skip_signal_regions # Whether to skip the SR categories
         self._skip_control_regions = skip_control_regions # Whether to skip the CR categories
 
-        # fill histograms using info from axes.py 
-        # histograms = {}
-        # for name, info in axes_info.items():
-        #     if 'variable' in info: 
-        #         dense_axis = hist.axis.Variable(info['variable'], name=name, label=info['label'])
-        #         sumw2_axis = hist.axis.Variable(info['variable'], name=name+'_sumw2', label=info['label'] + ' sum of w^2')
-        #     else:
-        #         dense_axis = hist.axis.Regular(*info['regular'], name=name, label=info['label'])
-        #         sum2w_axis = hist.axis.Regular(*info['regular'], name=name+'_sumw2', label=info['label'] + ' sum of w^2')
-
-        #     histograms[name] = HistEFT(
-        #         proc_axis, 
-        #         syst_axis,
-        #         dense_axis,
-        #         wc_names = wc_names_lst, 
-        #         label=r'Events',
-        #     )
-
-        #     histograms[name+'_sumw2'] = HistEFT(
-        #         proc_axis, 
-        #         syst_axis,
-        #         sum2w_axis,
-        #         wc_names = wc_names_lst, 
-        #         label=r'Events',
-        #     )
-
+        # fill histograms using info from axes.json
         with open(ttbarEFT_path("params/axes.json"), 'r') as axes_file:
             axes_info = json.load(axes_file)
 
@@ -103,13 +78,13 @@ class AnalysisProcessor(processor.ProcessorABC):
                 label=r'Events',
             )
 
-            # histograms[name+'_sumw2'] = HistEFT(
-            #     proc_axis, 
-            #     syst_axis,
-            #     sum2w_axis,
-            #     wc_names = wc_names_lst, 
-            #     label=r'Events',
-            # )
+            histograms[name+'_sumw2'] = HistEFT(
+                proc_axis, 
+                # syst_axis,
+                sum2w_axis,
+                wc_names = wc_names_lst, 
+                label=r'Events',
+            )
 
         self._accumulator = histograms
 
@@ -144,13 +119,19 @@ class AnalysisProcessor(processor.ProcessorABC):
         dataset         = events.metadata['dataset']
         # isEFT             = self._samples[dataset]["WCnames"] != []
         isData          = self._samples[dataset]['isData']
-        histAxisName  = self._samples[dataset]['histAxisName']
+        histAxisName    = self._samples[dataset]['histAxisName']
         year            = self._samples[dataset]['year']
         xsec            = self._samples[dataset]['xsec']
         sow             = self._samples[dataset]['nSumOfWeights']
 
         isEFT = hasattr(events, 'EFTfitCoefficients')    
         assert not (isEFT and isData), f"isEFT and isData cannot both be True. Check input samples."
+
+
+        datasets = ["Muon", "SingleMuon", "SingleElectron", "EGamma", "MuonEG", "DoubleMuon", "DoubleElectron", "DoubleEG"]
+        for d in datasets:
+            if dataset.startswith(d):
+                dataset = dataset.split('_')[0]
 
 
         ######### EFT coefficients ##########
@@ -176,17 +157,6 @@ class AnalysisProcessor(processor.ProcessorABC):
         }
         lumi_mask = LumiMask(golden_json_path[year])(events.run,events.luminosityBlock)
 
-        # if year == "2016" or year == "2016APV":
-        #     golden_json_path = topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt")
-        # elif year == "2017":
-        #     golden_json_path = topcoffea_path("data/goldenJsons/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt")
-        # elif year == "2018":
-        #     golden_json_path = topcoffea_path("data/goldenJsons/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt")
-        # else:
-        #     raise ValueError(f"Error: Unknown year \"{year}\".")
-        # lumi_mask = LumiMask(golden_json_path)(events.run,events.luminosityBlock)
-
-
         ######### Initialize Objects #########
         met  = events.MET
         ele  = events.Electron
@@ -194,11 +164,8 @@ class AnalysisProcessor(processor.ProcessorABC):
         tau  = events.Tau
         jets = events.Jet 
 
-        # An array of lenght events that is just 1 for each event
+        # An array of length events that is just 1 for each event
         events.nom = ak.ones_like(events.MET.pt)
-
-
-
 
         ######### Lepton Selection ##########
         leptonSelection = tt_os.Run2LeptonSelection()
@@ -214,9 +181,6 @@ class AnalysisProcessor(processor.ProcessorABC):
         leps_sorted = ak.pad_none(leps_sorted, 2)
         l0 = leps_sorted[:,0]
         l1 = leps_sorted[:,1]
-
-        # nleps = ak.num(leps)
-
 
         ######### Systematics #########
         # wgt_correction_syst_lst = [
@@ -247,7 +211,6 @@ class AnalysisProcessor(processor.ProcessorABC):
         njets = ak.num(goodJets)
         ht = ak.sum(goodJets.pt,axis=-1)
         j0 = goodJets[ak.argmax(goodJets.pt,axis=-1,keepdims=True)]
-
 
         # Medium DeepJet WP
         medium_tag = "btag_wp_medium_" + year.replace("201", "UL1")
@@ -345,6 +308,8 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         jet_variables = ['j0pt', 'j0eta', 'j0phi']
 
+        # print(f"\n\n filling njets variable no cuts applied yet. njets={njets} \n\n")
+
         ######## Normalizations ########
         if not isData: 
             lumi = 1000.0*get_lumi(year)
@@ -370,6 +335,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         for lep_cat in CR_cat_dict.keys():
 
             for jet_cat in CR_cat_dict[lep_cat]['jet_list']: 
+                # cuts_list = ['jetvetomap', '2los']
                 cuts_list = ['jetvetomap', '2los', 'bmask_exactly0med']
 
                 if isData:
@@ -378,19 +344,24 @@ class AnalysisProcessor(processor.ProcessorABC):
                 cuts_list.append(lep_cat)
                 cuts_list.append(jet_cat)
 
-                ch_name = lep_cat
+                # ch_name = f"{lep_cat}_{jet_cat}"
+                ch_name = f"{lep_cat}"
+
+                # print(f"\n\n filling category with cuts list: {cuts_list} \n\n")
 
                 event_selection_mask = selections.all(*(cuts_list))
                 weights_cut = weights[event_selection_mask]
                 eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
 
                 for dense_axis_name, dense_axis_vals in dense_axis_variables.items():
-                    # if the category requires zero bjets, don't fill jet histograms
+                    # if the category requires zero jets, don't fill jet histograms
                     if (jet_cat == 'exactly_0j') and (dense_axis_name in jet_variables):
+                        print(f"Skipping '{dense_axis_name}' in category '{ch_name}'. Jet histograms are not filled for categories that don't require a jet")
                         continue
+
                     if dense_axis_name not in self._hist_lst:
                         print(f"Skipping \"{dense_axis_name}\", it is not in the list of hists to include")
-                        continue 
+                        continue                         
 
                     # Fill the histos
                     axes_fill_info_dict = {
@@ -402,6 +373,17 @@ class AnalysisProcessor(processor.ProcessorABC):
                     }
 
                     hout[dense_axis_name].fill(**axes_fill_info_dict)
+
+                    if self._do_errors: 
+                        axes_fill_info_dict = {
+                            dense_axis_name+"_sumw2" : dense_axis_vals[event_selection_mask],
+                            "channel"       : ch_name,
+                            "process"       : histAxisName,
+                            "weight"        : np.square(weights_cut),
+                            "eft_coeff"     : None,
+                        }
+
+                        hout[dense_axis_name+"_sumw2"].fill(**axes_fill_info_dict)
 
         return hout
 
