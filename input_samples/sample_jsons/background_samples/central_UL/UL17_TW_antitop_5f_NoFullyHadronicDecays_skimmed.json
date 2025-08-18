@@ -1,0 +1,23 @@
+{
+    "xsec": "19.47",
+    "year": "2017",
+    "treeName": "Events",
+    "histAxisName": "TW_5f",
+    "options": "",
+    "era": "",
+    "WCnames": [],
+    "files": [
+        "/cms/cephfs/data/store/user/rgoldouz/NanoAodPostProcessingUL/UL17/v2/UL17_tbarW_NoFullyHadronicDecays/tree_373.root",
+        "/cms/cephfs/data/store/user/rgoldouz/NanoAodPostProcessingUL/UL17/v2/UL17_tbarW_NoFullyHadronicDecays/tree_121.root",
+        "/cms/cephfs/data/store/user/rgoldouz/NanoAodPostProcessingUL/UL17/v2/UL17_tbarW_NoFullyHadronicDecays/tree_696.root",
+        "/cms/cephfs/data/store/user/rgoldouz/NanoAodPostProcessingUL/UL17/v2/UL17_tbarW_NoFullyHadronicDecays/tree_2626.root",
+        "/cms/cephfs/data/store/user/rgoldouz/NanoAodPostProcessingUL/UL17/v2/UL17_tbarW_NoFullyHadronicDecays/tree_832.root",
+        "/cms/cephfs/data/store/user/rgoldouz/NanoAodPostProcessingUL/UL17/v2/UL17_tbarW_NoFullyHadronicDecays/tree_1304.root",
+        "/cms/cephfs/data/store/user/rgoldouz/NanoAodPostProcessingUL/UL17/v2/UL17_tbarW_NoFullyHadronicDecays/tree_287.root",
+        "/cms/cephfs/data/store/user/rgoldouz/NanoAodPostProcessingUL/UL17/v2/UL17_tbarW_NoFullyHadronicDecays/tree_1040.root"
+    ],
+    "nEvents": 1004177,
+    "nSumOfWeights": 227381210.6579999,
+    "isData": false,
+    "path": "/cms/cephfs/data/store/user/rgoldouz/NanoAodPostProcessingUL/UL17/v2/UL17_tbarW_NoFullyHadronicDecays"
+}
