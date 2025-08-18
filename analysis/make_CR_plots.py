@@ -59,13 +59,17 @@ def make_cr_fig(h_data, h_mc):
     rax.set_ylabel("Data/MC")
     
     ax.set_title(f"{ch}")
-    ax.legend(loc='best', ncol=2, fontsize=12)
 
     rax.set_ylim([0.6, 1.4])
     rax.set_yticks([0.6, 0.8, 1, 1.2, 1.4])
     
     ax.set_xmargin(0)    # makes 0 on x-axis start at left edge
     rax.set_xmargin(0)   # makes 0 on x-axis start at left edge
+    
+    if ("eta" in name) or ("phi" in name): 
+        ax.legend(loc='lower center', fontsize=12)
+    else: 
+        ax.legend(loc='best', ncol=2, fontsize=12)
     
     if "eta" in name: 
         rax.set_xlim([-3, 3])
