@@ -1,7 +1,7 @@
 {
 	"CR_axes" : {
 	    "njets":{
-	        "regular": [10, 0, 10],
+	        "regular": [8, 0, 8],
 	        "label": "njets"
 	    },
 	    "nleps": {
@@ -13,47 +13,47 @@
 	    	"label": "nbjets"
 	    },
 	    "mll": {
-	    	"regular": [50, 0, 1000],
+	    	"regular": [35, 0, 700],
 	    	"label": "mll [GeV]"
 	    },
 	    "ptll": {
-	    	"regular": [30, 0, 600],
+	    	"regular": [25, 0, 500],
 	    	"label": "$p_T(ll)$ [GeV]"
 	    },
 	    "l0pt": {
-        	"regular": [30, 0, 600],
+        	"regular": [20, 0, 400],
         	"label": "$p_T$ (leading lepton) [GeV]"
     	},
     	"l0eta": {
-    		"regular": [30, -3, 3],
+    		"regular": [24, -3, 3],
     		"label": "$\\eta$ (leading lepton)"
     	},
     	"l0phi": {
-    		"regular": [40, -4, 4],
+    		"regular": [32, -4, 4],
     		"label": "$\\phi$ (leading lepton)"
     	},
    	    "l1pt": {
-        	"regular": [30, 0, 600],
+        	"regular": [20, 0, 400],
         	"label": "$p_T$ (subleading lepton) [GeV]"
     	},
     	"l1eta": {
-    		"regular": [30, -3, 3],
+    		"regular": [24, -3, 3],
     		"label": "$\\eta$ (subleading lepton)"
     	},
     	"l1phi": {
-    		"regular": [40, -4, 4],
+    		"regular": [32, -4, 4],
     		"label": "$\\phi$ (subleading lepton)"
     	},
     	"j0pt": {
-    		"regular": [40, 0, 800],
+    		"regular": [35, 0, 700],
     		"label": "$p_T$ (leading jet) [GeV]"
     	},
     	"j0eta": {
-    		"regular": [30, -3, 3],
+    		"regular": [24, -3, 3],
     		"label": "$\\eta$ (leading jet)"
     	},
     	"j0phi": {
-    		"regular": [40, -4, 4],
+    		"regular": [32, -4, 4],
     		"label": "$\\phi$ (leading jet)"
     	},	
 	    "mt2":{
@@ -61,7 +61,7 @@
         	"label": "$m_{T2}$ [GeV]"
     	}, 
     	"MET": {
-    		"regular": [25, 0, 500],
+    		"regular": [15, 0, 300],
     		"label": "MET [GeV]"
     	}
 	}

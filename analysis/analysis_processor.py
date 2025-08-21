@@ -27,7 +27,7 @@ from ttbarEFT.modules.analysis_tools import make_mt2, get_lumi
 # from ttbarEFT.modules.axes import info as axes_info
 import ttbarEFT.modules.object_selection as tt_os
 import ttbarEFT.modules.event_selection as tt_es
-from ttbarEFT.modules.corrections import ApplyJetVetoMaps
+from ttbarEFT.modules.corrections import ApplyJetVetoMaps, AttachElectronSF
 
 from topcoffea.modules.get_param_from_jsons import GetParam
 
@@ -157,6 +157,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         }
         lumi_mask = LumiMask(golden_json_path[year])(events.run,events.luminosityBlock)
 
+
         ######### Initialize Objects #########
         met  = events.MET
         ele  = events.Electron
@@ -166,6 +167,7 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         # An array of length events that is just 1 for each event
         events.nom = ak.ones_like(events.MET.pt)
+
 
         ######### Lepton Selection ##########
         leptonSelection = tt_os.Run2LeptonSelection()
@@ -178,9 +180,9 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         leps = ak.concatenate([ele_good, mu_good], axis=1)
         leps_sorted = leps[ak.argsort(leps.pt, axis=-1,ascending=False)] 
-        leps_sorted = ak.pad_none(leps_sorted, 2)
-        l0 = leps_sorted[:,0]
-        l1 = leps_sorted[:,1]
+
+        AttachElectronSF(leps_sorted, year) 
+
 
         ######### Systematics #########
         # wgt_correction_syst_lst = [
@@ -227,10 +229,19 @@ class AnalysisProcessor(processor.ProcessorABC):
         ######### Add variables into event object so that they persist #########
         events['njets'] = njets 
         events['leps_pt_sorted'] = leps_sorted
-
         # events['nbtagsm'] = nbtagsm 
 
         tt_es.addLepCatMasks(events)
+
+
+        ######### Create objects for dense axes ##########
+        leps_sorted = ak.pad_none(leps_sorted, 2)
+        l0 = leps_sorted[:,0]
+        l1 = leps_sorted[:,1]
+
+        ptll = (l0+l1).pt
+        mll = (l0+l1).mass
+
 
         ######### Create Lepton Categories ##########
         select_cat_dict = None
@@ -241,22 +252,14 @@ class AnalysisProcessor(processor.ProcessorABC):
 
 
         ######### Selection Masks #########
-        # create trigger mask
         pass_trg = tc_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict)
         # at_least_two_leps = ak.fill_none(nleps>=2, False)
-
-        # b jet masks
-        # bmask_exactly0med = (nbtagsm==0) 
-        # bmask_exactly1med = (nbtagsm==1) 
-        # bmask_exactly2med = (nbtagsm==2) 
-        # bmask_atleast2med = (nbtagsm>=2) 
 
         # Charge masks
         chargel0_p = ak.fill_none(((l0.charge)>0),False)
         chargel0_m = ak.fill_none(((l0.charge)<0),False)
         charge2l_os = ak.fill_none(((l0.charge+l1.charge)==0),False)
         charge2l_ss = ak.fill_none(((l0.charge+l1.charge)!=0),False)
-
 
 
         ######### Store boolean masks with PackedSelection ##########
@@ -285,10 +288,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         selections.add("atleast_1j", (njets>=1))
 
 
-        ######### Variables for the dense axes of the hists ##########
-
-        ptll = (l0+l1).pt
-        mll = (l0+l1).mass
+        ######### Fill dense axes variables ##########
 
         dense_axis_variables = {}
         dense_axis_variables['njets'] = njets
@@ -308,7 +308,6 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         jet_variables = ['j0pt', 'j0eta', 'j0phi']
 
-        # print(f"\n\n filling njets variable no cuts applied yet. njets={njets} \n\n")
 
         ######## Normalizations ########
         if not isData: 
@@ -328,9 +327,6 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         ########## Fill the histograms ##########
 
-        # selections used by all categories
-        # base_cuts_list = ['pass_trg', 'jetvetomap', 'bmask_exactly0med']
-
         # loop through categories adding selections for each
         for lep_cat in CR_cat_dict.keys():
 
@@ -346,8 +342,6 @@ class AnalysisProcessor(processor.ProcessorABC):
 
                 # ch_name = f"{lep_cat}_{jet_cat}"
                 ch_name = f"{lep_cat}"
-
-                # print(f"\n\n filling category with cuts list: {cuts_list} \n\n")
 
                 event_selection_mask = selections.all(*(cuts_list))
                 weights_cut = weights[event_selection_mask]
