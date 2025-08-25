@@ -6,7 +6,7 @@ import topcoffea.modules.utils as utils
 def main():
     parser = argparse.ArgumentParser(description='Create json file with list of samples and metadata')
     parser.add_argument('path'              , default=''           , help = 'Path to local directory')
-    parser.add_argument('--xsec','-x'       , default=1            , help = 'Cross section (number or file to read)')
+    parser.add_argument('--xsec','-x'       , default=1, type=float, help = 'Cross section (number or file to read)')
     parser.add_argument('--year','-y'       , default=-1           , help = 'Year')
     parser.add_argument('--treename'        , default='Events'     , help = 'Name of the tree')
     parser.add_argument('--histAxisName'    , default=''           , help = 'Name for the samples axis of the coffea hist', required=True)
