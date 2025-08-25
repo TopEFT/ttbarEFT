@@ -28,7 +28,6 @@ def AttachElectronSF(electrons, year):
         'sf_nom': nominal 
         'sf_up': up
         'sf_down': down
-        'sf_HEEP': igh pT identification cut (HEEP) 
 
     In Run2, the pT regions are above and below 20 GeV. We only selection ele pT>20 so we only 
     have to apply the RecoAbove20 region 
@@ -73,15 +72,13 @@ def AttachElectronSF(electrons, year):
     pt_flat = ak.flatten(pt)
     phi_flat = ak.flatten(phi)
 
-    print(f"\n\n number of None in eta_flat: {ak.sum(ak.is_none(eta))} \n\n")
-    print(f"\n\n number of None in pt_flat: {ak.sum(ak.is_none(pt))} \n\n")
-
     # initilize clib electron SFs file
     clib_year = clib_year_map[year]
     egm_year = egm_tag_map[clib_year]
     egm_tag = "Electron-ID-SF"
     egm_tag = "UL-" + "Electron-ID-SF"
-    json_path = topcoffea_path(f"data/POG/EGM/{clib_year}/electron.json.gz")
+    # json_path = topcoffea_path(f"data/POG/EGM/{clib_year}/electron.json.gz")
+    json_path = ttbarEFT_path(f"data/POG/EGM/{clib_year}/electron.json.gz")
     ceval = correctionlib.CorrectionSet.from_file(json_path)
 
     # create the pt mask
@@ -89,7 +86,9 @@ def AttachElectronSF(electrons, year):
     pt_mask = ak.flatten(pt >= 20)
     pt_mod = ak.where(pt_mask, pt_flat, 900) #returns (pt_val=pt_flat if pt_mask=True), else pt_val=900
 
+
     ###### evaluate reco sf ######
+
     egm_args = [pt_tag, eta_flat, pt_mod]
     # arrays where if pt_mask=True, get sf from clib; else = 1
     reco_nom_flat = ak.to_numpy(ak.where(pt_mask, ceval[egm_tag].evaluate(egm_year, "sf", *egm_args), 1))
@@ -100,9 +99,6 @@ def AttachElectronSF(electrons, year):
     reco_up = ak.unflatten(reco_up_flat, ak.num(pt))
     reco_down = ak.unflatten(reco_down_flat, ak.num(pt))
 
-    electrons['sf_reco_ele'] = reco_nom
-    electrons['sf_reco_ele_up'] = reco_up
-    electrons['sf_reco_ele_down'] = reco_down
 
     ###### evaluate HEEP sf ######
 
@@ -195,9 +191,94 @@ def AttachElectronSF(electrons, year):
     HEEPSF_up = ak.unflatten(HEEPSF_up_flat, ak.num(eta))
     HEEPSF_down = ak.unflatten(HEEPSF_down_flat, ak.num(eta))
 
-    electrons['sf_nom_ele'] = reco_nom * HEEPSF_nom
-    electrons['sf_up_ele'] = reco_up * HEEPSF_up
-    electrons['sf_down_ele'] = reco_up * HEEPSF_down
+    # Attach SFs (reco*HEEP) to electrons
+    electrons['SF_ele_nom'] = reco_nom * HEEPSF_nom
+    electrons['SF_ele_up'] = reco_up * HEEPSF_up
+    electrons['SF_ele_down'] = reco_up * HEEPSF_down
+
+    electrons['SF_muon_nom'] = ak.ones_like(reco_nom)
+    electrons['SF_muon_up'] = ak.ones_like(reco_nom)
+    electrons['SF_muon_down'] = ak.ones_like(reco_nom)
+
+
+def AttachMuonSF(muons, year): 
+    '''
+    Inserts the following scale factor values inot the electrons array 
+        'sf_nom': nominal 
+        'sf_up': up
+        'sf_down': down
+
+    In Run2, the pT regions are above and below 20 GeV. We only selection ele pT>20 so we only 
+    have to apply the RecoAbove20 region 
+    To include Run3, this function would need to be updated for Run2 vs Run3 since there are 3 pT regions
+    See topeft/topeft/modules/corrections.py AttachElectronSF as an example 
+    '''
+
+    if year not in clib_year_map.keys():
+        raise Exception(f"Error: Unknown year \"{year}\".")
+
+    # initialize muon variables 
+    abs_eta = np.abs(muons.eta) #For run3 abs(eta) should be changed to signed eta
+    pt = muons.pt 
+    phi = muons.phi 
+
+    abseta_flat = ak.flatten(abs_eta)
+    pt_flat = ak.flatten(pt)
+    phi_flat = ak.flatten(phi)
+
+    clib_year = clib_year_map[year]
+    json_path_HighPt = ttbarEFT_path(f"data/POG/MUO/{clib_year}/muon_HighPt.json.gz")
+    json_path_z = ttbarEFT_path(f"data/POG/MUO/{clib_year}/muon_Z.json.gz")
+
+    ceval_HighPt = correctionlib.CorrectionSet.from_file(json_path_HighPt)
+    ceval_z = correctionlib.CorrectionSet.from_file(json_path_z)
+
+    # pt_mask = ak.flatten(pt >= 50) # the lowest pT bin in muon_HighPt is 50 
+
+    # evaluate SFs
+
+    genTracks_nom_flat = ceval_z["NUM_TrackerMuons_DEN_genTracks"].evaluate(abseta_flat, pt_flat, "nominal")
+    genTracks_up_flat = ceval_z["NUM_TrackerMuons_DEN_genTracks"].evaluate(abseta_flat, pt_flat, "systup")
+    genTracks_down_flat = ceval_z["NUM_TrackerMuons_DEN_genTracks"].evaluate(abseta_flat, pt_flat, "systdown")
+
+    TrackerGlobal_nom_flat = ceval_HighPt["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "nominal")
+    TrackerGlobal_up_flat = ceval_HighPt["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "systup")
+    TrackerGlobal_down_flat = ceval_HighPt["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "systdown")
+
+    HighPtID_nom_flat = ceval_HighPt["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "nominal")
+    HighPtID_up_flat = ceval_HighPt["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "systup")
+    HighPtID_down_flat = ceval_HighPt["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "systdown")
+    
+    LooseRelTkIso_nom_flat = ceval_HighPt["NUM_probe_LooseRelTkIso_DEN_HighPtProbes"].evaluate(abseta_flat, pt_flat, "nominal") 
+    LooseRelTkIso_up_flat = ceval_HighPt["NUM_probe_LooseRelTkIso_DEN_HighPtProbes"].evaluate(abseta_flat, pt_flat, "systup") 
+    LooseRelTkIso_down_flat = ceval_HighPt["NUM_probe_LooseRelTkIso_DEN_HighPtProbes"].evaluate(abseta_flat, pt_flat, "systdown") 
+
+    # unflatten arrays
+
+    genTracks_nom = ak.unflatten(genTracks_nom_flat, ak.num(pt))
+    genTracks_up = ak.unflatten(genTracks_up_flat, ak.num(pt))
+    genTracks_down = ak.unflatten(genTracks_down_flat, ak.num(pt))
+
+    TrackerGlobal_nom = ak.unflatten(TrackerGlobal_nom_flat, ak.num(pt))
+    TrackerGlobal_up = ak.unflatten(TrackerGlobal_up_flat, ak.num(pt))
+    TrackerGlobal_down = ak.unflatten(TrackerGlobal_down_flat, ak.num(pt))
+
+    HighPtID_nom = ak.unflatten(HighPtID_nom_flat, ak.num(pt))
+    HighPtID_up = ak.unflatten(HighPtID_up_flat, ak.num(pt))
+    HighPtID_down = ak.unflatten(HighPtID_down_flat, ak.num(pt))
+
+    LooseRelTkIso_nom = ak.unflatten(LooseRelTkIso_nom_flat, ak.num(pt))
+    LooseRelTkIso_up = ak.unflatten(LooseRelTkIso_up_flat, ak.num(pt))
+    LooseRelTkIso_down = ak.unflatten(LooseRelTkIso_down_flat, ak.num(pt))
+
+    # attach SFs to muons 
+    muons['SF_muon_nom'] = genTracks_nom * TrackerGlobal_nom * HighPtID_nom * LooseRelTkIso_nom
+    muons['SF_muon_up'] = genTracks_up * TrackerGlobal_up * HighPtID_up * LooseRelTkIso_up
+    muons['SF_muon_down'] = genTracks_down * TrackerGlobal_down * HighPtID_down * LooseRelTkIso_down
+
+    muons['SF_ele_nom'] = ak.ones_like(pt)
+    muons['SF_ele_up'] = ak.ones_like(pt)
+    muons['SF_ele_down'] = ak.ones_like(pt)
 
 
 def ApplyJetVetoMaps(jets, year):

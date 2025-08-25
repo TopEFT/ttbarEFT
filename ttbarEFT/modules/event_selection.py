@@ -197,3 +197,18 @@ def addLepCatMasks(events):
     events['is_em'] = ((n_e_2l==1) & (n_m_2l==1))
     events['is_mm'] = ((n_e_2l==0) & (n_m_2l==2))
 
+def addLepSFs(events):
+
+    leps = events.leps_pt_sorted
+    padded_leps = ak.pad_none(leps, 2)
+
+    print(f"\n\n padded_leps.fields: {padded_leps.fields} \n\n")
+
+    events['SF_2l_ele'] = padded_leps[:,0].SF_ele_nom * padded_leps[:,1].SF_ele_nom
+    events['SF_2l_ele_up'] = padded_leps[:,0].SF_ele_up * padded_leps[:,1].SF_ele_up
+    events['SF_2l_ele_down'] = padded_leps[:,0].SF_ele_down * padded_leps[:,1].SF_ele_down
+
+    events['SF_2l_muon'] = padded_leps[:,0].SF_muon_nom * padded_leps[:,1].SF_muon_nom
+    events['SF_2l_muon_up'] = padded_leps[:,0].SF_muon_up * padded_leps[:,1].SF_muon_up
+    events['SF_2l_muon_down'] = padded_leps[:,0].SF_muon_down * padded_leps[:,1].SF_muon_down
+
