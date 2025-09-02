@@ -27,7 +27,7 @@ from ttbarEFT.modules.analysis_tools import make_mt2, get_lumi
 # from ttbarEFT.modules.axes import info as axes_info
 import ttbarEFT.modules.object_selection as tt_os
 import ttbarEFT.modules.event_selection as tt_es
-from ttbarEFT.modules.corrections import ApplyJetVetoMaps, AttachElectronSF, AttachMuonSF
+from ttbarEFT.modules.corrections import AttachElectronSF, AttachMuonSF, AttachMuonTrigSF, ApplyMuonPtCorr, ApplyJetVetoMaps
 
 from topcoffea.modules.get_param_from_jsons import GetParam
 
@@ -113,7 +113,6 @@ class AnalysisProcessor(processor.ProcessorABC):
     def columns(self):
         return self._columns
 
-
     def process(self, events):
 
         # Dataset parameters
@@ -166,22 +165,30 @@ class AnalysisProcessor(processor.ProcessorABC):
         tau  = events.Tau
         jets = events.Jet 
 
+        leptonSelection = tt_os.Run2LeptonSelection()
+
         # An array of length events that is just 1 for each event
         events.nom = ak.ones_like(events.MET.pt)
 
 
-        ######### Lepton Selection ##########
-        leptonSelection = tt_os.Run2LeptonSelection()
-
+        ######### Electron Selection ##########
+        
         ele['isSelE']=leptonSelection.is_sel_ele(ele)
-        mu['isSelM']=leptonSelection.is_sel_muon(mu)
-
         ele_good = ele[ele.isSelE]
-        mu_good = mu[mu.isSelM]
 
         AttachElectronSF(ele_good, year) 
+
+
+        ######### Muon Selection ##########
+        
+        mu['pt'] = ApplyMuonPtCorr(mu, year, isData)
+        mu['isSelM']=leptonSelection.is_sel_muon(mu)
+        
+        mu_good = mu[mu.isSelM]
         AttachMuonSF(mu_good, year)
 
+
+        ######### Lepton Selection ##########
         leps = ak.concatenate([ele_good, mu_good], axis=1)
         leps_sorted = leps[ak.argsort(leps.pt, axis=-1,ascending=False)] 
 

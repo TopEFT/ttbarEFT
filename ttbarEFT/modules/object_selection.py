@@ -9,7 +9,7 @@ class Run2LeptonSelection:
         # apply eta, HEEP cuts
         pt_mask = ele.pt > 35
         eta_mask = ((abs(ele.eta) < 1.4442) | (abs(ele.eta) > 1.556)) & (abs(ele.eta) < 2.4)
-        HEEP_mask = ele.cutBased_HEEP
+        HEEP_mask = ele.cutBased_HEEP #bool, a simple robust ID designed to be safe for high electrons
 
         return (pt_mask & eta_mask & HEEP_mask)
 
@@ -17,8 +17,8 @@ class Run2LeptonSelection:
         # apply eta, highPtId and tkIsoId cuts
         pt_mask = muon.pt > 53
         eta_mask = (abs(muon.eta) < 2.4)
-        highPtId_mask = (muon.highPtId == 2)
-        tkIsoId_mask = (muon.tkIsoId > 0)
+        highPtId_mask = (muon.highPtId == 2) #global high pT, includes tracker high pT
+        tkIsoId_mask = (muon.tkIsoId > 0) #selects tkIsoLoose & tkIsoTight
 
         return (pt_mask & eta_mask & highPtId_mask & tkIsoId_mask)
 

@@ -22,7 +22,7 @@ from ttbarEFT.modules import plotting_tools_histEFT as plt_tools
 np.seterr(divide='ignore', invalid='ignore')
 
 
-def make_cr_fig(h_data, h_mc):
+def make_cr_fig(h_data, h_mc, name, title):
 
     total_mc = h_mc[{'process':sum}]
 
@@ -30,7 +30,8 @@ def make_cr_fig(h_data, h_mc):
     ratio = np.divide(h_data.values(), total_mc.values())
 
     # set up figure and colors
-    colors = ['tan', 'tab:gray', 'tab:cyan','tab:pink','tab:green','#7a21dd','#5790fc','#f89c20','#e42536']
+    # colors = ['tan', 'tab:gray', 'tab:cyan','tab:pink','tab:green','#7a21dd','#5790fc','#f89c20','#e42536']
+    colors = ['#e42536', '#5790fc', 'tab:green', '#f89c20','tab:pink', 'tab:cyan', 'tab:gray', 'tab:brown', 'tan', '#7a21dd']
 
     hep.style.use("CMS")
     # Initialize figure and axes
@@ -58,7 +59,7 @@ def make_cr_fig(h_data, h_mc):
     rax.set_xlabel(xlabel)
     rax.set_ylabel("Data/MC")
     
-    ax.set_title(f"{ch}")
+    ax.set_title(f"{title}")
 
     rax.set_ylim([0.6, 1.4])
     rax.set_yticks([0.6, 0.8, 1, 1.2, 1.4])
@@ -67,9 +68,10 @@ def make_cr_fig(h_data, h_mc):
     rax.set_xmargin(0)   # makes 0 on x-axis start at left edge
     
     if ("eta" in name) or ("phi" in name): 
-        ax.legend(loc='lower center', fontsize=12)
+        ax.legend(loc='lower center', fontsize=14)
     else: 
-        ax.legend(loc='best', ncol=2, fontsize=12)
+        ax.legend(loc='upper right', fontsize=14)
+    # ax.legend(loc='best', bbox_to_anchor=(1.0, 0.8), fontsize=12)
     
     if "eta" in name: 
         rax.set_xlim([-3, 3])
@@ -108,11 +110,15 @@ if __name__ == "__main__":
     channels = ["ee", "mm"]
 
     for ch in channels: 
-        for name in hists_data: 
-            h_data = hists_data[name][{'process':sum}].as_hist({})[{'channel':ch}]
-            h_mc = hists_mc[name].as_hist({})[{'channel':ch}]
+        if ch == "mm":
+            plot_title = r"$\mu\mu$"
+        else: plot_title = ch
 
-            fig, ax, rax = make_cr_fig(h_data, h_mc)
+        for name in hists_data: 
+            h_data = hists_data[name][{'process':sum}][{'systematic': "nominal"}].as_hist({})[{'channel':ch}]
+            h_mc = hists_mc[name][{'systematic': "nominal"}].as_hist({})[{'channel':ch}]
+
+            fig, ax, rax = make_cr_fig(h_data, h_mc, name, plot_title)
 
             figname = ""
             if title is not None: 

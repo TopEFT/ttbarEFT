@@ -6,6 +6,7 @@ import awkward as ak
 import correctionlib
 
 from coffea import lookup_tools
+from coffea.lookup_tools import txt_converters, rochester_lookup
 
 from topcoffea.modules.paths import topcoffea_path
 from ttbarEFT.modules.paths import ttbarEFT_path
@@ -201,9 +202,42 @@ def AttachElectronSF(electrons, year):
     electrons['SF_muon_down'] = ak.ones_like(reco_nom)
 
 
+def AttachMuonTrigSF(muons, year):
+    if year not in clib_year_map.keys():
+        raise Exception(f"Error: Unknown year \"{year}\".")
+
+    # initialize muon variables 
+    abs_eta = np.abs(muons.eta) #For run3 abs(eta) should be changed to signed eta
+    pt = muons.pt 
+    phi = muons.phi 
+
+    abseta_flat = ak.flatten(abs_eta)
+    pt_flat = ak.flatten(pt)
+    phi_flat = ak.flatten(phi) 
+
+    clib_year = clib_year_map[year]
+    json_path_HighPt = ttbarEFT_path(f"data/POG/MUO/{clib_year}/muon_HighPt.json.gz")
+    json_path_z = ttbarEFT_path(f"data/POG/MUO/{clib_year}/muon_Z.json.gz")
+
+    ceval_HighPt = correctionlib.CorrectionSet.from_file(json_path_HighPt)
+    ceval_z = correctionlib.CorrectionSet.from_file(json_path_z)
+
+    trigger_norm_flat = ceval_HighPt["NUM_HLT_DEN_HighPtLooseRelIsoProbes"].evaluate(abseta_flat, pt_flat, "nominal")
+    trigger_up_flat = ceval_HighPt["NUM_HLT_DEN_HighPtLooseRelIsoProbes"].evaluate(abseta_flat, pt_flat, "systup")
+    trigger_down_flat = ceval_HighPt["NUM_HLT_DEN_HighPtLooseRelIsoProbes"].evaluate(abseta_flat, pt_flat, "systdown")
+
+    trigger_norm = ak.unflatten(trigger_norm_flat, ak.num(pt))
+    trigger_up = ak.unflatten(trigger_up_flat, ak.num(pt))
+    trigger_down = ak.unflatten(trigger_down_flat, ak.num(pt))
+
+    muons['SF_muon_trig_nom'] = trigger_norm
+    muons['SF_muon_trig_up'] = trigger_up
+    muons['SF_muon_trig_down'] = trigger_down
+
+
 def AttachMuonSF(muons, year): 
     '''
-    Inserts the following scale factor values inot the electrons array 
+    Inserts the following scale factor values into the electrons array 
         'sf_nom': nominal 
         'sf_up': up
         'sf_down': down
@@ -234,51 +268,70 @@ def AttachMuonSF(muons, year):
     ceval_z = correctionlib.CorrectionSet.from_file(json_path_z)
 
     # pt_mask = ak.flatten(pt >= 50) # the lowest pT bin in muon_HighPt is 50 
-
     # evaluate SFs
 
-    genTracks_nom_flat = ceval_z["NUM_TrackerMuons_DEN_genTracks"].evaluate(abseta_flat, pt_flat, "nominal")
-    genTracks_up_flat = ceval_z["NUM_TrackerMuons_DEN_genTracks"].evaluate(abseta_flat, pt_flat, "systup")
-    genTracks_down_flat = ceval_z["NUM_TrackerMuons_DEN_genTracks"].evaluate(abseta_flat, pt_flat, "systdown")
+    tracking_nom_flat = ceval_z["NUM_TrackerMuons_DEN_genTracks"].evaluate(abseta_flat, pt_flat, "nominal")
+    tracking_up_flat = ceval_z["NUM_TrackerMuons_DEN_genTracks"].evaluate(abseta_flat, pt_flat, "systup")
+    tracking_down_flat = ceval_z["NUM_TrackerMuons_DEN_genTracks"].evaluate(abseta_flat, pt_flat, "systdown")
 
-    TrackerGlobal_nom_flat = ceval_HighPt["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "nominal")
-    TrackerGlobal_up_flat = ceval_HighPt["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "systup")
-    TrackerGlobal_down_flat = ceval_HighPt["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "systdown")
+    reco_nom_flat = ceval_HighPt["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "nominal")
+    reco_up_flat = ceval_HighPt["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "systup")
+    reco_down_flat = ceval_HighPt["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "systdown")
 
-    HighPtID_nom_flat = ceval_HighPt["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "nominal")
-    HighPtID_up_flat = ceval_HighPt["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "systup")
-    HighPtID_down_flat = ceval_HighPt["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "systdown")
+    ID_nom_flat = ceval_HighPt["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "nominal")
+    ID_up_flat = ceval_HighPt["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "systup")
+    ID_down_flat = ceval_HighPt["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "systdown")
     
-    LooseRelTkIso_nom_flat = ceval_HighPt["NUM_probe_LooseRelTkIso_DEN_HighPtProbes"].evaluate(abseta_flat, pt_flat, "nominal") 
-    LooseRelTkIso_up_flat = ceval_HighPt["NUM_probe_LooseRelTkIso_DEN_HighPtProbes"].evaluate(abseta_flat, pt_flat, "systup") 
-    LooseRelTkIso_down_flat = ceval_HighPt["NUM_probe_LooseRelTkIso_DEN_HighPtProbes"].evaluate(abseta_flat, pt_flat, "systdown") 
+    ISO_nom_flat = ceval_HighPt["NUM_probe_LooseRelTkIso_DEN_HighPtProbes"].evaluate(abseta_flat, pt_flat, "nominal") 
+    ISO_up_flat = ceval_HighPt["NUM_probe_LooseRelTkIso_DEN_HighPtProbes"].evaluate(abseta_flat, pt_flat, "systup") 
+    ISO_down_flat = ceval_HighPt["NUM_probe_LooseRelTkIso_DEN_HighPtProbes"].evaluate(abseta_flat, pt_flat, "systdown") 
 
     # unflatten arrays
 
-    genTracks_nom = ak.unflatten(genTracks_nom_flat, ak.num(pt))
-    genTracks_up = ak.unflatten(genTracks_up_flat, ak.num(pt))
-    genTracks_down = ak.unflatten(genTracks_down_flat, ak.num(pt))
+    tracking_nom = ak.unflatten(tracking_nom_flat, ak.num(pt))
+    tracking_up = ak.unflatten(tracking_up_flat, ak.num(pt))
+    tracking_down = ak.unflatten(tracking_down_flat, ak.num(pt))
 
-    TrackerGlobal_nom = ak.unflatten(TrackerGlobal_nom_flat, ak.num(pt))
-    TrackerGlobal_up = ak.unflatten(TrackerGlobal_up_flat, ak.num(pt))
-    TrackerGlobal_down = ak.unflatten(TrackerGlobal_down_flat, ak.num(pt))
+    reco_nom = ak.unflatten(reco_nom_flat, ak.num(pt))
+    reco_up = ak.unflatten(reco_up_flat, ak.num(pt))
+    reco_down = ak.unflatten(reco_down_flat, ak.num(pt))
 
-    HighPtID_nom = ak.unflatten(HighPtID_nom_flat, ak.num(pt))
-    HighPtID_up = ak.unflatten(HighPtID_up_flat, ak.num(pt))
-    HighPtID_down = ak.unflatten(HighPtID_down_flat, ak.num(pt))
+    ID_nom = ak.unflatten(ID_nom_flat, ak.num(pt))
+    ID_up = ak.unflatten(ID_up_flat, ak.num(pt))
+    ID_down = ak.unflatten(ID_down_flat, ak.num(pt))
 
-    LooseRelTkIso_nom = ak.unflatten(LooseRelTkIso_nom_flat, ak.num(pt))
-    LooseRelTkIso_up = ak.unflatten(LooseRelTkIso_up_flat, ak.num(pt))
-    LooseRelTkIso_down = ak.unflatten(LooseRelTkIso_down_flat, ak.num(pt))
+    ISO_nom = ak.unflatten(ISO_nom_flat, ak.num(pt))
+    ISO_up = ak.unflatten(ISO_up_flat, ak.num(pt))
+    ISO_down = ak.unflatten(ISO_down_flat, ak.num(pt))
 
     # attach SFs to muons 
-    muons['SF_muon_nom'] = genTracks_nom * TrackerGlobal_nom * HighPtID_nom * LooseRelTkIso_nom
-    muons['SF_muon_up'] = genTracks_up * TrackerGlobal_up * HighPtID_up * LooseRelTkIso_up
-    muons['SF_muon_down'] = genTracks_down * TrackerGlobal_down * HighPtID_down * LooseRelTkIso_down
+    muons['SF_muon_nom'] = tracking_nom * reco_nom * ID_nom * ISO_nom
+    muons['SF_muon_up'] = tracking_up * reco_up * ID_up * ISO_up
+    muons['SF_muon_down'] = tracking_down * reco_down * ID_down * ISO_down
 
     muons['SF_ele_nom'] = ak.ones_like(pt)
     muons['SF_ele_up'] = ak.ones_like(pt)
-    muons['SF_ele_down'] = ak.ones_like(pt)
+    muons['SF_ele_down'] = ak.ones_like(pt)    
+
+
+def ApplyMuonPtCorr(muons, year, isData):
+    '''
+    For muons with pt<120, Rochester Corrections are applied 
+    For muons with pt>120, the tunep correction is applied
+    '''
+
+    pt = muons.pt
+    pt_flat = ak.flatten(pt)
+    pt_mask = ak.flatten(pt >= 120)
+    tunep_factor = ak.flatten(muons.tunepRelPt)
+
+    rocco_pt = ak.flatten(ApplyRochesterCorrections(muons, year, isData))
+    tunep_pt = pt_flat * tunep_factor
+
+    pt_corr_flat = ak.where(pt_mask, rocco_pt, tunep_pt) #if pt mask, pt_corr=tunep_pt, else pt_corr=rocco_pt
+    pt_corr = ak.unflatten(pt_corr_flat, ak.num(pt))
+
+    return pt_corr
 
 
 def ApplyJetVetoMaps(jets, year):
@@ -319,3 +372,49 @@ def ApplyJetVetoMaps(jets, year):
     veto_map_event = ak.sum(jet_vetomap_score, axis=-1)
 
     return veto_map_event
+
+
+###### Muon Rochester corrections
+################################################################
+# https://gitlab.cern.ch/akhukhun/roccor
+# https://github.com/CoffeaTeam/coffea/blob/master/coffea/lookup_tools/rochester_lookup.py
+def ApplyRochesterCorrections(mu, year, isData):
+    rocco_tag = None
+
+    rocco_year_map = {
+        '2016APV': '2016aUL',
+        '2016': '2016bUL',
+        '2017': '2017UL',
+        '2018': '2018UL'
+    }
+
+    rocco_tag = rocco_year_map[year]
+    rochester_data = txt_converters.convert_rochester_file(topcoffea_path(f"data/MuonScale/RoccoR{rocco_tag}.txt"), loaduncs=True)
+    rochester = rochester_lookup.rochester_lookup(rochester_data)
+    if not isData:
+        hasgen = ~np.isnan(ak.fill_none(mu.matched_gen.pt, np.nan))
+        mc_rand = np.random.rand(*ak.to_numpy(ak.flatten(mu.pt)).shape)
+        mc_rand = ak.unflatten(mc_rand, ak.num(mu.pt, axis=1))
+        corrections = np.array(ak.flatten(ak.ones_like(mu.pt)))
+        mc_kspread = rochester.kSpreadMC(
+            mu.charge[hasgen],mu.pt[hasgen],
+            mu.eta[hasgen],
+            mu.phi[hasgen],
+            mu.matched_gen.pt[hasgen]
+        )
+        mc_ksmear = rochester.kSmearMC(
+            mu.charge[~hasgen],
+            mu.pt[~hasgen],
+            mu.eta[~hasgen],
+            mu.phi[~hasgen],
+            mu.nTrackerLayers[~hasgen],
+            mc_rand[~hasgen]
+        )
+        hasgen_flat = np.array(ak.flatten(hasgen))
+        corrections[hasgen_flat] = np.array(ak.flatten(mc_kspread))
+        corrections[~hasgen_flat] = np.array(ak.flatten(mc_ksmear))
+        corrections = ak.unflatten(corrections, ak.num(mu.pt, axis=1))
+    else:
+        corrections = rochester.kScaleDT(mu.charge, mu.pt, mu.eta, mu.phi)
+
+    return (mu.pt * corrections)
