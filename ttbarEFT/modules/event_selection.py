@@ -1,43 +1,51 @@
 import awkward as ak
 
 triggers_dict = {
-    "2016": {
-        "SingleElectron":[
-            "Ele27_WPTight_Gsf",
-            "Photon175",    
-        ],
+    "2016APV": {
         "SingleMuon": [
             "Mu50", 
             "TkMu50",
         ],
         "DoubleEG":[
-            "Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ",
+            "DoubleEle33_CaloIdL_MW",
+        ],
+    },
+    "2016APV_run276453": {
+        "SingleMuon": [
+            "Mu50", 
+            "TkMu50",
+        ],
+        "DoubleEG":[
+            "DoubleEle33_CaloIdL_GsfTrkIdVL",
+        ],
+    },
+    "2016": {
+        "SingleMuon": [
+            "Mu50", 
+            "TkMu50",
+        ],
+        "DoubleEG":[
+            "DoubleEle33_CaloIdL_GsfTrkIdVL_MW"
         ],
     },
     "2017": {
-        "SingleElectron":[
-            "Ele35_WPTight_Gsf",
-            "Photon200",
-        ],
         "SingleMuon":[
             "Mu50",
             "TkMu100",
             "OldMu100", 
         ],
         "DoubleEG":[
-            "Ele23_Ele12_CaloIdL_TrackIdL_IsoVL",
+            "DoubleEle33_CaloIdL_MW",,
         ],
     },
     "2018": {
-        "EGamma":[
-            "Ele23_Ele12_CaloIdL_TrackIdL_IsoVL",
-            "Ele32_WPTight_Gsf",
-            "Photon200",
-        ],
         "SingleMuon":[
             "Mu50", 
             "TkMu100",
             "OldMu100",
+        ],
+        "EGamma":[
+            "DoubleEle25_CaloIdL_MW",,
         ],
     },
 }
@@ -45,13 +53,11 @@ triggers_dict = {
 exclude_triggers_dict = {
     "2016": {
         "SingleMuon": [],
-        "SingleElectron": triggers_dict["2016"]["SingleMuon"],
-        "DoubleEG": triggers_dict["2016"]["SingleMuon"] + triggers_dict["2016"]["SingleElectron"],
+        "DoubleEG": triggers_dict["2016"]["SingleMuon"],
     },  
     "2017": {
         "SingleMuon": [],
-        "SingleElectron": triggers_dict["2017"]["SingleMuon"],
-        "DoubleEG": triggers_dict["2017"]["SingleMuon"] + triggers_dict["2017"]["SingleElectron"],
+        "DoubleEG": triggers_dict["2017"]["SingleMuon"],
     },
     "2018": {
         "SingleMuon": [],

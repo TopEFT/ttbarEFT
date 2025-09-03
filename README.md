@@ -35,3 +35,8 @@ unset PYTHONPATH
 micromamba activate ttbarEFT
 ```
 
+# Previous Analysis
+
+- Copy of TOP-17-020: https://arxiv.org/pdf/1903.11144
+- Reza's NanoAOD analysis script: https://github.com/rgoldouz/EFTNanoAnalysis/blob/master/NanoAnalysis/src/MyAnalysis.cc
+- Reza's FCNC analysis repo: https://github.com/rgoldouz/FCNC/tree/main/NanoAnalysis
