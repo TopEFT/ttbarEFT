@@ -1,4 +1,5 @@
 import awkward as ak
+import numpy as np 
 
 triggers_dict = {
     "2016APV": {
@@ -35,7 +36,7 @@ triggers_dict = {
             "OldMu100", 
         ],
         "DoubleEG":[
-            "DoubleEle33_CaloIdL_MW",,
+            "DoubleEle33_CaloIdL_MW",
         ],
     },
     "2018": {
@@ -45,7 +46,7 @@ triggers_dict = {
             "OldMu100",
         ],
         "EGamma":[
-            "DoubleEle25_CaloIdL_MW",,
+            "DoubleEle25_CaloIdL_MW",
         ],
     },
 }
@@ -64,6 +65,67 @@ exclude_triggers_dict = {
         "EGamma": triggers_dict["2018"]["SingleMuon"],
     },
 }
+
+MC_lepcat_triggers_dict = {
+    "ee": "DoubleEG",   #for 2018, ee trigger is from EGamma
+    "em": "SingleMuon", 
+    "mm": "SingleMuon",
+}
+
+# This is a helper function called by trg_pass_no_overlap
+#   - Takes events objects, and a lits of triggers
+#   - Returns an array the same length as events, elements are true if the event passed at least one of the triggers and false otherwise
+def passes_trg_inlst(events,trg_name_lst):
+    tpass = np.zeros_like(np.array(events.MET.pt), dtype=bool)
+    trg_info_dict = events.HLT
+
+    # "fields" should be list of all triggers in the dataset
+    common_triggers = set(trg_info_dict.fields) & set(trg_name_lst)
+
+    # Check to make sure that at least one of our specified triggers is present in the dataset
+    if len(common_triggers) == 0 and len(trg_name_lst):
+        raise Exception("No triggers from the sample matched to the ones used in the analysis.")
+
+    for trg_name in common_triggers:
+        tpass = tpass | trg_info_dict[trg_name]
+    return tpass
+
+
+# This is what we call from the processor
+#   - Returns an array the len of events
+#   - Elements are false if they do not pass any of the triggers defined in dataset_dict
+#   - In the case of data, events are also false if they overlap with another dataset
+def trg_pass_no_overlap(events,is_data,dataset,year,dataset_dict,exclude_dict,lep_cat, era=None):
+
+    # Initialize ararys and lists, get trg pass info from events
+    trg_passes    = np.zeros_like(np.array(events.MET.pt), dtype=bool) # Array of False the len of events
+    trg_overlaps  = np.zeros_like(np.array(events.MET.pt), dtype=bool) # Array of False the len of events
+    trg_info_dict = events.HLT
+    full_trg_lst  = []
+
+    run_number = events.run
+
+    # In case of data, check if events overlap with other datasets
+    if is_data:
+        # use different triggers for 2016APV for runs >= 276453
+        if (year == '2016APV') and (run_number >= 276453): 
+            dataset= "2016APV_run276453"
+
+        trg_passes = passes_trg_inlst(events,dataset_dict[year][dataset])
+        trg_overlaps = passes_trg_inlst(events, exclude_dict[year][dataset])
+
+    # In case of MC, pick the trigger dictionary dataset based on lepton channel
+    # ee channel is filled from electron triggers, em and mm channels from only muon triggers
+    else: 
+        if (year == '2018') and (lep_cat == 'ee'):
+            dataset_name = 'EGamma'
+        else: 
+            dataset_name = MC_lepcat_triggers_dict[lep_cat]
+
+        trg_passes = passes_trg_inlst(events, dataset_dict[year][dataset_name])
+
+    # Return true if passes trg and does not overlap
+    return (trg_passes & ~trg_overlaps)
 
 
 def addLepCatMasks(events):

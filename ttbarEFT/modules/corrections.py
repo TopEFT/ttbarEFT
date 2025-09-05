@@ -23,6 +23,36 @@ clib_year_map = {
     "2023BPix": "2023_Summer23BPix",
 }
 
+def AttachElectronTrigSF(electrons, year):
+
+    extLepSF = lookup_tools.extractor()
+
+    extLepSF.add_weight_sets([f"ElecSF_2016APV_barrel UL2016preVFP_Barrel_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+    extLepSF.add_weight_sets([f"ElecSF_2016APV_endcap UL2016preVFP_Endcaps_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+    extLepSF.add_weight_sets([f"ElecSF_2016_barrel UL2016postVFP_Barrel_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+    extLepSF.add_weight_sets([f"ElecSF_2016_endcap UL2016postVFP_Endcaps_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+    extLepSF.add_weight_sets([f"ElecSF_2017_barrel UL2017_Barrel_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+    extLepSF.add_weight_sets([f"ElecSF_2017_endcap UL2017_Endcaps_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+    extLepSF.add_weight_sets([f"ElecSF_2018_barrel UL2018_Barrel_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+    extLepSF.add_weight_sets([f"ElecSF_2018_endcap UL2018_Endcaps_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+
+    extLepSF.finalize()
+    SFevaluator = extLepSF.make_evaluator()
+
+    eta = electrons.eta
+    eta_barrel_mask = ak.flatten(abs(eta) < 1.4442)
+    
+    pt = electrons.pt
+
+    ElecSF = ak.where(
+                eta_barrel_mask, 
+                SFevaluator[f"ElecSF_{year}_barrel"](pt, eta),
+                SFevaluator[f"ElecSF_{year}_endcap"](pt, eta)
+            )
+
+    electrons['SF_elec_trig_nom'] = ElecSF 
+
+
 def AttachElectronSF(electrons, year):
     '''
     Inserts the following scale factor values inot the electrons array 

@@ -15,6 +15,7 @@ analysis/tmp*-tmp-*/
 analysis/*.pkl.gz
 analysis/__pycache__/
 analysis/*/*.pkl.gz
+analysis/topeft-envs/
 
 # Distribution / packaging
 *.egg

@@ -14,7 +14,7 @@ from coffea.nanoevents import NanoAODSchema
 from topcoffea.modules import utils
 import topcoffea.modules.remote_environment as remote_environment
 
-LST_OF_KNOWN_EXECUTORS = ["futures","work_queue"]
+LST_OF_KNOWN_EXECUTORS = ["futures","work_queue", "taskvine"]
 
 if __name__ == '__main__':
 
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     if executor not in LST_OF_KNOWN_EXECUTORS:
         raise Exception(f"The \"{executor}\" executor is not known. Please specify an executor from the known executors ({LST_OF_KNOWN_EXECUTORS}). Exiting.")
 
-    if executor == "work_queue":
+    if executor in ["work_queue", "taskvine"]:
         # construct wq port range
         port = list(map(int, args.port.split('-')))
         if len(port) < 1:
@@ -186,13 +186,12 @@ if __name__ == '__main__':
     # Run the processor and get the output
     processor_instance = analysis_processor.AnalysisProcessor(samplesdict,wc_lst,hist_lst)
 
-    if executor == "work_queue":
+    if executor in ["work_queue", "taskvine"]:
         executor_args = {
-            'master_name': '{}-workqueue-coffea'.format(os.environ['USER']),
+            'master_name': f"{os.environ['USER']}-{executor}-coffea",
 
             # find a port to run work queue in this range:
             'port': port,
-
             'debug_log': 'debug.log',
             'transactions_log': 'tr.log',
             'stats_log': 'stats.log',
@@ -207,12 +206,12 @@ if __name__ == '__main__':
             # 'extra_input_files': ["nanogen_processor.py"],
             'extra_input_files' : [proc_file],
 
-            'retries': 5,
+            'retries': 10,
 
             # use mid-range compression for chunks results. 9 is the default for work
             # queue in coffea. Valid values are 0 (minimum compression, less memory
             # usage) to 16 (maximum compression, more memory usage).
-            'compression': 9,
+            'compression': 8,
 
             # automatically find an adequate resource allocation for tasks.
             # tasks are first tried using the maximum resources seen of previously ran
@@ -273,16 +272,36 @@ if __name__ == '__main__':
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
     elif executor ==  "work_queue":
         executor = processor.WorkQueueExecutor(**executor_args)
-        runner = processor.Runner(executor, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks, skipbadfiles=False, xrootdtimeout=180)
+        runner = processor.Runner(
+            executor, 
+            schema=NanoAODSchema, 
+            chunksize=chunksize, 
+            maxchunks=nchunks, 
+            skipbadfiles=False, 
+            xrootdtimeout=180)
+    elif executor == "taskvine":
+        try:
+            executor = processor.TaskVineExecutor(**executor_args)
+        except AttributeError:
+            raise RuntimeError("TaskVineExecutor not available.")
+        runner = processor.Runner(
+            executor,
+            schema=NanoAODSchema,
+            chunksize=chunksize,
+            maxchunks=nchunks,
+            skipbadfiles=True,
+            xrootdtimeout=300,
+        )
+
 
     output = runner(flist, treename, processor_instance)
 
     dt = time.time() - tstart
 
-    if executor == "work_queue":
-        print('Processed {} events in {} seconds ({:.2f} evts/sec).'.format(nevts_total,dt,nevts_total/dt))
+    if executor in ["work_queue", "taskvine"]:
+        print(f"Processed {nevts_total} events in {dt} seconds ({nevts_total/dt:.2f} events/sec)")
     elif executor == "futures":
-        print("Processing time: %1.2f s with %i workers (%.2f s cpu overall)" % (dt, nworkers, dt*nworkers, ))
+        print(f"Processing time: {dt.2f} seconds with {nworkers} workers ({dt*nworkers} cpu overall)")
     
 
     # Save the output

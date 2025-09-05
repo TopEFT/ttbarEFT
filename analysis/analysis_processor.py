@@ -314,6 +314,7 @@ class AnalysisProcessor(processor.ProcessorABC):
 
 
             ######### Selection Masks #########
+            # pass_trg = tt_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict, lep_cat)
             pass_trg = tc_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict)
             # at_least_two_leps = ak.fill_none(nleps>=2, False)
 
@@ -435,7 +436,7 @@ class AnalysisProcessor(processor.ProcessorABC):
                         for dense_axis_name, dense_axis_vals in dense_axis_variables.items():
                             # if the category requires zero jets, don't fill jet histograms
                             if (jet_cat == 'exactly_0j') and (dense_axis_name in jet_variables):
-                                print(f"Skipping '{dense_axis_name}' in category '{ch_name}'. Jet histograms are not filled for categories that don't require a jet")
+                                print(f"Skipping '{dense_axis_name}' in category '{ch_name}_{jet_cat}'. Jet histograms are not filled for categories that don't require a jet")
                                 continue
 
                             if dense_axis_name not in self._hist_lst:
