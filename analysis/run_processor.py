@@ -161,6 +161,7 @@ if __name__ == '__main__':
     if executor in ["taskvine"]:
         executor_args = {
             'manager_name': f"{os.environ['USER']}-{executor}-coffea",
+            'filepath': '/tmp/hnelson2/vine-tmp/',
 
             # find a port to run work queue in this range:
             'port': port,
@@ -190,8 +191,8 @@ if __name__ == '__main__':
             # tasks. on resource exhaustion, they are retried with the maximum resource
             # values, if specified below. if a maximum is not specified, the task waits
             # forever until a larger worker connects.
-            'resource_monitor': True,
-            'resources_mode': 'auto',
+            'resource_monitor': 'measure',
+            'resources_mode': 'max',
 
             # this resource values may be omitted when using
             # resources_mode: 'auto', but they do make the initial portion
@@ -250,7 +251,6 @@ if __name__ == '__main__':
             schema=NanoAODSchema,
             chunksize=chunksize,
             maxchunks=nchunks,
-            skipbadfiles=True,
             xrootdtimeout=300,
         )
 
