@@ -14,7 +14,7 @@ from coffea.nanoevents import NanoAODSchema
 from topcoffea.modules import utils
 import topcoffea.modules.remote_environment as remote_environment
 
-LST_OF_KNOWN_EXECUTORS = ["futures","work_queue", "taskvine"]
+LST_OF_KNOWN_EXECUTORS = ["taskvine", "iterative"]
 
 if __name__ == '__main__':
 
@@ -29,15 +29,13 @@ if __name__ == '__main__':
     parser.add_argument('--nchunks','-c'  , default=None  , help = 'You can choose to run only a number of chunks')
     parser.add_argument('--outname','-o'  , default='histos', help = 'Name of the output file with histograms')
     parser.add_argument('--treename'      , default='Events', help = 'Name of the tree inside the files')
-    parser.add_argument('--do-errors'      , action='store_true', help = 'Save the w**2 coefficients')
-    parser.add_argument('--do-systs', action='store_true', help = 'Compute systematic variations')
     parser.add_argument('--wc-list', action='extend', nargs='+', help = 'Specify a list of Wilson coefficients to use in filling histograms.')
     parser.add_argument('--hist-list', action='extend', nargs='+', help = 'Specify a list of histograms to fill.')
     parser.add_argument('--port', default='9123-9130', help = 'Specify the Work Queue port. An integer PORT or an integer range PORT_MIN-PORT_MAX.')
     parser.add_argument('--processor', '-p', default='analysis_processor.py', help='Specify processor file name')
 
     args        = parser.parse_args()
-    jsonFiles  = args.jsonFiles
+    jsonFiles   = args.jsonFiles
     executor    = args.executor
     prefix      = args.prefix
     pretend     = args.pretend
@@ -46,11 +44,10 @@ if __name__ == '__main__':
     nchunks     = int(args.nchunks) if not args.nchunks is None else args.nchunks
     outname     = args.outname
     treename    = args.treename
-    do_errors   = args.do_errors
-    do_systs    = args.do_systs
     wc_lst      = args.wc_list if args.wc_list is not None else []
     proc_file   = args.processor
     proc_name   = args.processor[:-3]
+    hist_lst    = args.hist_list
 
     print("\n running with processor: ", proc_file, '\n')
     print("\n jsonFiles argument: ", jsonFiles, '\n')
@@ -61,7 +58,7 @@ if __name__ == '__main__':
     if executor not in LST_OF_KNOWN_EXECUTORS:
         raise Exception(f"The \"{executor}\" executor is not known. Please specify an executor from the known executors ({LST_OF_KNOWN_EXECUTORS}). Exiting.")
 
-    if executor in ["work_queue", "taskvine"]:
+    if executor in ["taskvine"]:
         # construct wq port range
         port = list(map(int, args.port.split('-')))
         if len(port) < 1:
@@ -72,17 +69,6 @@ if __name__ == '__main__':
             # convert single values into a range of one element
             port.append(port[0])
 
-    if args.hist_list == ["weights"]:
-        hist_lst = ["weights_SM", "weights_SM_log",
-                    "weights_pt0", "weights_pt0_log",
-                    "weights_pt1", "weights_pt1_log",
-                    "weights_pt2", "weights_pt2_log",
-                    "weights_pt3", "weights_pt3_log",
-                    "weights_pt4", "weights_pt4_log"]
-    elif args.hist_list == ["kinematics"]:
-        hist_lst = ["tops_pt", "avg_top_pt", "l0pt", "dr_leps", "ht", "jets_pt", "j0pt", "njets", "mtt", "mll"]
-    else:
-        hist_lst = args.hist_list
 
     # Load samples from json and setup the inputs to the processor
     samplesdict = {}
@@ -95,10 +81,14 @@ if __name__ == '__main__':
             samplesdict[sampleName] = json.load(jf)
             samplesdict[sampleName]['redirector'] = prefix
 
+    print(f"isinstance(jsonFiles, str): {isinstance(jsonFiles, str)}")
+
     if isinstance(jsonFiles, str) and ',' in jsonFiles:
         jsonFiles = jsonFiles.replace(' ', '').split(',')
     elif isinstance(jsonFiles, str):
         jsonFiles = [jsonFiles]
+
+    print(f"jsonFiles: {jsonFiles}")
     
     for jsonFile in jsonFiles:
         if os.path.isdir(jsonFile):
@@ -107,6 +97,8 @@ if __name__ == '__main__':
                 if f.endswith('.json'): allInputFiles.append(jsonFile+f)
         else:
             allInputFiles.append(jsonFile)
+
+    print(f"allInputFiles: {allInputFiles}")
 
     # Read from cfg files
     for f in allInputFiles:
@@ -137,31 +129,12 @@ if __name__ == '__main__':
                             prefix = l
                         else:
                             LoadJsonToSampleName(l, prefix)
-                    # else:
-                    #     if not l.endswith('.json'):
-                    #         prefix = l
-                    #     else:
-                    #         LoadJsonToSampleName(l, prefix)
 
     flist = {}
     for sname in samplesdict.keys():
         #flist[sname] = samplesdict[sname]['files']
         redirector = samplesdict[sname]['redirector']
         flist[sname] = [(redirector+f) for f in samplesdict[sname]['files']]
-
-    # Get the list of WCs
-    # Here we make sure WC list is same for all files
-    # There are ways of handling if not, but for now let's just stick to the simple case
-    # wc_set = ()
-    # for item in samplesdict:
-    #     for i, file_name in enumerate(samplesdict[item]['files']):
-    #         wc_lst = utils.get_list_of_wc_names(file_name)
-    #         if i==0:
-    #             wc_set = set(wc_lst)
-    #         else:
-    #             if set(wc_lst) != wc_set:
-    #                raise Exception("ERROR: Not all files have same WC list")
-    # wc_lst = wc_lst
 
     # Extract the list of all WCs, as long as we haven't already specified one.
     if len(wc_lst) == 0:
@@ -183,19 +156,18 @@ if __name__ == '__main__':
     else:
         print('No Wilson coefficients specified')
 
-    # Run the processor and get the output
-    processor_instance = analysis_processor.AnalysisProcessor(samplesdict,wc_lst,hist_lst)
+    proc_instance = analysis_processor.AnalysisProcessor(samplesdict,wc_lst,hist_lst)
 
-    if executor in ["work_queue", "taskvine"]:
+    if executor in ["taskvine"]:
         executor_args = {
-            'master_name': f"{os.environ['USER']}-{executor}-coffea",
+            'manager_name': f"{os.environ['USER']}-{executor}-coffea",
 
             # find a port to run work queue in this range:
             'port': port,
-            'debug_log': 'debug.log',
-            'transactions_log': 'tr.log',
-            'stats_log': 'stats.log',
-            'tasks_accum_log': 'tasks.log',
+            # 'debug_log': 'debug.log',
+            # 'transactions_log': 'tr.log',
+            # 'stats_log': 'stats.log',
+            # 'tasks_accum_log': 'tasks.log',
 
             #'environment_file': 'topEFT-env.tar.gz',
             'environment_file': remote_environment.get_environment(
@@ -204,7 +176,7 @@ if __name__ == '__main__':
                 # extra_conda=["pytorch=2.3.1", "numpy=1.23.5"]
             ),
             # 'extra_input_files': ["nanogen_processor.py"],
-            'extra_input_files' : [proc_file],
+            # 'extra_input_files' : [proc_file],
 
             'retries': 10,
 
@@ -239,8 +211,8 @@ if __name__ == '__main__':
             # control the size of accumulation tasks. Results are
             # accumulated in groups of size chunks_per_accum, keeping at
             # most chunks_per_accum at the same time in memory per task.
-            'chunks_per_accum': 25,
-            'chunks_accum_in_mem': 2,
+            # 'chunks_per_accum': 25,
+            # 'chunks_accum_in_mem': 2,
 
             # terminate workers on which tasks have been running longer than average.
             # This is useful for temporary conditions on worker nodes where a task will
@@ -267,25 +239,14 @@ if __name__ == '__main__':
     # Run the processor and get the output
     tstart = time.time()
 
-    if executor == "futures":
-        exec_instance = processor.FuturesExecutor(workers=nworkers)
+    if executor == "iterative":
+        exec_instance = processor.IterativeExecutor()
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
-    elif executor ==  "work_queue":
-        executor = processor.WorkQueueExecutor(**executor_args)
-        runner = processor.Runner(
-            executor, 
-            schema=NanoAODSchema, 
-            chunksize=chunksize, 
-            maxchunks=nchunks, 
-            skipbadfiles=False, 
-            xrootdtimeout=180)
+
     elif executor == "taskvine":
-        try:
-            executor = processor.TaskVineExecutor(**executor_args)
-        except AttributeError:
-            raise RuntimeError("TaskVineExecutor not available.")
+        exec_instance = processor.TaskVineExecutor(**executor_args)
         runner = processor.Runner(
-            executor,
+            exec_instance,
             schema=NanoAODSchema,
             chunksize=chunksize,
             maxchunks=nchunks,
@@ -293,17 +254,14 @@ if __name__ == '__main__':
             xrootdtimeout=300,
         )
 
-
-    output = runner(flist, treename, processor_instance)
-
+    output = runner(fileset=flist, processor_instance=proc_instance, treename=treename)
     dt = time.time() - tstart
 
-    if executor in ["work_queue", "taskvine"]:
+    if executor in ["taskvine"]:
         print(f"Processed {nevts_total} events in {dt} seconds ({nevts_total/dt:.2f} events/sec)")
-    elif executor == "futures":
-        print(f"Processing time: {dt.2f} seconds with {nworkers} workers ({dt*nworkers} cpu overall)")
+    elif executor == "iterative":
+        print(f"Processing time: {dt:.2f} seconds with {nworkers} workers ({dt*nworkers} cpu overall)")
     
-
     # Save the output
     outpath = "."
     if not os.path.isdir(outpath): os.system("mkdir -p %s"%outpath)
@@ -312,4 +270,3 @@ if __name__ == '__main__':
     with gzip.open(out_pkl_file, "wb") as fout:
         cloudpickle.dump(output, fout)
     print("Done!")
-
