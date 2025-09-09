@@ -140,16 +140,37 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         leptonSelection = tt_os.Run2LeptonSelection()
 
-        njets = ak.num(jets)
+        # An array of length events that is just 1 for each event
+        events['nom'] = ak.ones_like(events.MET.pt)
+
+        ######### Electron Selection ##########
+        ele['isSelE']=leptonSelection.is_sel_ele(ele)
+        ele_good = ele[ele.isSelE]
+
+        AttachElectronSF(ele_good, year)    # TODO: this should be added inside an only MC block
+
+
+        ######### Muon Selection ##########
+        mu['pt'] = ApplyMuonPtCorr(mu, year, isData)
+        mu['isSelM']=leptonSelection.is_sel_muon(mu)
+        
+        mu_good = mu[mu.isSelM]
+        AttachMuonSF(mu_good, year)         # TODO: this should be added inside an only MC block
+
+
+        ######### Lepton Selection ##########
+        leps = ak.concatenate([ele_good, mu_good], axis=1)
+        leps_sorted = leps[ak.argsort(leps.pt, axis=-1,ascending=False)] 
+
+        events['leps_pt_sorted'] = leps_sorted
+
 
         ######### Add variables into event object so that they persist #########
-        events['njets'] = njets 
+        events['njets'] = ak.num(jets)
 
         ######### Fill dense axes variables ##########
-
         dense_axis_variables = {}
-        dense_axis_variables['njets'] = njets
-
+        dense_axis_variables['njets'] = events.njets
         weights = np.ones_like(events['event'])
 
 
