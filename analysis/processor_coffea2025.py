@@ -132,7 +132,13 @@ class AnalysisProcessor(processor.ProcessorABC):
 
 
         ######### Initialize Objects #########
+        met  = events.MET
+        ele  = events.Electron
+        mu   = events.Muon
+        tau  = events.Tau
         jets = events.Jet 
+
+        leptonSelection = tt_os.Run2LeptonSelection()
 
         njets = ak.num(jets)
 
