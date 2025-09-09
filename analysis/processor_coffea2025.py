@@ -182,7 +182,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         nbtagsm = ak.num(goodJets[isBtagJetsMedium])
 
         # JetVetoMaps applied
-        veto_map_array = ApplyJetVetoMaps(goodJets, year)
+        veto_map_array = ApplyJetVetoMaps(goodJets, year)   # TODO: check if these should only be applied to MC (vs also data)
         veto_map_mask = (veto_map_array == 0)
 
 
@@ -232,6 +232,7 @@ class AnalysisProcessor(processor.ProcessorABC):
 
 
         ######### Selection Masks #########
+        # TODO: implement ttbar trigger function that updates based on channel
         pass_trg = tc_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict)
 
         # Charge masks
@@ -285,15 +286,17 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         jet_variables = ['j0pt', 'j0eta', 'j0phi']
 
-        weights = np.ones_like(events['event'])
+        # weight = np.ones_like(events['event'])
 
 
         ########## Fill the histograms ##########
+        weights_object = copy.deepcopy(weights_obj_base)
+        weight = weights_object.weight(None) 
 
         cuts_list = ['jetvetomap', '2los', 'bmask_exactly0med', 'ee', 'atleast_1j']
         event_selection_mask = selections.all(*(cuts_list))
 
-        weights_cut = weights[event_selection_mask]
+        weights_cut = weight[event_selection_mask]
         eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
 
         for dense_axis_name, dense_axis_vals in dense_axis_variables.items():
