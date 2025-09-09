@@ -51,13 +51,6 @@ class AnalysisProcessor(processor.ProcessorABC):
         with open(ttbarEFT_path("params/axes.json"), 'r') as axes_file:
             axes_info = json.load(axes_file)
 
-        # axes_info = {
-        #     "njets": {
-        #         "regular": [8, 0, 8],
-        #         "label": "njets", 
-        #     }
-        # }
-
         histograms = {}
         for name, info in axes_info['CR_axes'].items():
         # for name, info in axes_info.items():
@@ -70,6 +63,8 @@ class AnalysisProcessor(processor.ProcessorABC):
 
             histograms[name] = HistEFT(
                 proc_axis, 
+                # chan_axis,
+                # syst_axis,
                 dense_axis,
                 wc_names = wc_names_lst, 
                 label=r'Events',
@@ -77,8 +72,8 @@ class AnalysisProcessor(processor.ProcessorABC):
 
             histograms[name+'_sumw2'] = HistEFT(
                 proc_axis, 
-                chan_axis,
-                syst_axis,
+                # chan_axis,
+                # syst_axis,
                 sumw2_axis,
                 wc_names = wc_names_lst, 
                 label=r'Events',
@@ -125,6 +120,15 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         # Initialize the out object
         hout = self.accumulator
+
+        ######### Lumi Mask for Data #########        
+        golden_json_path = {
+            "2016": topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
+            "2016APV": topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
+            "2017": topcoffea_path("data/goldenJsons/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"),
+            "2018": topcoffea_path("data/goldenJsons/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"),
+        }
+        lumi_mask = LumiMask(golden_json_path[year])(events.run,events.luminosityBlock)
 
 
         ######### Initialize Objects #########
