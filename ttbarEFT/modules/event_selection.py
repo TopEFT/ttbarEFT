@@ -145,20 +145,25 @@ def addLepCatMasks(events):
 
 
     # 1l masks
-    events["is_e"] = ((n_e_2l==1) & (n_m_2l==0))
-    events["is_m"] = ((n_e_2l==0) & (n_m_2l==1))
+    events['is_e'] = ((n_e_2l==1) & (n_m_2l==0))
+    events['is_m'] = ((n_e_2l==0) & (n_m_2l==1))
 
     # 2l masks
     events['is_ee'] = ((n_e_2l==2) & (n_m_2l==0))
     events['is_em'] = ((n_e_2l==1) & (n_m_2l==1))
     events['is_mm'] = ((n_e_2l==0) & (n_m_2l==2))
 
-def addLepSFs(events):
-
+def addLepSFs(events, ele, mu):
+    # TODO: probably need to change these to SF_2l_ee, SF_2l_mm, and add SF_2l_em 
+    # where SF_2l_em = leps[0].SF_ele * leps[0].SF_muon * leps[1].SF_ele * leps[1].SF_muon
+    
     leps = events.leps_pt_sorted
     padded_leps = ak.pad_none(leps, 2)
 
-    print(f"\n\n padded_leps.fields: {padded_leps.fields} \n\n")
+    # leps = ak.concatenate([ele, mu], axis=1)
+    # padded_leps = ak.pad_none(leps[ak.argsort(leps.pt, axis=-1,ascending=False)], 2) 
+
+    print(f"\n\n {padded_leps.fields} \n\n")
 
     events['SF_2l_ele'] = padded_leps[:,0].SF_ele_nom * padded_leps[:,1].SF_ele_nom
     events['SF_2l_ele_up'] = padded_leps[:,0].SF_ele_up * padded_leps[:,1].SF_ele_up
@@ -167,4 +172,3 @@ def addLepSFs(events):
     events['SF_2l_muon'] = padded_leps[:,0].SF_muon_nom * padded_leps[:,1].SF_muon_nom
     events['SF_2l_muon_up'] = padded_leps[:,0].SF_muon_up * padded_leps[:,1].SF_muon_up
     events['SF_2l_muon_down'] = padded_leps[:,0].SF_muon_down * padded_leps[:,1].SF_muon_down
-

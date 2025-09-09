@@ -161,7 +161,7 @@ if __name__ == '__main__':
     if executor in ["taskvine"]:
         executor_args = {
             'manager_name': f"{os.environ['USER']}-{executor}-coffea",
-            'filepath': '/tmp/hnelson2/vine-tmp/',
+            'filepath': f"/tmp/{os.environ['USER']}/vine-tmp/",
 
             # find a port to run work queue in this range:
             'port': port,
@@ -170,12 +170,12 @@ if __name__ == '__main__':
             # 'stats_log': 'stats.log',
             # 'tasks_accum_log': 'tasks.log',
 
-            #'environment_file': 'topEFT-env.tar.gz',
-            'environment_file': remote_environment.get_environment(
-                extra_pip_local = {"ttbarEFT": ["ttbarEFT", "setup.py"]},
-                extra_pip=['mt2'],
-                # extra_conda=["pytorch=2.3.1", "numpy=1.23.5"]
-            ),
+            'environment_file': '/users/hnelson2/ttbarEFT-coffea2025/analysis/topeft-envs/env_spec_b3473f78_edit_HEAD.tar.gz',
+            # 'environment_file': remote_environment.get_environment(
+            #     extra_pip_local = {"ttbarEFT": ["ttbarEFT", "setup.py"]},
+            #     extra_pip=['mt2'],
+            #     # extra_conda=["pytorch=2.3.1", "numpy=1.23.5"]
+            # ),
             # 'extra_input_files': ["nanogen_processor.py"],
             # 'extra_input_files' : [proc_file],
 

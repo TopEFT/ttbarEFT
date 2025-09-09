@@ -218,35 +218,92 @@ class AnalysisProcessor(processor.ProcessorABC):
             # weights_obj_base.add('lepSF_muon', events.SF_2l_muon, copy.deepcopy(events.SF_2l_muon_up), copy.deepcopy(events.SF_2l_muon_down)) 
 
 
-        ######### Add variables into event object so that they persist #########
+        ######### Add variables to EVENTS #########
         events['njets'] = ak.num(jets)
+        tt_es.addLepCatMasks(events) 
+
+        ######### Create objects for dense axes ##########
+        leps_sorted = ak.pad_none(leps_sorted, 2)
+        l0 = leps_sorted[:,0]
+        l1 = leps_sorted[:,1]
+
+        ptll = (l0+l1).pt
+        mll = (l0+l1).mass
+
+
+        ######### Selection Masks #########
+        pass_trg = tc_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict)
+
+        # Charge masks
+        chargel0_p = ak.fill_none(((l0.charge)>0),False)
+        chargel0_m = ak.fill_none(((l0.charge)<0),False)
+        charge2l_os = ak.fill_none(((l0.charge+l1.charge)==0),False)
+        charge2l_ss = ak.fill_none(((l0.charge+l1.charge)!=0),False)
+
+
+        ######### Store boolean masks with PackedSelection ##########
+        selections = PackedSelection(dtype='uint64')
         
+        selections.add('is_good_lumi', lumi_mask)
+        selections.add('pass_trg', pass_trg)
+        selections.add('jetvetomap', veto_map_mask)
 
-        # leps = ak.concatenate([ele[ele.isGoodElec], mu[mu.isGoodMuon]], axis=1)
-        # leps_sorted = leps[ak.argsort(leps.pt, axis=-1,ascending=False)] 
+        # selections.add('2l', at_least_two_leps) 
+        selections.add('2los', charge2l_os)
 
-        # events['leps_pt_sorted'] = leps_sorted
+        selections.add("ee",  (events.is_ee & pass_trg))
+        selections.add("em",  (events.is_em & pass_trg))
+        selections.add("mm",  (events.is_mm))
 
+        selections.add('bmask_exactly0med', (nbtagsm==0))
+        selections.add('bmask_exactly1med', (nbtagsm==1))
+        selections.add('bmask_exactly2med', (nbtagsm==2))
+        selections.add('bmask_atleast2med', (nbtagsm>=2))
 
+        selections.add("exactly_0j", (njets==0))
+        selections.add("exactly_1j", (njets==1))
+        selections.add("exactly_2j", (njets==2))
 
-
+        selections.add("atleast_1j", (njets>=1))
 
         ######### Fill dense axes variables ##########
         dense_axis_variables = {}
         dense_axis_variables['njets'] = events.njets
+        dense_axis_variables['nbjets'] = nbtagsm
+        dense_axis_variables['mll'] = mll
+        dense_axis_variables['ptll'] = ptll
+        dense_axis_variables['l0pt'] = l0.pt
+        dense_axis_variables['l0eta'] = l0.eta 
+        dense_axis_variables['l0phi'] = l0.phi 
+        dense_axis_variables['l1pt'] = l1.pt
+        dense_axis_variables['l1eta'] = l1.eta 
+        dense_axis_variables['l1phi'] = l1.phi
+        dense_axis_variables['j0pt'] = ak.flatten(j0.pt) 
+        dense_axis_variables['j0eta'] = ak.flatten(j0.eta)
+        dense_axis_variables['j0phi'] = ak.flatten(j0.phi)
+        dense_axis_variables['MET'] = met.pt
+
+        jet_variables = ['j0pt', 'j0eta', 'j0phi']
+
         weights = np.ones_like(events['event'])
 
 
         ########## Fill the histograms ##########
 
+        cuts_list = ['jetvetomap', '2los', 'bmask_exactly0med', 'ee', 'atleast_1j']
+        event_selection_mask = selections.all(*(cuts_list))
+
+        weights_cut = weights[event_selection_mask]
+        eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
+
         for dense_axis_name, dense_axis_vals in dense_axis_variables.items():
 
             # Fill the histos
             axes_fill_info_dict = {
-                dense_axis_name : dense_axis_vals,
+                dense_axis_name : dense_axis_vals[event_selection_mask],
                 "process"       : histAxisName,
-                "weight"        : weights,
-                "eft_coeff"     : eft_coeffs,
+                "weight"        : weights_cut,
+                "eft_coeff"     : eft_coeffs_cut,
             }
 
             hout[dense_axis_name].fill(**axes_fill_info_dict)
