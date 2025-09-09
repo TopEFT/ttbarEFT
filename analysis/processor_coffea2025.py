@@ -155,6 +155,7 @@ class AnalysisProcessor(processor.ProcessorABC):
 
 
         ######### Lepton Selection ##########
+        # add lepton scale factors 
         if not isData: 
             AttachElectronSF(ele_good, year)    
             AttachMuonSF(mu_good, year)     
@@ -163,15 +164,63 @@ class AnalysisProcessor(processor.ProcessorABC):
         leps_sorted = leps[ak.argsort(leps.pt, axis=-1,ascending=False)] 
 
         events['leps_pt_sorted'] = leps_sorted
-    
-    
+
+
+        ######### Jet Selections #########
+        jets['isPres'] = tt_os.is_pres_jet(jets) 
+        goodJets = jets[jets.isPres] 
+
+        njets = ak.num(goodJets)
+        ht = ak.sum(goodJets.pt,axis=-1)
+        j0 = goodJets[ak.argmax(goodJets.pt,axis=-1,keepdims=True)]
+
+        # Medium DeepJet WP
+        medium_tag = "btag_wp_medium_" + year.replace("201", "UL1")
+        btagwpm = get_tc_param(medium_tag)
+        isBtagJetsMedium = (goodJets.btagDeepFlavB > btagwpm)
+        isNotBtagJetsMedium = np.invert(isBtagJetsMedium)
+        nbtagsm = ak.num(goodJets[isBtagJetsMedium])
+
+        # JetVetoMaps applied
+        veto_map_array = ApplyJetVetoMaps(goodJets, year)
+        veto_map_mask = (veto_map_array == 0)
+
+
         ######### Systematics #########
+
+        weights_obj_base = coffea.analysis_tools.Weights(len(events),storeIndividual=True)
+
         if not isData: 
+            # If this is not an eft sample, get the genWeight
+            if eft_coeffs is None: 
+                genw = events['genWeight']
+            else: 
+                genw = np.ones_like(events['event'])
+
+            lumi = 1000.0*get_lumi(year)
+            norm = genw*(xsec/sow)*lumi
+            weights_obj_base.add('norm', norm)
+
             tt_es.addLepSFs(events, ele_good, mu_good) 
+            # AttachPSWeights(events)
+            # AttachScaleWeights(events) 
+            # AttachPdfWeights(events)
+
+            #weights_obj_base.add('ISR')...
+            #weights_obj_base.add('FSR')...
+            #weights_obj_base.add('renorm')...
+            #weights_obj_base.add('fact')...
+            #weights_obj_base.add('Prefiring')...
+            #weights_obj_base.add('PU')...
+
+            # TODO: Are these teh correct way to apply these? Might need to be applied based on lepton category
+            # weights_obj_base.add('lepSF_ele', events.SF_2l_ele, copy.deepcopy(events.SF_2l_ele_up), copy.deepcopy(events.SF_2l_ele_down))
+            # weights_obj_base.add('lepSF_muon', events.SF_2l_muon, copy.deepcopy(events.SF_2l_muon_up), copy.deepcopy(events.SF_2l_muon_down)) 
 
 
         ######### Add variables into event object so that they persist #########
         events['njets'] = ak.num(jets)
+        
 
         # leps = ak.concatenate([ele[ele.isGoodElec], mu[mu.isGoodMuon]], axis=1)
         # leps_sorted = leps[ak.argsort(leps.pt, axis=-1,ascending=False)] 
