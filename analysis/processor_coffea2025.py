@@ -44,21 +44,42 @@ class AnalysisProcessor(processor.ProcessorABC):
         self._dtype = dtype 
 
         proc_axis = hist.axis.StrCategory([], name="process", growth=True)
+        chan_axis = hist.axis.StrCategory([], name="channel", growth=True)
+        syst_axis = hist.axis.StrCategory([], name="systematic", label=r"Systematic Uncertainty", growth=True)
 
-        axes_info = {
-            "njets": {
-                "regular": [8, 0, 8],
-                "label": "njets", 
-            }
-        }
+        # fill histograms using info from axes.json
+        with open(ttbarEFT_path("params/axes.json"), 'r') as axes_file:
+            axes_info = json.load(axes_file)
+
+        # axes_info = {
+        #     "njets": {
+        #         "regular": [8, 0, 8],
+        #         "label": "njets", 
+        #     }
+        # }
 
         histograms = {}
-        for name, info in axes_info.items():
-            dense_axis = hist.axis.Regular(*info['regular'], name=name, label=info['label'])
+        for name, info in axes_info['CR_axes'].items():
+        # for name, info in axes_info.items():
+            if 'variable' in info: 
+                dense_axis = hist.axis.Variable(info['variable'], name=name, label=info['label'])
+                sumw2_axis = hist.axis.Variable(info['variable'], name=name+'_sumw2', label=info['label'] + ' sum of w^2')
+            else:
+                dense_axis = hist.axis.Regular(*info['regular'], name=name, label=info['label'])
+                sumw2_axis = hist.axis.Regular(*info['regular'], name=name+'_sumw2', label=info['label'] + ' sum of w^2')
 
             histograms[name] = HistEFT(
                 proc_axis, 
                 dense_axis,
+                wc_names = wc_names_lst, 
+                label=r'Events',
+            )
+
+            histograms[name+'_sumw2'] = HistEFT(
+                proc_axis, 
+                chan_axis,
+                syst_axis,
+                sumw2_axis,
                 wc_names = wc_names_lst, 
                 label=r'Events',
             )
