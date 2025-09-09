@@ -144,29 +144,36 @@ class AnalysisProcessor(processor.ProcessorABC):
         events['nom'] = ak.ones_like(events.MET.pt)
 
         ######### Electron Selection ##########
-        ele['isSelE']=leptonSelection.is_sel_ele(ele)
-        ele_good = ele[ele.isSelE]
-
-        AttachElectronSF(ele_good, year)    # TODO: this should be added inside an only MC block
-
+        ele['isGoodElec']=leptonSelection.is_sel_ele(ele)
+        ele_good = ele[ele.isGoodElec]
 
         ######### Muon Selection ##########
         mu['pt'] = ApplyMuonPtCorr(mu, year, isData)
-        mu['isSelM']=leptonSelection.is_sel_muon(mu)
-        
-        mu_good = mu[mu.isSelM]
-        AttachMuonSF(mu_good, year)         # TODO: this should be added inside an only MC block
+        mu['isGoodMuon']=leptonSelection.is_sel_muon(mu)
+        mu_good = mu[mu.isGoodMuon]
 
 
-        ######### Lepton Selection ##########
-        leps = ak.concatenate([ele_good, mu_good], axis=1)
+        # ######### Lepton Selection ##########
+        # leps = ak.concatenate([ele['isSelE'], mu['isSelM']], axis=1)
+        # leps_sorted = leps[ak.argsort(leps.pt, axis=-1,ascending=False)] 
+
+        # events['leps_pt_sorted'] = leps_sorted
+
+
+        ######### Systematics #########
+        if not isData: 
+            AttachElectronSF(ele_good, year)    # TODO: this should be added inside an only MC block
+            AttachMuonSF(mu_good, year)         # TODO: this should be added inside an only MC block
+            tt_es.addLepSFs(events, ele_good, mu_good) 
+
+        ######### Add variables into event object so that they persist #########
+        events['njets'] = ak.num(jets)
+
+        leps = ak.concatenate([ele[ele.isGoodElec], mu[mu.isGoodMuon]], axis=1)
         leps_sorted = leps[ak.argsort(leps.pt, axis=-1,ascending=False)] 
 
         events['leps_pt_sorted'] = leps_sorted
 
-
-        ######### Add variables into event object so that they persist #########
-        events['njets'] = ak.num(jets)
 
         ######### Fill dense axes variables ##########
         dense_axis_variables = {}
