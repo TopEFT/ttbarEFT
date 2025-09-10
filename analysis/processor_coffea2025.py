@@ -91,9 +91,9 @@ class AnalysisProcessor(processor.ProcessorABC):
     def accumulator(self):
         return self._accumulator
 
-    # @property
-    # def columns(self):
-    #     return self._columns
+    @property
+    def columns(self):
+        return self._columns
 
     def process(self, events):
 
@@ -108,6 +108,10 @@ class AnalysisProcessor(processor.ProcessorABC):
         isEFT = hasattr(events, 'EFTfitCoefficients')    
         assert not (isEFT and isData), f"isEFT and isData cannot both be True. Check input samples."
 
+        # for current testing purposes, set categories here
+        lep_cat = 'ee'
+        bjet_cat = '0j'
+        njet_cat = 'atleast_1j'
 
         ######### EFT coefficients ##########
         # Extract the EFT quadratic coefficients and optionally use them to calculate the coefficients on the w**2 quartic function
@@ -120,15 +124,6 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         # Initialize the out object
         hout = self.accumulator
-
-        ######### Lumi Mask for Data #########        
-        golden_json_path = {
-            "2016": topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
-            "2016APV": topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
-            "2017": topcoffea_path("data/goldenJsons/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"),
-            "2018": topcoffea_path("data/goldenJsons/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"),
-        }
-        lumi_mask = LumiMask(golden_json_path[year])(events.run,events.luminosityBlock)
 
 
         ######### Initialize Objects #########
@@ -182,7 +177,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         nbtagsm = ak.num(goodJets[isBtagJetsMedium])
 
         # JetVetoMaps applied
-        veto_map_array = ApplyJetVetoMaps(goodJets, year)   # TODO: check if these should only be applied to MC (vs also data)
+        veto_map_array = ApplyJetVetoMaps(goodJets, year)   
         veto_map_mask = (veto_map_array == 0)
 
 
@@ -213,7 +208,7 @@ class AnalysisProcessor(processor.ProcessorABC):
             #weights_obj_base.add('Prefiring')...
             #weights_obj_base.add('PU')...
 
-            # TODO: Are these teh correct way to apply these? Might need to be applied based on lepton category
+            # TODO: Are these the correct way to apply these? Might need to be applied based on lepton category
             # weights_obj_base.add('lepSF_ele', events.SF_2l_ele, copy.deepcopy(events.SF_2l_ele_up), copy.deepcopy(events.SF_2l_ele_down))
             # weights_obj_base.add('lepSF_muon', events.SF_2l_muon, copy.deepcopy(events.SF_2l_muon_up), copy.deepcopy(events.SF_2l_muon_down)) 
 
@@ -232,8 +227,19 @@ class AnalysisProcessor(processor.ProcessorABC):
 
 
         ######### Selection Masks #########
-        # TODO: implement ttbar trigger function that updates based on channel
-        pass_trg = tc_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict)
+
+        if isData:
+            # Lumi Mask for Data    
+            golden_json_path = {
+                "2016": topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
+                "2016APV": topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
+                "2017": topcoffea_path("data/goldenJsons/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"),
+                "2018": topcoffea_path("data/goldenJsons/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"),
+            }
+            lumi_mask = LumiMask(golden_json_path[year])(events.run,events.luminosityBlock)
+
+
+        pass_trg = tt_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict, lep_cat)
 
         # Charge masks
         chargel0_p = ak.fill_none(((l0.charge)>0),False)
@@ -245,7 +251,9 @@ class AnalysisProcessor(processor.ProcessorABC):
         ######### Store boolean masks with PackedSelection ##########
         selections = PackedSelection(dtype='uint64')
         
-        selections.add('is_good_lumi', lumi_mask)
+        if isData: 
+            selections.add('is_good_lumi', lumi_mask)
+
         selections.add('pass_trg', pass_trg)
         selections.add('jetvetomap', veto_map_mask)
 

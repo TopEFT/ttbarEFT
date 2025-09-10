@@ -170,14 +170,14 @@ if __name__ == '__main__':
             # 'stats_log': 'stats.log',
             # 'tasks_accum_log': 'tasks.log',
 
-            'environment_file': '/users/hnelson2/ttbarEFT-coffea2025/analysis/topeft-envs/env_spec_b3473f78_edit_HEAD.tar.gz',
+            'environment_file': '/users/hnelson2/ttbarEFT-coffea2025/analysis/test.tar.gz',
             # 'environment_file': remote_environment.get_environment(
             #     extra_pip_local = {"ttbarEFT": ["ttbarEFT", "setup.py"]},
             #     extra_pip=['mt2'],
             #     # extra_conda=["pytorch=2.3.1", "numpy=1.23.5"]
             # ),
             # 'extra_input_files': ["nanogen_processor.py"],
-            # 'extra_input_files' : [proc_file],
+            'extra_input_files' : [proc_file],
 
             'retries': 10,
 
@@ -233,7 +233,7 @@ if __name__ == '__main__':
             # fails, its standard output is also printed, so we can turn
             # off print_stdout for all tasks.
             'verbose': True,
-            'print_stdout': False,
+            'print_stdout': True,
         }
 
 

@@ -95,7 +95,7 @@ def passes_trg_inlst(events,trg_name_lst):
 #   - Returns an array the len of events
 #   - Elements are false if they do not pass any of the triggers defined in dataset_dict
 #   - In the case of data, events are also false if they overlap with another dataset
-def trg_pass_no_overlap(events,is_data,dataset,year,dataset_dict,exclude_dict,lep_cat, era=None):
+def trg_pass_no_overlap(events,is_data,dataset,year,dataset_dict,exclude_dict,lep_cat):
 
     # Initialize ararys and lists, get trg pass info from events
     trg_passes    = np.zeros_like(np.array(events.MET.pt), dtype=bool) # Array of False the len of events
@@ -122,7 +122,9 @@ def trg_pass_no_overlap(events,is_data,dataset,year,dataset_dict,exclude_dict,le
         else: 
             dataset_name = MC_lepcat_triggers_dict[lep_cat]
 
+        print(f"\n\n lep_cat: {lep_cat} \n dataset_name:{dataset_name} \n dictionary: {dataset_dict[year][dataset_name]} \n\n")
         trg_passes = passes_trg_inlst(events, dataset_dict[year][dataset_name])
+
 
     # Return true if passes trg and does not overlap
     return (trg_passes & ~trg_overlaps)
@@ -153,6 +155,7 @@ def addLepCatMasks(events):
     events['is_em'] = ((n_e_2l==1) & (n_m_2l==1))
     events['is_mm'] = ((n_e_2l==0) & (n_m_2l==2))
 
+
 def addLepSFs(events, ele, mu):
     # TODO: probably need to change these to SF_2l_ee, SF_2l_mm, and add SF_2l_em 
     # where SF_2l_em = leps[0].SF_ele * leps[0].SF_muon * leps[1].SF_ele * leps[1].SF_muon
@@ -165,10 +168,14 @@ def addLepSFs(events, ele, mu):
 
     print(f"\n\n {padded_leps.fields} \n\n")
 
-    events['SF_2l_ele'] = padded_leps[:,0].SF_ele_nom * padded_leps[:,1].SF_ele_nom
-    events['SF_2l_ele_up'] = padded_leps[:,0].SF_ele_up * padded_leps[:,1].SF_ele_up
-    events['SF_2l_ele_down'] = padded_leps[:,0].SF_ele_down * padded_leps[:,1].SF_ele_down
+    events['SF_2l_ee'] = padded_leps[:,0].SF_ele_nom * padded_leps[:,1].SF_ele_nom
+    events['SF_2l_ee_up'] = padded_leps[:,0].SF_ele_up * padded_leps[:,1].SF_ele_up
+    events['SF_2l_ee_down'] = padded_leps[:,0].SF_ele_down * padded_leps[:,1].SF_ele_down
 
-    events['SF_2l_muon'] = padded_leps[:,0].SF_muon_nom * padded_leps[:,1].SF_muon_nom
-    events['SF_2l_muon_up'] = padded_leps[:,0].SF_muon_up * padded_leps[:,1].SF_muon_up
-    events['SF_2l_muon_down'] = padded_leps[:,0].SF_muon_down * padded_leps[:,1].SF_muon_down
+    events['SF_2l_mm'] = padded_leps[:,0].SF_muon_nom * padded_leps[:,1].SF_muon_nom
+    events['SF_2l_mm_up'] = padded_leps[:,0].SF_muon_up * padded_leps[:,1].SF_muon_up
+    events['SF_2l_mm_down'] = padded_leps[:,0].SF_muon_down * padded_leps[:,1].SF_muon_down
+
+    events['SF_2l_em'] = padded_leps[:,0].SF_ele_nom * padded_leps[:,0].SF_muon_nom * padded_leps[:,1].SF_ele_nom * padded_leps[:,1].SF_muon_nom
+    events['SF_2l_em_up'] = padded_leps[:,0].SF_ele_up * padded_leps[:,0].SF_muon_up * padded_leps[:,1].SF_ele_up * padded_leps[:,1].SF_muon_up
+    events['SF_2l_em_down'] = padded_leps[:,0].SF_ele_down * padded_leps[:,0].SF_muon_down * padded_leps[:,1].SF_ele_down * padded_leps[:,1].SF_muon_down
