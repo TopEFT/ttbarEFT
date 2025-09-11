@@ -170,13 +170,12 @@ if __name__ == '__main__':
             # 'stats_log': 'stats.log',
             # 'tasks_accum_log': 'tasks.log',
 
-            'environment_file': '/users/hnelson2/ttbarEFT-coffea2025/analysis/test.tar.gz',
+            # 'environment_file': '/users/hnelson2/ttbarEFT-coffea2025/analysis/topeft-envs/env_spec_03e46e41_edit_HEAD.tar.gz',
             # 'environment_file': remote_environment.get_environment(
             #     extra_pip_local = {"ttbarEFT": ["ttbarEFT", "setup.py"]},
-            #     extra_pip=['mt2'],
+            #     # extra_pip=['mt2'],
             #     # extra_conda=["pytorch=2.3.1", "numpy=1.23.5"]
             # ),
-            # 'extra_input_files': ["nanogen_processor.py"],
             'extra_input_files' : [proc_file],
 
             'retries': 10,
@@ -257,9 +256,9 @@ if __name__ == '__main__':
     output = runner(fileset=flist, processor_instance=proc_instance, treename=treename)
     dt = time.time() - tstart
 
-    if executor in ["taskvine"]:
-        print(f"Processed {nevts_total} events in {dt} seconds ({nevts_total/dt:.2f} events/sec)")
-    elif executor == "iterative":
+    # if executor in ["taskvine"]:
+    #     print(f"Processed {nevts_total} events in {dt} seconds ({nevts_total/dt:.2f} events/sec)")
+    if executor == "iterative":
         print(f"Processing time: {dt:.2f} seconds with {nworkers} workers ({dt*nworkers} cpu overall)")
     
     # Save the output

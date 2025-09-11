@@ -16,6 +16,7 @@ analysis/*.pkl.gz
 analysis/__pycache__/
 analysis/*/*.pkl.gz
 analysis/topeft-envs/
+analysis/vine-run-info/
 
 # Distribution / packaging
 *.egg
