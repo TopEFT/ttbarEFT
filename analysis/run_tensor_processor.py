@@ -5,6 +5,7 @@ from coffea import processor
 from coffea.nanoevents import NanoAODSchema
 from torch import cat, float64, Generator, save, tensor
 from torch.utils.data import random_split, TensorDataset
+import topcoffea.modules.utils as utils
 
 def main():
     parser = argparse.ArgumentParser(description='You can customize your run')
@@ -100,6 +101,19 @@ def main():
         redirector = samplesdict[sname]['redirector']
         flist[sname] = [f'{prefix}{f}' for f in samplesdict[sname]['files']]
 
+    wc_set = ()
+    for item in samplesdict:
+        for i, file_name in enumerate(samplesdict[item]['files']):
+            if prefix:
+                wc_lst = utils.get_list_of_wc_names(f'{prefix}/{file_name}')
+            else:
+                wc_lst = utils.get_list_of_wc_names(file_name)
+            if i==0:
+                wc_set = set(wc_lst)
+            else:
+                if set(wc_lst) != wc_set:
+                   raise Exception("ERROR: Not all files have same WC list")
+
     if executor == "work_queue":
         executor_args = {
             'master_name': '{}-workqueue-coffea'.format(os.environ['USER']),
@@ -135,9 +149,9 @@ def main():
         processor_instance = ml_data.AnalysisProcessor(samplesdict, dtype)
     elif proc == 'centralGen':
         import centralGen
-        processor_instance = centralGen.AnalysisProcessor(samplesdict, dtype)
+        processor_instance = centralGen.AnalysisProcessor(samplesdict, dtype, wc_lst, outname)
 
-    output = runner(flist, treename, processor_instance)
+    runner(flist, treename, processor_instance)
 
     dt = time.time() - tstart
 
@@ -145,21 +159,6 @@ def main():
         print(f'Processed {nevts_total} events in {dt:.2f} seconds ({nevts_total/dt:.2f} evts/sec).')
     elif executor == "futures":
         print(f'Processing time: {dt:.2f} with {nworkers} ({dt*nworkers:.2f} cpu overall)')
-
-    trainTotal = int(output['train_features'].get().shape[0])
-    trainTruth, _ = random_split(cat([tensor([1]).repeat(trainTotal), tensor([0]).repeat(trainTotal)]), 
-                                 [0.5,0.5], generator=Generator().manual_seed(42))
-
-    testTotal = int(output['test_features'].get().shape[0])
-    testTruth, _ = random_split(cat([tensor([1]).repeat(testTotal), tensor([0]).repeat(testTotal)]), 
-                                [0.5,0.5], generator=Generator().manual_seed(42))
-
-    
-
-    if not os.path.isdir(outname): os.system("mkdir -p %s"%outname)
-    print(f"\nSaving output in {outname}...")
-    save(TensorDataset(output['train_features'].get(), output['train_fit_coefs'].get(), trainTruth[:]),  os.path.join(outname,"train.p"))
-    save(TensorDataset(output['test_features'].get(), output['test_fit_coefs'].get(), testTruth[:]),  os.path.join(outname,"test.p"))
     
     print("Done!")
     

@@ -1,25 +1,30 @@
-from analysis_tools import genEventSelection, genObjectSelection, TensorAccumulator
+from ttbarEFT.modules.analysis_tools import genEventSelection, genObjectSelection, TensorAccumulator, get_lumi
 from coffea.nanoevents import NanoAODSchema
 from coffea import processor
+from torch import from_numpy, Generator, tensor
+from torch.utils.data import random_split, TensorDataset
 
 import awkward as ak
 import numpy as np
-import torch
+
+NanoAODSchema.warn_missing_crossrefs = False
 
 NanoAODSchema.warn_missing_crossrefs = False
 
 class AnalysisProcessor(processor.ProcessorABC):
-    def __init__(self, samples, dtype=torch.float64):
-        self._dtype   = dtype
+    def __init__(self, samples, dtype):
         self._samples = samples
-       
+        self._dtype   = dtype
+        
     def accumulator(self):
         return self._accumulator
         
     def process(self, events):     
 
-        features  = TensorAccumulator(torch.tensor([]), dtype=self._dtype)
-        fit_coefs = TensorAccumulator(torch.tensor([]), dtype=self._dtype)
+        train_features  = TensorAccumulator(tensor([]), dtype=self._dtype)
+        train_fit_coefs = TensorAccumulator(tensor([]), dtype=self._dtype)
+        test_features   = TensorAccumulator(tensor([]), dtype=self._dtype)
+        test_fit_coefs  = TensorAccumulator(tensor([]), dtype=self._dtype)
 
         leps, jets = genObjectSelection(events)
         event_selection_mask = genEventSelection(leps, jets)
@@ -31,21 +36,38 @@ class AnalysisProcessor(processor.ProcessorABC):
         eft_coeffs = ak.to_numpy(events['EFTfitCoefficients']) if hasattr(events, "EFTfitCoefficients") else None
         eft_coeffs = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
 
-
-        features = features.concat(torch.from_numpy(np.concatenate([[leps.pt[:,0].to_numpy()], 
-                                                                    [leps.pt[:,1].to_numpy()], 
-                                                                    [leps.eta[:,0].to_numpy()], 
-                                                                    [leps.eta[:,1].to_numpy()], 
-                                                                    [leps.phi[:,0].to_numpy()], 
-                                                                    [leps.phi[:,1].to_numpy()],  
-                                                                    [njets.to_numpy()], 
-                                                                    [jets.pt[:,0].to_numpy()], 
-                                                                    [jets.pt[:,1].to_numpy()],
-                                                                   ]).T))
+        features = from_numpy(np.concatenate([[leps.pt[:,0].to_numpy()], 
+                                              [leps.pt[:,1].to_numpy()], 
+                                              [leps.eta[:,0].to_numpy()], 
+                                              [leps.eta[:,1].to_numpy()], 
+                                              [leps.phi[:,0].to_numpy()], 
+                                              [leps.phi[:,1].to_numpy()],  
+                                              [njets.to_numpy()], 
+                                              [jets.pt[:,0].to_numpy()], 
+                                              [jets.pt[:,1].to_numpy()],
+                                              [(jets[:,0] + jets[:,1] + leps[:,0] + leps[:,1]).mass.to_numpy()],
+                                              [jets[:,0].delta_r(jets[:,1]).to_numpy()],
+                                              [(jets[:,0].rho/jets[:,1].rho).to_numpy()],
+                                              [abs(jets[:,0].eta - jets[:,1].eta).to_numpy()]
+                                             ]).T)
     
-        fit_coefs = fit_coefs.concat(torch.from_numpy(eft_coeffs))
+        fit_coefs = from_numpy(eft_coeffs)
 
-        return {'features': features, 'fit_coefs': fit_coefs}
+        train, test = random_split(TensorDataset(features, fit_coefs), [0.7, 0.3], generator=Generator().manual_seed(42))
+
+        train_features  = train_features.concat(train[:][0])
+        train_fit_coefs = train_fit_coefs.concat(train[:][1])
+        test_features   = test_features.concat(test[:][0])
+        test_fit_coefs  = test_fit_coefs.concat(test[:][1])
+
+        output = {
+            'train_features':  train_features, 
+            'train_fit_coefs': train_fit_coefs, 
+            'test_features':   test_features, 
+            'test_fit_coefs':  test_fit_coefs
+        }
+
+        return output
     
     def postprocess(self, accumulator):
         return accumulator
