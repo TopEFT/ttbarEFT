@@ -8,6 +8,7 @@ import os
 import importlib
 
 import numpy as np
+from coffea import dataset_tools
 from coffea import processor
 from coffea.nanoevents import NanoAODSchema
 
@@ -85,14 +86,14 @@ if __name__ == '__main__':
             samplesdict[sampleName] = json.load(jf)
             samplesdict[sampleName]['redirector'] = prefix
 
-    print(f"isinstance(jsonFiles, str): {isinstance(jsonFiles, str)}")
+    # print(f"isinstance(jsonFiles, str): {isinstance(jsonFiles, str)}")
 
     if isinstance(jsonFiles, str) and ',' in jsonFiles:
         jsonFiles = jsonFiles.replace(' ', '').split(',')
     elif isinstance(jsonFiles, str):
         jsonFiles = [jsonFiles]
 
-    print(f"jsonFiles: {jsonFiles}")
+    # print(f"jsonFiles: {jsonFiles}")
     
     for jsonFile in jsonFiles:
         if os.path.isdir(jsonFile):
@@ -102,7 +103,7 @@ if __name__ == '__main__':
         else:
             allInputFiles.append(jsonFile)
 
-    print(f"allInputFiles: {allInputFiles}")
+    # print(f"allInputFiles: {allInputFiles}")
 
     # Read from cfg files
     for f in allInputFiles:
@@ -134,11 +135,17 @@ if __name__ == '__main__':
                         else:
                             LoadJsonToSampleName(l, prefix)
 
-    flist = {}
+    ### NEW PREPROCESSING ### 
+    data_dict = {}
     for sname in samplesdict.keys():
-        #flist[sname] = samplesdict[sname]['files']
-        redirector = samplesdict[sname]['redirector']
-        flist[sname] = [(redirector+f) for f in samplesdict[sname]['files']]
+
+        files_dict = {}
+        for f in samplesdict[sname]['files']:
+            files_dict[f] = {'object_path': 'Events'}
+        
+        data_dict[sname] = {'files': files_dict}
+
+    ### END OF NEW PREPROCESSING ###
 
     # Extract the list of all WCs, as long as we haven't already specified one.
     if len(wc_lst) == 0:
@@ -160,8 +167,6 @@ if __name__ == '__main__':
     else:
         print('No Wilson coefficients specified')
 
-    print(f"\n samplesdict: {samplesdict} \n")
-
     mgr = vine.Manager(
         port=port,
         name= f"{os.environ['USER']}-ddr-coffea",
@@ -181,11 +186,17 @@ if __name__ == '__main__':
         )
         x509_proxy = None
 
-    # proc_instance = analysis_processor.AnalysisProcessor(samplesdict,wc_lst, hist_lst, lep_cat=)
-
     ddr = CoffeaDynamicDataReduction(
         mgr, #taskvine manager,
-        data=samplesdict,
+        # data={'test_dataset': {
+        #     "files": {
+        #         "/cms/cephfs/data/store/user/hnelson2/mc/central_ttbar_nanoAOD/UL17/nanoAOD_TTto2L2Nu_1Jets_smeft_MTT_0to700/NAOD-00000_2262.root": 
+        #             {'object_path': "Events",
+        #              'num_entries': 1000},
+        #         }
+        #     }
+        # },
+        data = dataset_tools.preprocess(data_dict)[0], #only grab out_available not out_updated 
         processors = {
             "ee_chan": analysis_processor.AnalysisProcessor(samplesdict,'ee', wc_lst, hist_lst),
             "mm_chan": analysis_processor.AnalysisProcessor(samplesdict,'mm', wc_lst, hist_lst),
@@ -193,122 +204,11 @@ if __name__ == '__main__':
         schema=NanoAODSchema,
         remote_executor_args={"scheduler": "threads"},
         checkpoint_accumulations=False,
-        resources_processing=1,
-        resources_accumualting=2,
+        resources_processing={"cores": 1},
+        resources_accumualting={"cores": 2},
         results_directory=results_dir,
         x509_proxy=x509_proxy,
     )
 
-    # proc_instance = analysis_processor.AnalysisProcessor(samplesdict,wc_lst,hist_lst)
-
-    # if executor in ["taskvine"]:
-    #     executor_args = {
-    #         'manager_name': f"{os.environ['USER']}-{executor}-coffea",
-    #         'filepath': f"/tmp/{os.environ['USER']}/vine-tmp/",
-
-    #         # find a port to run work queue in this range:
-    #         'port': port,
-    #         # 'debug_log': 'debug.log',
-    #         # 'transactions_log': 'tr.log',
-    #         # 'stats_log': 'stats.log',
-    #         # 'tasks_accum_log': 'tasks.log',
-
-    #         # 'environment_file': '/users/hnelson2/ttbarEFT-coffea2025/analysis/topeft-envs/env_spec_03e46e41_edit_HEAD.tar.gz',
-    #         # 'environment_file': remote_environment.get_environment(
-    #         #     extra_pip_local = {"ttbarEFT": ["ttbarEFT", "setup.py"]},
-    #         #     # extra_pip=['mt2'],
-    #         #     # extra_conda=["pytorch=2.3.1", "numpy=1.23.5"]
-    #         # ),
-    #         'extra_input_files' : [proc_file],
-
-    #         'retries': 10,
-
-    #         # use mid-range compression for chunks results. 9 is the default for work
-    #         # queue in coffea. Valid values are 0 (minimum compression, less memory
-    #         # usage) to 16 (maximum compression, more memory usage).
-    #         'compression': 8,
-
-    #         # automatically find an adequate resource allocation for tasks.
-    #         # tasks are first tried using the maximum resources seen of previously ran
-    #         # tasks. on resource exhaustion, they are retried with the maximum resource
-    #         # values, if specified below. if a maximum is not specified, the task waits
-    #         # forever until a larger worker connects.
-    #         'resource_monitor': 'measure',
-    #         'resources_mode': 'max',
-
-    #         # this resource values may be omitted when using
-    #         # resources_mode: 'auto', but they do make the initial portion
-    #         # of a workflow run a little bit faster.
-    #         # Rather than using whole workers in the exploratory mode of
-    #         # resources_mode: auto, tasks are forever limited to a maximum
-    #         # of 8GB of mem and disk.
-    #         #
-    #         # NOTE: The very first tasks in the exploratory
-    #         # mode will use the values specified here, so workers need to be at least
-    #         # this large. If left unspecified, tasks will use whole workers in the
-    #         # exploratory mode.
-    #         # 'cores': 1,
-    #         # 'disk': 8000,   #MB
-    #         # 'memory': 10000, #MB
-
-    #         # control the size of accumulation tasks. Results are
-    #         # accumulated in groups of size chunks_per_accum, keeping at
-    #         # most chunks_per_accum at the same time in memory per task.
-    #         # 'chunks_per_accum': 25,
-    #         # 'chunks_accum_in_mem': 2,
-
-    #         # terminate workers on which tasks have been running longer than average.
-    #         # This is useful for temporary conditions on worker nodes where a task will
-    #         # be finish faster is ran in another worker.
-    #         # the time limit is computed by multipliying the average runtime of tasks
-    #         # by the value of 'fast_terminate_workers'.  Since some tasks can be
-    #         # legitimately slow, no task can trigger the termination of workers twice.
-    #         #
-    #         # warning: small values (e.g. close to 1) may cause the workflow to misbehave,
-    #         # as most tasks will be terminated.
-    #         #
-    #         # Less than 1 disables it.
-    #         'fast_terminate_workers': 0,
-
-    #         # print messages when tasks are submitted, finished, etc.,
-    #         # together with their resource allocation and usage. If a task
-    #         # fails, its standard output is also printed, so we can turn
-    #         # off print_stdout for all tasks.
-    #         'verbose': True,
-    #         'print_stdout': True,
-    #     }
-
-
-    # Run the processor and get the output
-    # tstart = time.time()
-
-    # if executor == "iterative":
-    #     exec_instance = processor.IterativeExecutor()
-    #     runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
-
-    # elif executor == "taskvine":
-    #     exec_instance = processor.TaskVineExecutor(**executor_args)
-    #     runner = processor.Runner(
-    #         exec_instance,
-    #         schema=NanoAODSchema,
-    #         chunksize=chunksize,
-    #         maxchunks=nchunks,
-    #         xrootdtimeout=300,
-    #     )
-
-    # output = runner(fileset=flist, processor_instance=proc_instance, treename=treename)
-    # dt = time.time() - tstart
-
-    # if executor in ["taskvine"]:
-    #     print(f"Processed {nevts_total} events in {dt} seconds ({nevts_total/dt:.2f} events/sec)")
-    # if executor == "iterative":
-    #     print(f"Processing time: {dt:.2f} seconds with {nworkers} workers ({dt*nworkers} cpu overall)")
-    
-    # # Save the output
-    # outpath = "."
-    # if not os.path.isdir(outpath): os.system("mkdir -p %s"%outpath)
-    # out_pkl_file = os.path.join(outpath,outname+".pkl.gz")
-    # print(f"\nSaving output in {out_pkl_file}...")
-    # with gzip.open(out_pkl_file, "wb") as fout:
-    #     cloudpickle.dump(output, fout)
-    # print("Done!")
+    result = ddr.compute()
+    pprint.pprint(result)
