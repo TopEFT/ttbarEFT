@@ -134,7 +134,6 @@ class AnalysisProcessor(processor.ProcessorABC):
             # Check to see if the ordering of WCs for this sample matches what want
             if self._samples[dataset]['WCnames'] != self._wc_names_lst:
                 eft_coeffs = efth.remap_coeffs(self._samples[dataset]['WCnames'], self._wc_names_lst, eft_coeffs)
-        eft_w2_coeffs = efth.calc_w2_coeffs(eft_coeffs,self._dtype) if (self._do_errors and eft_coeffs is not None) else None
 
         # Initialize the out object
         hout = self.accumulator
@@ -158,7 +157,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         leptonSelection = tt_os.Run2LeptonSelection()
 
         # An array of length events that is just 1 for each event
-        events.nom = ak.ones_like(events.MET.pt)
+        events['nom'] = ak.ones_like(events.MET.pt)
 
         ######### Electron Selection ##########
         ele['isGoodElec']=leptonSelection.is_sel_ele(ele)
@@ -350,12 +349,12 @@ class AnalysisProcessor(processor.ProcessorABC):
             for dense_axis_name, dense_axis_vals in dense_axis_variables.items():
                 # if the category requires zero jets, don't fill jet histograms
                 if (jet_cat == 'exactly_0j') and (dense_axis_name in jet_variables):
-                    print(f"Skipping '{dense_axis_name}' in category '{ch_name}_{jet_cat}'. Jet histograms are not filled for categories that don't require a jet")
+                    print(f"Skipping '{dense_axis_name}' in category '{lep_cat}_{jet_cat}'. Jet histograms are not filled for categories that don't require a jet")
                     continue
 
-                if dense_axis_name not in self._hist_lst:
-                    print(f"Skipping \"{dense_axis_name}\", it is not in the list of hists to include")
-                    continue                         
+                # if dense_axis_name not in self._hist_lst:
+                #     print(f"Skipping \"{dense_axis_name}\", it is not in the list of hists to include")
+                #     continue                         
 
                 # Fill the histos
                 axes_fill_info_dict = {
