@@ -92,14 +92,21 @@ class AnalysisProcessor(processor.ProcessorABC):
         #     self._hist_lst = hist_lst 
 
         # print out basic info before running over filesrun2leptonselection
-        print("\n\n")
-        print("self._samples", self._samples)
-        print("self._wc_names_lst", self._wc_names_lst)
-        print("\n\n")
+        # print("\n\n")
+        # print("self._samples", self._samples)
+        # print("self._wc_names_lst", self._wc_names_lst)
+        # print("\n\n")
 
     @property
     def accumulator(self):
         return self._accumulator
+
+    def __call__(self, events):
+        """
+        Required by the CoffeaDynamicDataReduction (ddr) executor,
+        which calls the processor instance directly with the events chunk.
+        """
+        return self.process(events)
 
     @property
     def columns(self):

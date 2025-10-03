@@ -14,11 +14,14 @@ from coffea import dataset_tools
 from coffea import processor
 from coffea.nanoevents import NanoAODSchema
 
+from functools import partial
+
 from topcoffea.modules import utils
-import topcoffea.modules.remote_environment as remote_environment
+import ttbarEFT.modules.remote_environment as remote_environment
 
 from ddr import CoffeaDynamicDataReduction
 import ndcctools.taskvine as vine
+import ttbarEFT.modules.analysis_processor_ddr as analysis_processor
 
 
 def get_filename_from_path(filename):
@@ -107,7 +110,7 @@ if __name__ == '__main__':
     if executor not in known_executors: 
         raise ValueError(f"The executor \"{executor}\" is not known. Please specify an executor from the known list: {known_executors}")
 
-    analysis_processor = importlib.import_module(proc_name)
+    # analysis_processor = importlib.import_module(proc_name)
     print(f"\n  running with processor: {proc_file}")
     print(f"\n  inputFile argument: {inputFile} \n")
 
@@ -158,15 +161,21 @@ if __name__ == '__main__':
     else: 
         print(f"Wilson Coefficients: NONE SPECIFIED")
 
-
     if executor == 'ddr': 
         ### TaskVine Manager ### 
-        mgr = vine.Manager(
+        # mgr = vine.Manager(
+        mgr = vine.DaskVine(
             port=port,
             name= f"{os.environ['USER']}-ddr-coffea",
         )
         mgr.tune("hungry-minimum", 1)
         mgr.enable_monitoring(watchdog=False)
+
+        # env = remote_environment.get_environment(
+        #     extra_pip_local = {"ttbarEFT": ["ttbarEFT", "setup.py"],
+        #                         "dynamic_data_reduction": []},
+        # )
+        # sched_for_pre = partial(mgr, environment=env)
 
         # Check if the X509 proxy file exists
         x509_proxy = f"/tmp/x509up_u{os.getuid()}"
@@ -175,10 +184,15 @@ if __name__ == '__main__':
                 f"Warning: X509 proxy file {args.x509_proxy} does not exist. Setting to None."
             )
             x509_proxy = None
+
         ### Make Data for DDR ###
         data_dict = {}
         for sname in samplesdict.keys():
             data_dict[sname] = preprocessing_for_ddr(samplesdict[sname])
+
+        def accumulator(): 
+            proc = analysis_processor.AnalysisProcessor(samplesdict,'ee', wc_lst, hist_lst)
+            return proc.accumulator
 
         ### Dynamic Data Reduction ### 
         ddr = CoffeaDynamicDataReduction(
@@ -193,6 +207,8 @@ if __name__ == '__main__':
                 "ee_chan": analysis_processor.AnalysisProcessor(samplesdict,'ee', wc_lst, hist_lst),
                 "mm_chan": analysis_processor.AnalysisProcessor(samplesdict,'mm', wc_lst, hist_lst),
             },
+            # accumulator=analysis_processor.AnalysisProcessor.accumulator,
+            accumulator = accumulator,
             schema=NanoAODSchema,
             remote_executor_args={"scheduler": "threads"},
             checkpoint_accumulations=False,
@@ -200,6 +216,7 @@ if __name__ == '__main__':
             resources_accumualting={"cores": 2},
             results_directory=results_dir,
             x509_proxy=x509_proxy,
+            # source_postprocess=make_source_postprocess(schema, uproot_options={}),
         )
 
         result = ddr.compute()
