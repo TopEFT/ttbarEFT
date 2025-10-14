@@ -164,16 +164,21 @@ class AnalysisProcessor(processor.ProcessorABC):
         is_final_mask = genpart.hasFlags(["fromHardProcess","isLastCopy"])
         ele  = genpart[is_final_mask & (abs(genpart.pdgId) == 11)]
         mu   = genpart[is_final_mask & (abs(genpart.pdgId) == 13)]
+        tau = genpart[is_final_mask & (abs(genpart.pdgId) == 15)]
         nu_ele = genpart[is_final_mask & (abs(genpart.pdgId) == 12)]
         nu_mu = genpart[is_final_mask & (abs(genpart.pdgId) == 14)]
-        nu = ak.concatenate([nu_ele,nu_mu],axis=1)
+        nu_tau = genpart[is_final_mask & (abs(genpart.pdgId) == 16)]
+        # nu = ak.concatenate([nu_ele,nu_mu],axis=1)
+        nu = ak.concatenate([nu_ele,nu_mu, nu_tau],axis=1)
         jets = events.GenJet
 
         ######## Lep selection  ########
 
         e_selec = ((ele.pt>20) & (abs(ele.eta)<2.5))
         m_selec = ((mu.pt>20) & (abs(mu.eta)<2.5))
-        leps = ak.concatenate([ele[e_selec],mu[m_selec]],axis=1)
+        t_selec = ((tau.pt>20) & (abs(tau.eta)<2.5))
+        # leps = ak.concatenate([ele[e_selec],mu[m_selec]],axis=1)
+        leps = ak.concatenate([ele[e_selec],mu[m_selec], tau[t_selec]],axis=1)
         leps = leps[ak.argsort(leps.pt, axis=-1, ascending=False)]
         l0 = leps[ak.argmax(leps.pt, axis=-1, keepdims=True)]
 
@@ -231,7 +236,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         ######## Normalization ########
 
         # Normalize by (xsec/sow)
-        lumi = 1000.0*get_lumi(year)
+        lumi = 1000.0*get_lumi(year) #lumi is in fb^-1 but xsec is in pb
         norm = (xsec/sow)*lumi
 
         if eft_coeffs is None:

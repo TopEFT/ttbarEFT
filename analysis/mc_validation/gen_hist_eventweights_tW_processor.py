@@ -28,6 +28,7 @@ rwgt2 = {"ctGIm": -0.5, "ctGRe":-0.5, "cHQ3": 1.5, "ctWRe": -1.0, "cbWRe": -8.0,
          "cleQt3Re11": 12.0, "cleQt3Re22": 12.0, "cleQt3Re33": 12.0,
          "cleQt1Re11": 15.0, "cleQt1Re22": 15.0, "cleQt1Re33": 15.0}
 
+# other reweight points
 rwgt3 = {"ctGIm": -1.0, "ctGRe":-1.0, "cHQ3": 3.0, "ctWRe": 3.0, "cbWRe": 10.0, "cHtbRe": 6.0,
          "cQl311": 10.0, "cQl322": 10.0, "cQl333": 10.0,
          "cleQt3Re11": 20.0, "cleQt3Re22": 20.0, "cleQt3Re33": 20.0,
@@ -146,7 +147,17 @@ class AnalysisProcessor(processor.ProcessorABC):
         # eft_coeffs is never Jagged so convert immediately to numpy for ease of use.
         eft_coeffs = ak.to_numpy(events['EFTfitCoefficients']) if hasattr(events, "EFTfitCoefficients") else None
 
-        # else: 
+        # include the LHEmmnl>100 cut
+        lhepart = events.LHEPart
+        lhe_mmnl = (lhepart[:,5]+lhepart[:,6]).mass
+        mmnl_more100 = ak.fill_none(lhe_mmnl>100, False)
+        selections = PackedSelection()
+        selections.add('mmnl', mmnl_more100)
+        event_selection_mask = selections.all('mmnl')
+
+        eft_coeffs=eft_coeffs[event_selection_mask]
+
+        # calculate reweighted event weights 
         wc_lst_SM = order_wc_values(self._wc_names_lst, SM_pt)
         event_weights_SM = calc_event_weights(eft_coeffs, wc_lst_SM)
             

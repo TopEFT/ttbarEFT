@@ -324,11 +324,11 @@ def make_hist_ratio_plot_single(h_num, h_denom, label_num, label_denom, xlabel, 
     fig.subplots_adjust(hspace=.1)
 
     # Plot histograms with errors
-    hep.histplot(h_denom, ax=ax, stack=False, yerr=True, linewidth=2, label=label_denom)
     hep.histplot(h_num, ax=ax, stack=False, yerr=True, linewidth=2, label=label_num)
     # Plot ratio with errors
     rax.scatter(centers, ratio)
     rax.errorbar(centers, ratio, xerr = None, yerr = uncert, capsize=5, ls='none')
+    hep.histplot(h_denom, ax=ax, stack=False, yerr=True, linewidth=2, label=label_denom)
 
     ## Formatting
     ax.legend(loc = 'upper right')

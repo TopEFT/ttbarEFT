@@ -36,7 +36,22 @@ rwgt2 = {"ctGIm": -0.5, "ctGRe":-0.5, "cHQ3": 1.5, "ctWRe": -1.0, "cbWRe": -8.0,
          "cleQt3Re11": 12.0, "cleQt3Re22": 12.0, "cleQt3Re33": 12.0,
          "cleQt1Re11": 15.0, "cleQt1Re22": 15.0, "cleQt1Re33": 15.0}
 
-rwgt_choice = rwgt2
+mt2_check1 = {"ctGIm": 0, "ctGRe": 0, "cHQ3": 0, "ctWRe": 0, "cbWRe": 0, "cHtbRe": 0,
+         "cQl311": 0.5, "cQl322": 0, "cQl333": 0,
+         "cleQt3Re11": 0, "cleQt3Re22": 0, "cleQt3Re33": 0,
+         "cleQt1Re11": 0, "cleQt1Re22": 0, "cleQt1Re33": 0}
+
+mt2_check2 = {"ctGIm": 0, "ctGRe": 0, "cHQ3": 0, "ctWRe": 0, "cbWRe": 0, "cHtbRe": 0,
+         "cQl311": 0, "cQl322": 0, "cQl333": 0,
+         "cleQt3Re11": 0.5, "cleQt3Re22": 0, "cleQt3Re33": 0,
+         "cleQt1Re11": 0, "cleQt1Re22": 0, "cleQt1Re33": 0}
+
+mt2_check3 = {"ctGIm": 0, "ctGRe": 0, "cHQ3": 0, "ctWRe": 0, "cbWRe": 0, "cHtbRe": 0,
+         "cQl311": 0, "cQl322": 0, "cQl333": 0,
+         "cleQt3Re11": 0, "cleQt3Re22": 0, "cleQt3Re33": 0,
+         "cleQt1Re11": 1.0, "cleQt1Re22": 0, "cleQt1Re33": 0}
+
+rwgt_choice = mt2_check3
 
 # Get the lumi for the given year (in fb^-1)
 # Ref: https://twiki.cern.ch/twiki/bin/view/CMS/LumiRecommendationsRun2#Luminosity_for_pp_13_TeV_data
@@ -253,35 +268,20 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         # Normalize by (xsec/sow)
         lumi = 1000.0*get_lumi(year) #lumi is fb^-1, but xsec is in pb
-
-        # tW_yukawa_const = 1.5217
-        # tW_new1_const = 1.5007769740968973
-        tW_powheg_const = 1.845
-        tWLO_stpt1_const = 1.87421
-        tWLO_stpt2_const = 1.88947
-
-
         norm = (xsec/sow)*lumi
-        # norm = (xsec/sow)*(1/tW_yukawa_const)*lumi
-        # norm = (xsec/sow)*(1/tW_new1_const)
-        # norm = (xsec/sow)*(1/tW_powheg_const)
-
-        # norm = (xsec/sow)*(1/tWLO_stpt1_const)
-        # norm = (xsec/sow)*(1/tWLO_stpt2_const)
-        # norm = (xsec/sow)*(1/tW_powheg_const)
 
         counts = np.ones_like(events['event'])[event_selection_mask]
 
         ######## Fill histos ########
         hout = self._histo_dict
         variables_to_fill = {
-            "njets"     : njets_cut,
-            "nleps"     : nleps_cut,
-            "ntops"     : ntops_cut,
-            "mll"       : mll,
-            "dr_leps"   : dr_cut,
-            "l0pt"      : ak.flatten(l0pt_cut),
-            "top_pt"    : ak.flatten(top_pt_cut),
+            # "njets"     : njets_cut,
+            # "nleps"     : nleps_cut,
+            # "ntops"     : ntops_cut,
+            # "mll"       : mll,
+            # "dr_leps"   : dr_cut,
+            # "l0pt"      : ak.flatten(l0pt_cut),
+            # "top_pt"    : ak.flatten(top_pt_cut),
             "mt2"       : mt2_var,
         }
 
