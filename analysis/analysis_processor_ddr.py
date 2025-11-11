@@ -101,12 +101,12 @@ class AnalysisProcessor(processor.ProcessorABC):
     def accumulator(self):
         return self._accumulator
 
-    def __call__(self, events):
-        """
-        Required by the CoffeaDynamicDataReduction (ddr) executor,
-        which calls the processor instance directly with the events chunk.
-        """
-        return self.process(events)
+    # def __call__(self, events):
+    #     """
+    #     Required by the CoffeaDynamicDataReduction (ddr) executor,
+    #     which calls the processor instance directly with the events chunk.
+    #     """
+    #     return self.process(events)
 
     @property
     def columns(self):
@@ -337,6 +337,13 @@ class AnalysisProcessor(processor.ProcessorABC):
         # Loop through systematics and fill histograms
         weights_object = copy.deepcopy(weights_obj_base)
         weight = weights_object.weight(None) 
+        # if eft_coeffs is None:
+            # weight= events["genWeight"]
+        # else:
+        # weight = np.ones_like(events['event'])
+
+        print(f"\n\n weight shape: {np.shape(weight)} \n\n")
+        print(f"\n\n eft_coeffs shape: {np.shape(eft_coeffs)} \n\n")
 
         for jet_cat in CR_cat_dict[lep_cat]['jet_list']: 
             # masks that are applied to all categories
@@ -350,7 +357,6 @@ class AnalysisProcessor(processor.ProcessorABC):
 
 
             event_selection_mask = selections.all(*(cuts_list))
-            weights_cut = weight[event_selection_mask]
             eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
 
             for dense_axis_name, dense_axis_vals in dense_axis_variables.items():
@@ -367,7 +373,7 @@ class AnalysisProcessor(processor.ProcessorABC):
                 axes_fill_info_dict = {
                     dense_axis_name : dense_axis_vals[event_selection_mask],
                     "process"       : histAxisName,
-                    "weight"        : weights_cut,
+                    "weight"        : weight[event_selection_mask],
                     "eft_coeff"     : eft_coeffs_cut,
                 }
 
