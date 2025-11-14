@@ -1,0 +1,15 @@
+{
+    "xsec": 1.0,
+    "year": "2017",
+    "treeName": "Events",
+    "histAxisName": "ttbar_noEFT",
+    "options": "",
+    "era": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/noEFT/nanoGen/TT01j2l_SM/NanoGen_TT01j2l_SM/nanoGen_10016.root"
+    ],
+    "nEvents": 1.0,
+    "nSumOfWeights": 1.0,
+    "isData": false
+}
