@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# /usr/bin/env python
 import argparse
 import json
 import yaml
@@ -24,20 +24,22 @@ import ndcctools.taskvine as vine
 
 
 def get_filename_from_path(filename):
+    
     full_file_name = os.path.basename(filename)
     base, extension = os.path.splitext(full_file_name)
+
     return base
 
 
-def load_json_to_sampledict(inputFile, prefix):
+def load_json_to_samplesdict(inputFile, prefix):
 
-    temp_dict = {}
+    samplesdict = {}
     json_dict = read_json_file(inputFile)
     sample_name = get_filename_from_path(inputFile)
-    temp_dict[sample_name] = json_dict
-    temp_dict[sample_name]['redirector'] = prefix
+    samplesdict[sample_name] = json_dict
+    samplesdict[sample_name]['redirector'] = prefix
 
-    return temp_dict
+    return samplesdict
 
 
 def preprocessing_for_taskvine(samplesdict):
@@ -107,7 +109,7 @@ if __name__ == '__main__':
     hist_lst    = args.hist_list
     ports       = args.port
 
-    print("\n running with processor: ", proc_file, '\n')
+    print("\n\nrunning with processor: ", proc_file, '\n')
 
     analysis_processor = importlib.import_module(proc_name)
 
@@ -136,23 +138,31 @@ if __name__ == '__main__':
             # convert single values into a range of one element
             port.append(port[0])
 
-        print(f"port: {port}")
+        # print(f"port: {port}")
 
     ### Fill Samples Dictionary ### 
     samplesdict = {}
 
     if isJson: 
-        samplesdict.update(load_json_to_sampledict(inputFile, prefix))
+        samplesdict.update(load_json_to_samplesdict(inputFile, prefix))
 
     elif isYaml: 
         yaml_dict = read_yaml_file(inputFile)
-        redirector = yaml_dict['redirector']
-        jsonFiles = yaml_dict['jsonFiles']
+        if 'jsonFiles' in yaml_dict.keys(): 
+            redirector = yaml_dict['redirector']
+            jsonFiles = yaml_dict['jsonFiles']
 
-        print(f"\n\n redirector from yaml: {redirector} \n\n")
+            for f in jsonFiles: 
+                samplesdict.update(load_json_to_samplesdict(f, redirector))
+        else: 
+            for item in yaml_dict: 
+                redirector = yaml_dict[item]['redirector']
+                jsonFiles = yaml_dict[item]['jsonFiles']
 
-        for f in jsonFiles: 
-            samplesdict.update(load_json_to_sampledict(f, redirector))
+                for f in jsonFiles: 
+                    samplesdict.update(load_json_to_samplesdict(f, redirector))
+
+        # print(f"\n\n redirector from yaml: {redirector} \n\n")
 
     flist = {}
     for sname in samplesdict.keys():
@@ -191,10 +201,6 @@ if __name__ == '__main__':
             )
             x509_proxy = None
 
-        # print("samplesdict:")
-        # pprint.pprint(samplesdict)
-        # print("\n\n")
-
         data = {}
         for sname in samplesdict.keys():
             data[sname] = preprocessing_for_ddr(samplesdict[sname])
@@ -202,11 +208,11 @@ if __name__ == '__main__':
         # pprint.pprint(data)
         # print("\n\n")
 
-        print("Original data spec:")
-        for dataset_name, dataset_info in data.items():
-            print(f"  {dataset_name}:")
-            for file_path, file_info in dataset_info["files"].items():
-                print(f"    {file_path}: {file_info}")
+        # print("Original data spec:")
+        # for dataset_name, dataset_info in data.items():
+        #     print(f"  {dataset_name}:")
+        #     for file_path, file_info in dataset_info["files"].items():
+        #         print(f"    {file_path}: {file_info}")
 
         print("\nPreprocessing data with TaskVine...")
         preprocessed_data = preprocess(
@@ -219,14 +225,17 @@ if __name__ == '__main__':
             batch_size=5,
         )
 
-        with open("{inputFile}_preprocessed.json", "w") as f:
+        with open(f"{inputFile}_preprocessed.json", "w") as f:
             json.dump(preprocessed_data, f, indent=2)
 
-        print("\nPreprocessed data spec:")
-        for dataset_name, dataset_info in preprocessed_data.items():
-            print(f"  {dataset_name}:")
-            for file_path, file_info in dataset_info["files"].items():
-                print(f"    {file_path}: {file_info}")
+        print(f"\n\n preprocessed data saved to: {inputFile}_preprocessed.json \n\n")
+
+        print("\n\n Preprocessed data for ddr:")
+        pprint.pprint(preprocessed_data)
+        # for dataset_name, dataset_info in preprocessed_data.items():
+        #     print(f"  {dataset_name}:")
+        #     for file_path, file_info in dataset_info["files"].items():
+        #         print(f"    {file_path}: {file_info}")
 
         ### Dynamic Data Reduction ### 
         ddr = CoffeaDynamicDataReduction(
@@ -236,11 +245,13 @@ if __name__ == '__main__':
                 "ee_chan": analysis_processor.AnalysisProcessor(samplesdict,'ee', wc_lst, hist_lst),
                 "mm_chan": analysis_processor.AnalysisProcessor(samplesdict,'mm', wc_lst, hist_lst),
             },
+            accumulator=analysis_processor.AnalysisProcessor,
             extra_files = [proc_file],
             schema=NanoAODSchema,
-            accumulator=analysis_processor.AnalysisProcessor,
+            max_task_retries= 15, # default=10
+            # step_size=<INT>, #equivalent to chunksize, default=100k
             resources_processing={"cores": 1},
-            resources_accumualting={"cores": 2},
+            resources_accumualting={"cores": 1},
             results_directory=results_dir,
             verbose=True,
             x509_proxy=x509_proxy,
@@ -259,7 +270,6 @@ if __name__ == '__main__':
         exec_instance = processor.IterativeExecutor()
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
         hists = runner(fileset=flist, processor_instance=proc_instance, treename=treename)
-
 
     ### Save Output ###
     outpath = '.'

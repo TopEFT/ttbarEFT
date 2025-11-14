@@ -21,7 +21,7 @@ import ttbarEFT.modules.remote_environment as remote_environment
 
 from ddr import CoffeaDynamicDataReduction
 import ndcctools.taskvine as vine
-import ttbarEFT.modules.analysis_processor_ddr as analysis_processor
+# import ttbarEFT.modules.analysis_processor_ddr as analysis_processor
 
 
 def get_filename_from_path(filename):
@@ -110,7 +110,7 @@ if __name__ == '__main__':
     if executor not in known_executors: 
         raise ValueError(f"The executor \"{executor}\" is not known. Please specify an executor from the known list: {known_executors}")
 
-    # analysis_processor = importlib.import_module(proc_name)
+    analysis_processor = importlib.import_module(proc_name)
     print(f"\n  running with processor: {proc_file}")
     print(f"\n  inputFile argument: {inputFile} \n")
 
@@ -208,7 +208,7 @@ if __name__ == '__main__':
                 "mm_chan": analysis_processor.AnalysisProcessor(samplesdict,'mm', wc_lst, hist_lst),
             },
             # accumulator=analysis_processor.AnalysisProcessor.accumulator,
-            accumulator = accumulator,
+            extra_files = [proc_file],
             schema=NanoAODSchema,
             remote_executor_args={"scheduler": "threads"},
             checkpoint_accumulations=False,

@@ -38,7 +38,7 @@ np.seterr(divide='ignore', invalid='ignore', over='ignore')
 
 
 class AnalysisProcessor(processor.ProcessorABC):
-    def __init__(self, samples, lep_cat, wc_names_lst=[], dtype=np.float32):
+    def __init__(self, samples, lep_cat, wc_names_lst=[], hist_lst=None, dtype=np.float32):
         self._samples = samples
         self._wc_names_lst = wc_names_lst
         self._dtype = dtype 
@@ -82,31 +82,18 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         self._accumulator = histograms
 
-        # # set the list of hists to fill
-        # if hist_lst is None:
-        #     self._hist_lst = list(self._accumulator.keys()) #fill all hists if not specified
-        # else:
-        #     for hist_to_include in hist_lst:
-        #         if hist_to_include not in self._accumulator.keys():
-        #             raise Exception(f"Error: Cannot specify hist \'{hist_to_include}\', it is not defined in the processor.")
-        #     self._hist_lst = hist_lst 
-
-        # print out basic info before running over filesrun2leptonselection
-        # print("\n\n")
-        # print("self._samples", self._samples)
-        # print("self._wc_names_lst", self._wc_names_lst)
-        # print("\n\n")
+        # set the list of hists to fill
+        if hist_lst is None:
+            self._hist_lst = list(self._accumulator.keys()) #fill all hists if not specified
+        else:
+            for hist_to_include in hist_lst:
+                if hist_to_include not in self._accumulator.keys():
+                    raise Exception(f"Error: Cannot specify hist \'{hist_to_include}\', it is not defined in the processor.")
+            self._hist_lst = hist_lst 
 
     @property
     def accumulator(self):
         return self._accumulator
-
-    # def __call__(self, events):
-    #     """
-    #     Required by the CoffeaDynamicDataReduction (ddr) executor,
-    #     which calls the processor instance directly with the events chunk.
-    #     """
-    #     return self.process(events)
 
     @property
     def columns(self):
@@ -127,10 +114,10 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         lep_cat = self._lep_cat
 
-        # datasets = ["Muon", "SingleMuon", "SingleElectron", "EGamma", "MuonEG", "DoubleMuon", "DoubleElectron", "DoubleEG"]
-        # for d in datasets:
-        #     if dataset.startswith(d):
-        #         dataset = dataset.split('_')[0]
+        datasets = ["Muon", "SingleMuon", "SingleElectron", "EGamma", "MuonEG", "DoubleMuon", "DoubleElectron", "DoubleEG"]
+        for d in datasets:
+            if dataset.startswith(d):
+                dataset = dataset.split('_')[0]
 
 
         ######### EFT coefficients ##########
@@ -169,6 +156,9 @@ class AnalysisProcessor(processor.ProcessorABC):
         ######### Electron Selection ##########
         ele['isGoodElec']=leptonSelection.is_sel_ele(ele)
         ele_good = ele[ele.isGoodElec]
+        # ele_good = ele
+
+        # test_pt = ele.pt
 
 
         ######### Muon Selection ##########

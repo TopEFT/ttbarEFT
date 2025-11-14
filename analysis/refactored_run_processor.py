@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import json
+import yaml
 import time
 import cloudpickle
 import gzip
@@ -140,6 +141,8 @@ if __name__ == '__main__':
         #flist[sname] = samplesdict[sname]['files']
         redirector = samplesdict[sname]['redirector']
         flist[sname] = [(redirector+f) for f in samplesdict[sname]['files']]
+
+    print(f"\n\n flist contents: {flist}")
 
     ### Fill WC list ### 
     if len(wc_lst) == 0:
