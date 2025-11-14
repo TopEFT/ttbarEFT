@@ -1,0 +1,8 @@
+redirector : 'root://cmsxrootd.crc.nd.edu/' # xrootd access to files on cephfs
+jsonFiles:
+  # - '../input_samples/sample_jsons/tests/central_ttbarEFT_0_700.json' # my ceph directory # WORKED
+  # - '../input_samples/sample_jsons/tests/test2.json' # my ceph directory # WORKED
+  # - '../input_samples/sample_jsons/tests/test3.json' # my ceph directory # WORKED 
+  # - '../input_samples/sample_jsons/tests/test4.json' # my ceph directory # preprocessing WORKED # processing fails b/c this is only nanogen
+  # - '../input_samples/sample_jsons/tests/test_2017_data.json' # files in /store/data # FAILED
+  # - '../input_samples/sample_jsons/tests/powheg_test.json' # files in /store/mc # FAILED

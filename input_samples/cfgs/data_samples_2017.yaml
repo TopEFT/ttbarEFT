@@ -1,0 +1,15 @@
+### 2017 DATA ###
+
+redirector : 'root://cmsxcache.crc.nd.edu/' # xrootd access to non-ND files (`store/mc/` and `store/data`)
+# redirector : 'file:///cms/cephfs/data/' # direct file access
+jsonFiles:
+  - '../input_samples/sample_jsons/data_samples/2017/DoubleEG_B-UL2017.json'
+  - '../input_samples/sample_jsons/data_samples/2017/DoubleEG_C-UL2017.json'
+  - '../input_samples/sample_jsons/data_samples/2017/DoubleEG_D-UL2017.json'
+  - '../input_samples/sample_jsons/data_samples/2017/DoubleEG_E-UL2017.json'
+  - '../input_samples/sample_jsons/data_samples/2017/DoubleEG_F-UL2017.json'
+  - '../input_samples/sample_jsons/data_samples/2017/SingleMuon_B-UL2017.json'
+  - '../input_samples/sample_jsons/data_samples/2017/SingleMuon_C-UL2017.json'
+  - '../input_samples/sample_jsons/data_samples/2017/SingleMuon_D-UL2017.json'
+  - '../input_samples/sample_jsons/data_samples/2017/SingleMuon_E-UL2017.json'
+  - '../input_samples/sample_jsons/data_samples/2017/SingleMuon_F-UL2017.json'

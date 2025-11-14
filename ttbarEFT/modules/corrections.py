@@ -42,12 +42,12 @@ def AttachElectronTrigSF(electrons, year):
     eta = electrons.eta
     eta_barrel_mask = ak.flatten(abs(eta) < 1.4442)
     
-    pt = electrons.pt
+    Et = electrons.pt * electrons_scEtOverPt
 
     ElecSF = ak.where(
                 eta_barrel_mask, 
-                SFevaluator[f"ElecSF_{year}_barrel"](pt, eta),
-                SFevaluator[f"ElecSF_{year}_endcap"](pt, eta)
+                SFevaluator[f"ElecSF_{year}_barrel"](Et, eta),
+                SFevaluator[f"ElecSF_{year}_endcap"](Et, eta)
             )
 
     electrons['SF_elec_trig_nom'] = ElecSF 
@@ -348,6 +348,7 @@ def ApplyMuonPtCorr(muons, year, isData):
     '''
     For muons with pt<120, Rochester Corrections are applied 
     For muons with pt>120, the tunep correction is applied
+    Returns corrected pt
     '''
 
     pt = muons.pt
@@ -355,10 +356,10 @@ def ApplyMuonPtCorr(muons, year, isData):
     pt_mask = ak.flatten(pt >= 120)
     tunep_factor = ak.flatten(muons.tunepRelPt)
 
-    rocco_pt = ak.flatten(ApplyRochesterCorrections(muons, year, isData))
-    tunep_pt = pt_flat * tunep_factor
+    rocco_pt = ak.flatten(ApplyRochesterCorrections(muons, year, isData)) #output of rocco is correction*orig_pt
+    tunep_pt = tunep_factor * pt_flat   # calculate correction*orig_pt
 
-    pt_corr_flat = ak.where(pt_mask, rocco_pt, tunep_pt) #if pt mask, pt_corr=tunep_pt, else pt_corr=rocco_pt
+    pt_corr_flat = ak.where(pt_mask, tunep_pt, rocco_pt) #if pt mask, pt_corr=tunep_pt, else pt_corr=rocco_pt
     pt_corr = ak.unflatten(pt_corr_flat, ak.num(pt))
 
     return pt_corr

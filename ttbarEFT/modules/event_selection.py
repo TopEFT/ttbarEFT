@@ -122,7 +122,6 @@ def trg_pass_no_overlap(events,is_data,dataset,year,dataset_dict,exclude_dict,le
         else: 
             dataset_name = MC_lepcat_triggers_dict[lep_cat]
 
-        print(f"\n\n lep_cat: {lep_cat} \n dataset_name:{dataset_name} \n dictionary: {dataset_dict[year][dataset_name]} \n\n")
         trg_passes = passes_trg_inlst(events, dataset_dict[year][dataset_name])
 
 

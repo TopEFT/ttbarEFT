@@ -25,12 +25,13 @@ class Run2LeptonSelection:
 
 def is_pres_jet(jet):
 
+    pt_mask = jet.pt > 30
     eta_mask = (abs(jet.eta) < 2.4)
     id_mask = jet.jetId >= 6 #using jet.isTightLeptonVeto==True should be equivalent
     puId_mask = jet.puId > 1 
-    pt_mask = jet.pt > 30
+    
 
-    return (id_mask & puId_mask & pt_mask & eta_mask)
+    return (pt_mask & eta_mask & id_mask & puId_mask)
 
 
 def isClean(obj_A, obj_B, drmin=0.4):
