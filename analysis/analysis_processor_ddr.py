@@ -5,6 +5,7 @@ import numpy as np
 import awkward as ak
 import json
 import hist
+import yaml
 
 # from mt2 import mt2
 
@@ -134,11 +135,12 @@ class AnalysisProcessor(processor.ProcessorABC):
 
 
         ######### Create Lepton Categories ##########
-        select_cat_dict = None
-        with open(ttbarEFT_path("params/channels.json"), "r") as ch_json_test:
-            select_cat_dict = json.load(ch_json_test)
+        cat_dict = None
+        with open(ttbarEFT_path("params/channels.yaml"), "r") as f:
+            cat_dict=yaml.safe_load(f)
 
-        CR_cat_dict = select_cat_dict['CR_CHANNELS_JETS']
+        CR_cat_dict = cat_dict['CR_CHANNELS']
+        SR_cat_dict = cat_dict['SR_CHANNELS']
 
 
         ######### Initialize Objects #########
@@ -331,9 +333,6 @@ class AnalysisProcessor(processor.ProcessorABC):
             # weight= events["genWeight"]
         # else:
         # weight = np.ones_like(events['event'])
-
-        print(f"\n\n weight shape: {np.shape(weight)} \n\n")
-        print(f"\n\n eft_coeffs shape: {np.shape(eft_coeffs)} \n\n")
 
         for jet_cat in CR_cat_dict[lep_cat]['jet_list']: 
             # masks that are applied to all categories

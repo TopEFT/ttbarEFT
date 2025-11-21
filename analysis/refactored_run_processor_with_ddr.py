@@ -184,6 +184,12 @@ if __name__ == '__main__':
     # Run the processor and get the output
     tstart = time.time()
 
+    # processors = {
+    #     # "ee_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst),
+    #     # "mm_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='mm', wc_names_lst=wc_lst, hist_lst=hist_lst),
+    #     "em_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst),
+    # },
+
     if executor == 'ddr': 
 
         mgr = vine.Manager(
@@ -204,15 +210,6 @@ if __name__ == '__main__':
         data = {}
         for sname in samplesdict.keys():
             data[sname] = preprocessing_for_ddr(samplesdict[sname])
-        # print("data for ddr:")
-        # pprint.pprint(data)
-        # print("\n\n")
-
-        # print("Original data spec:")
-        # for dataset_name, dataset_info in data.items():
-        #     print(f"  {dataset_name}:")
-        #     for file_path, file_info in dataset_info["files"].items():
-        #         print(f"    {file_path}: {file_info}")
 
         print("\nPreprocessing data with TaskVine...")
         preprocessed_data = preprocess(
@@ -220,7 +217,7 @@ if __name__ == '__main__':
             data=data,
             tree_name="Events",
             timeout=30,
-            max_retries=3,
+            max_retries=5,
             show_progress=True,
             batch_size=5,
         )
@@ -230,25 +227,23 @@ if __name__ == '__main__':
 
         print(f"\n\n preprocessed data saved to: {inputFile}_preprocessed.json \n\n")
 
-        print("\n\n Preprocessed data for ddr:")
-        pprint.pprint(preprocessed_data)
-        # for dataset_name, dataset_info in preprocessed_data.items():
-        #     print(f"  {dataset_name}:")
-        #     for file_path, file_info in dataset_info["files"].items():
-        #         print(f"    {file_path}: {file_info}")
+        # print("\n\n Preprocessed data for ddr:")
+        # pprint.pprint(preprocessed_data)
 
         ### Dynamic Data Reduction ### 
         ddr = CoffeaDynamicDataReduction(
             mgr, #taskvine manager,
             data = preprocessed_data,
             processors = {
-                "ee_chan": analysis_processor.AnalysisProcessor(samplesdict,'ee', wc_lst, hist_lst),
-                "mm_chan": analysis_processor.AnalysisProcessor(samplesdict,'mm', wc_lst, hist_lst),
+                "ee_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst),
+                "mm_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='mm', wc_names_lst=wc_lst, hist_lst=hist_lst),
+                "em_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst),
             },
+            # processors = processors,
             accumulator=analysis_processor.AnalysisProcessor,
-            extra_files = [proc_file],
+            extra_files = [proc_file, "/users/hnelson2/ttbarEFT-coffea2025/ttbarEFT/params/channels.json"],
             schema=NanoAODSchema,
-            max_task_retries= 15, # default=10
+            max_task_retries= 20, # default=10
             # step_size=<INT>, #equivalent to chunksize, default=100k
             resources_processing={"cores": 1},
             resources_accumualting={"cores": 1},
@@ -264,12 +259,13 @@ if __name__ == '__main__':
 
 
     elif executor == 'iterative': 
-
+        
         flist = preprocessing_for_taskvine(samplesdict)
-        proc_instance = analysis_processor.AnalysisProcessor(samplesdict, 'ee', wc_lst,hist_lst)
+        proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst)
         exec_instance = processor.IterativeExecutor()
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
         hists = runner(fileset=flist, processor_instance=proc_instance, treename=treename)
+
 
     ### Save Output ###
     outpath = '.'

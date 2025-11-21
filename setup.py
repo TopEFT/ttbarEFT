@@ -8,6 +8,7 @@ setuptools.setup(
     package_data={
         "ttbarEFT": [
             "params/*.json",
+            "params/*.yaml",
             "data/POG/JME/*/*.json.gz",
             "data/POG/EGM/*/*.json.gz",
             "data/POG/MUO/*/*.json.gz"

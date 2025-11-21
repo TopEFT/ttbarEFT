@@ -14,7 +14,7 @@
 		}	
 	},
 	"CR_CHANNELS":{
-		"lep_flav_lst": ["ee", "mm"]	
+		"lep_flav_lst": ["ee", "mm", "em"]	
 	},
 	"CR_CHANNELS_JETS":{
 		"ee":{
@@ -22,6 +22,9 @@
 		}, 
 		"mm":{
 			"jet_list": ["exactly_0j", "atleast_1j"]
+		},
+		"em": {
+			"jet_lst": ["exactly_0j"],
 		}
 	}
 }

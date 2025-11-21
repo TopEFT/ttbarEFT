@@ -67,7 +67,7 @@ exclude_triggers_dict = {
 }
 
 MC_lepcat_triggers_dict = {
-    "ee": "DoubleEG",   #for 2018, ee trigger is from EGamma
+    "ee": "DoubleEG",   #for 2018, ee trigger is from EGamma, hardcoded in trigger function
     "em": "SingleMuon", 
     "mm": "SingleMuon",
 }
@@ -164,8 +164,6 @@ def addLepSFs(events, ele, mu):
 
     # leps = ak.concatenate([ele, mu], axis=1)
     # padded_leps = ak.pad_none(leps[ak.argsort(leps.pt, axis=-1,ascending=False)], 2) 
-
-    print(f"\n\n {padded_leps.fields} \n\n")
 
     events['SF_2l_ee'] = padded_leps[:,0].SF_ele_nom * padded_leps[:,1].SF_ele_nom
     events['SF_2l_ee_up'] = padded_leps[:,0].SF_ele_up * padded_leps[:,1].SF_ele_up

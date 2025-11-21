@@ -400,6 +400,319 @@
     },
     "metadata": {}
   },
+  "UL17_DY10to50": {
+    "files": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/3F086BB9-629A-F744-AE82-51E6F61F3F4E.root": {
+        "object_path": "Events",
+        "num_entries": 1589797
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/2ED63EED-CC3B-AB4A-A881-D076E80EDCBF.root": {
+        "object_path": "Events",
+        "num_entries": 800284
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/315FCEE7-4FF9-7E47-A138-237C223CA749.root": {
+        "object_path": "Events",
+        "num_entries": 1586059
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/0566D9D4-AF75-1B40-97A5-1C7B788F2A9F.root": {
+        "object_path": "Events",
+        "num_entries": 1539381
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/AB4F56F4-0B30-0A44-B28F-49DB39514E34.root": {
+        "object_path": "Events",
+        "num_entries": 2413331
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/02AFA777-D6E4-424D-BCAF-E737972A3FE0.root": {
+        "object_path": "Events",
+        "num_entries": 1420567
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/723D1B92-6157-2B48-915F-E06092B0C29A.root": {
+        "object_path": "Events",
+        "num_entries": 2079719
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/360C8F7A-C917-394D-96E1-F9226FD3BA3E.root": {
+        "object_path": "Events",
+        "num_entries": 159831
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/D37C75DE-CAF7-1647-A29C-8E6CBED07DC0.root": {
+        "object_path": "Events",
+        "num_entries": 2080262
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/6AEB66E9-C0BF-6E4B-B790-8ED3A4CCB5B3.root": {
+        "object_path": "Events",
+        "num_entries": 1444152
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/9DB87C47-EF7B-7B41-BC0F-9D873D8D48B7.root": {
+        "object_path": "Events",
+        "num_entries": 2390204
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/97690CBA-A6F2-324C-B350-879F491F122D.root": {
+        "object_path": "Events",
+        "num_entries": 1269460
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/F278BD20-5D06-A74B-B939-17294873A545.root": {
+        "object_path": "Events",
+        "num_entries": 2401901
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/9270E40E-C79B-9E44-996B-0C29A4065664.root": {
+        "object_path": "Events",
+        "num_entries": 480678
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/5A8A21DC-D798-1041-AB47-E425C70DADAB.root": {
+        "object_path": "Events",
+        "num_entries": 1546329
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/7D1F35B8-201F-594D-8FB2-774800795A0C.root": {
+        "object_path": "Events",
+        "num_entries": 479479
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/A03312B4-797D-0344-818C-6C85E5E67CF8.root": {
+        "object_path": "Events",
+        "num_entries": 1484609
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/804E887B-F4BF-E24D-814B-B3F9F1D9FF20.root": {
+        "object_path": "Events",
+        "num_entries": 1300998
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/CFE39449-E223-F240-8A54-23A084255AD0.root": {
+        "object_path": "Events",
+        "num_entries": 639881
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/9BF9D001-FEC1-274A-8BA4-11C66940E6C0.root": {
+        "object_path": "Events",
+        "num_entries": 308788
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/8462B9F0-9C61-AA41-8644-6B8359F6BCD8.root": {
+        "object_path": "Events",
+        "num_entries": 59909
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/F6D9F9D6-F61A-9E44-8E2E-3F3A0EDFA345.root": {
+        "object_path": "Events",
+        "num_entries": 5913
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/260B7F32-F193-7546-8DEB-29673A27CC97.root": {
+        "object_path": "Events",
+        "num_entries": 2251791
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/E7E9F869-A76D-A341-8536-35C3B35A697C.root": {
+        "object_path": "Events",
+        "num_entries": 159881
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/9814333E-91EF-254D-9BEE-7A7733593A65.root": {
+        "object_path": "Events",
+        "num_entries": 16955
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/90089326-1745-4C4B-9B67-A2AA57F0C985.root": {
+        "object_path": "Events",
+        "num_entries": 4016
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/E83BEB39-0977-8B45-A97A-1EE6B64B05A5.root": {
+        "object_path": "Events",
+        "num_entries": 1206532
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/EDD44363-A2AA-694F-A684-113FDA646F0F.root": {
+        "object_path": "Events",
+        "num_entries": 75709
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/575E0B77-03CA-C547-B89A-E7983644A3E1.root": {
+        "object_path": "Events",
+        "num_entries": 2399460
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/1F29F83B-7737-D345-803D-0789DF0E9FFD.root": {
+        "object_path": "Events",
+        "num_entries": 1194654
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/D7F369B5-A178-5040-80AA-9338EA0AC835.root": {
+        "object_path": "Events",
+        "num_entries": 26793
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/1C356D91-0ECD-9C40-8D93-EB880FAB921E.root": {
+        "object_path": "Events",
+        "num_entries": 684602
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/0BAB39CA-6782-894E-A4F5-EA97734867AD.root": {
+        "object_path": "Events",
+        "num_entries": 46719
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/CFBC6471-4BE0-D343-82A4-875CD5EE79C8.root": {
+        "object_path": "Events",
+        "num_entries": 55681
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/549784B6-AEE5-C645-82AE-F3BFCA5C7D1B.root": {
+        "object_path": "Events",
+        "num_entries": 9964
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/536175DF-2C1D-2743-8644-D3F60A9D006C.root": {
+        "object_path": "Events",
+        "num_entries": 1389325
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/C5A4D5BA-563D-6C44-9106-E1D405BA67DE.root": {
+        "object_path": "Events",
+        "num_entries": 480513
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/72187F8F-3A32-E147-90F4-5DEEE6522CFE.root": {
+        "object_path": "Events",
+        "num_entries": 1462144
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/5A85392B-1BAB-8B48-9A6C-0DA598D55C5B.root": {
+        "object_path": "Events",
+        "num_entries": 2399054
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/48D0609B-09F1-2747-BAE2-6A2D8918B6F6.root": {
+        "object_path": "Events",
+        "num_entries": 2467300
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/3C8DC7A3-C3F7-E047-85BA-15599C9FE296.root": {
+        "object_path": "Events",
+        "num_entries": 1235047
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/322F04FE-75CF-5949-8B84-565B366FEC20.root": {
+        "object_path": "Events",
+        "num_entries": 119321
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/92429F05-6E09-4A4D-A016-BA2D337EC8F1.root": {
+        "object_path": "Events",
+        "num_entries": 583777
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/3D332FC5-D316-6B40-9F1A-F3921FA15A27.root": {
+        "object_path": "Events",
+        "num_entries": 84459
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/564AF34E-C6EC-E34F-93ED-E8ADA3586EBD.root": {
+        "object_path": "Events",
+        "num_entries": 68510
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/E1FE20AC-3F07-134B-B4FD-FAAFC735E202.root": {
+        "object_path": "Events",
+        "num_entries": 1459821
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/0E59AFE9-63DC-0449-B097-5A5E5255880B.root": {
+        "object_path": "Events",
+        "num_entries": 280064
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/2D7A33DA-B70B-6844-AC18-88764C77ABE6.root": {
+        "object_path": "Events",
+        "num_entries": 633105
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/C5961E88-A951-B24E-99E4-97B8FD36D782.root": {
+        "object_path": "Events",
+        "num_entries": 1047587
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/A376ED3E-668E-9F47-ADDC-D331142F4F2E.root": {
+        "object_path": "Events",
+        "num_entries": 25830
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/20E6C3C8-C2C6-184D-BBAE-A639DCA79BE2.root": {
+        "object_path": "Events",
+        "num_entries": 1156951
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/1F9AEC1C-3894-AF41-850B-8F4E864FFA81.root": {
+        "object_path": "Events",
+        "num_entries": 447036
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/A13609FF-E591-5248-8196-6A38393E28C2.root": {
+        "object_path": "Events",
+        "num_entries": 7996
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/07DB9BE1-DB1C-D84F-8797-E9C847E66822.root": {
+        "object_path": "Events",
+        "num_entries": 987140
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/C62EC5BF-1F1A-0A41-A5A6-ECC8988BD27E.root": {
+        "object_path": "Events",
+        "num_entries": 304857
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/1F48DCA9-C654-F54F-9AE2-E9E8C4AE6D96.root": {
+        "object_path": "Events",
+        "num_entries": 691930
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/04BEC29C-BCAA-9245-A47D-CAAE70984A80.root": {
+        "object_path": "Events",
+        "num_entries": 51665
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/23C9C1D9-549E-4948-A050-E8CC3C3D09D9.root": {
+        "object_path": "Events",
+        "num_entries": 84390
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/F02C6160-1DF5-2340-A88E-11E8AA5A29E6.root": {
+        "object_path": "Events",
+        "num_entries": 1618433
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/E5096867-E2CB-7046-AFA5-1DFA59BDD6F8.root": {
+        "object_path": "Events",
+        "num_entries": 2388467
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/85E13ED5-5817-4445-9140-1A47286C9788.root": {
+        "object_path": "Events",
+        "num_entries": 1439630
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/0059C5E1-58B0-0E46-82A9-B4D209ADDEB8.root": {
+        "object_path": "Events",
+        "num_entries": 1480265
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/6A5E9875-B2E4-FD4A-B064-E4D8464596C2.root": {
+        "object_path": "Events",
+        "num_entries": 801107
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/B6838DDF-4DA3-7748-9CAC-F91E5C2FFE9B.root": {
+        "object_path": "Events",
+        "num_entries": 1634245
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/F4C9992A-80E1-0F41-87CB-05E5D8988CF4.root": {
+        "object_path": "Events",
+        "num_entries": 1352756
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/AAC45613-37C2-8C40-99B3-073EA1E22030.root": {
+        "object_path": "Events",
+        "num_entries": 84437
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/939C4CB4-517F-4C48-BCC5-DF03D9379028.root": {
+        "object_path": "Events",
+        "num_entries": 13889
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/4FDC0A8F-C12B-F949-99C9-746BC5F67721.root": {
+        "object_path": "Events",
+        "num_entries": 7955
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/A97706C3-2C7A-8346-B294-B7A751ABE4B1.root": {
+        "object_path": "Events",
+        "num_entries": 1076499
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/3EAA619B-EA39-5349-A9DA-E1FD1DAEBD56.root": {
+        "object_path": "Events",
+        "num_entries": 1740642
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/5865B750-3E85-EA4B-8281-10AA1BC15CFA.root": {
+        "object_path": "Events",
+        "num_entries": 67485
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/58A36738-0B35-4445-8E78-4E6C20AD45AD.root": {
+        "object_path": "Events",
+        "num_entries": 337977
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000/F03D7ADA-9326-DF45-A1CC-2F6D64CBBF0D.root": {
+        "object_path": "Events",
+        "num_entries": 240791
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/366BD5FC-3409-A54F-9AC1-0D714308968A.root": {
+        "object_path": "Events",
+        "num_entries": 169389
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/4C604A37-59DC-F34C-A3A2-7EE67910E6A3.root": {
+        "object_path": "Events",
+        "num_entries": 226448
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/91145CC3-F4C1-9D4E-B46A-99E4C44D199D.root": {
+        "object_path": "Events",
+        "num_entries": 77420
+      },
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/120000/7B46A646-7E61-7743-BBE2-99BA66969BC6.root": {
+        "object_path": "Events",
+        "num_entries": 640233
+      }
+    },
+    "metadata": {}
+  },
   "UL17_DY50": {
     "files": {
       "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/2510000/970E1290-7DA0-E84C-93A1-962287D8EC05.root": {
@@ -1017,331 +1330,191 @@
     },
     "metadata": {}
   },
-  "UL17_WJetsToLNu": {
+  "UL17_WWTo2L2Nu": {
     "files": {
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/906BDE23-170C-6343-9465-25D4182A51A8.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/110000/AA7C31AF-F89A-C743-B065-D61DA93C1534.root": {
         "object_path": "Events",
-        "num_entries": 623788
+        "num_entries": 4000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/EE6AF8C0-8296-7740-8A2D-5147C16CD732.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/110000/B7B5C9BA-955A-104B-BA9C-D9A48B24AE2F.root": {
         "object_path": "Events",
-        "num_entries": 379720
+        "num_entries": 18000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/DD6B708B-3DEA-764E-A6E6-7A698581A7B1.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/110000/FE218F8D-140F-3845-BA1B-B7DE4979D2C3.root": {
         "object_path": "Events",
-        "num_entries": 1276457
+        "num_entries": 66000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/98C6F14E-90BB-1D49-B460-95C07439905E.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/130000/274BE2C3-0EA6-6F4D-8B21-08C42FC1C4B4.root": {
         "object_path": "Events",
-        "num_entries": 1276559
+        "num_entries": 7000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/80344EA8-C12D-6F40-94AE-07BF7E4C2BF9.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/130000/3644F01A-06BC-A548-8F58-F0FB4B0CF1F8.root": {
         "object_path": "Events",
-        "num_entries": 1920145
+        "num_entries": 148000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/423E6A08-FAA8-624C-AC5F-CD1ADCD954D0.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/130000/4F16C798-8967-C949-969B-9F54FBD7537E.root": {
         "object_path": "Events",
-        "num_entries": 1437799
+        "num_entries": 34000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/85E161F5-908D-8440-9C14-7ECC18243CAA.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/130000/769C0EF8-6982-914E-8571-47EF7E476C28.root": {
         "object_path": "Events",
-        "num_entries": 50988
+        "num_entries": 24000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/8E358A41-B5B3-574D-AD16-FADEB9776757.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/130000/87652495-6DB7-B143-9E66-30357FB098A5.root": {
         "object_path": "Events",
-        "num_entries": 1062526
+        "num_entries": 304000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/4DFF7D60-D9FE-524A-BAF3-1CD1F308BADD.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/130000/A83B265F-E6D1-9A44-856D-895D3D7007E0.root": {
         "object_path": "Events",
-        "num_entries": 26821
+        "num_entries": 55000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/5C4F5948-B2E3-3C46-AA1E-694F77836D13.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/130000/CE0939FD-82D4-2646-8AE3-95342F365E33.root": {
         "object_path": "Events",
-        "num_entries": 2050901
+        "num_entries": 23000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/59017A7C-D396-FF4B-800E-54AD8806676E.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/130000/F6777C5C-E416-4344-AA38-46A16FB8AEE8.root": {
         "object_path": "Events",
-        "num_entries": 638861
+        "num_entries": 55000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/8C334291-8358-9D4E-9931-99FEB4219D5D.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/230000/64E7F032-046D-3E4C-907A-FC4CAA390F77.root": {
         "object_path": "Events",
-        "num_entries": 1648797
+        "num_entries": 45000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/6C432AD4-29BC-BB48-B926-BF8AF5EA4B9F.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/230000/873AC76A-AEDF-9746-9EF5-2234045D6440.root": {
         "object_path": "Events",
-        "num_entries": 159687
+        "num_entries": 55000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/E6651B02-DD7F-8042-95F2-A2C0F2CD1FA1.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/2430000/46D9A592-8F62-6E4B-8F63-EF6648F0AA34.root": {
         "object_path": "Events",
-        "num_entries": 71640
+        "num_entries": 36000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/63EA2381-75D9-554E-85BC-258519AD3122.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/2430000/DA317208-1CF8-1A49-B688-B47D25911289.root": {
         "object_path": "Events",
-        "num_entries": 1234145
+        "num_entries": 1320000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/19824700-5419-DB42-B7EA-64209C3B1FE3.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/2510000/B01484E4-4E5E-8347-8CB3-FF4FA951356F.root": {
         "object_path": "Events",
-        "num_entries": 11019
+        "num_entries": 55000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/0589E12E-CED1-BC42-B670-B7EC27C52C38.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/2510000/B4A82885-34F5-C243-BB8C-83BDB28443EA.root": {
         "object_path": "Events",
-        "num_entries": 155058
+        "num_entries": 47000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/6CC451C0-9238-1C4C-8E7D-A9B57F28DC03.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/01E53054-2A32-1B4C-A6BD-2D35C78A0CC6.root": {
         "object_path": "Events",
-        "num_entries": 810505
+        "num_entries": 394000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/8913B7A3-61ED-B842-A40E-1A00F9ED0718.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/1A437CD1-411C-7643-B79E-E02FFA1747CB.root": {
         "object_path": "Events",
-        "num_entries": 1635198
+        "num_entries": 20000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/8A721ED8-4F45-8A46-AAE1-B782866C56B7.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/2AE21BB6-74DD-1842-8678-8987853765EA.root": {
         "object_path": "Events",
-        "num_entries": 319602
+        "num_entries": 1023000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/65CAF4DF-D2E0-B941-A3D4-7EB34CF2EEC3.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/3F1CA95D-072D-BD4B-BBCC-3BAEB7B29C86.root": {
         "object_path": "Events",
-        "num_entries": 1643866
+        "num_entries": 8000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/0484EE2D-B9C2-C44E-871F-E24C32B678FD.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/4DAF4938-FDE8-7444-BD35-FE3FBFB8EFC1.root": {
         "object_path": "Events",
-        "num_entries": 160096
+        "num_entries": 20000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/2F848C85-F445-264E-BF5B-0859D75C10CC.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/58F6E29F-BD96-094B-B39E-F1E6C81AA0E5.root": {
         "object_path": "Events",
-        "num_entries": 8860
+        "num_entries": 8000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/4BD69EA5-20E5-5B4A-A081-ACB8A66E607A.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/5B94474D-EAC3-3148-99B8-CE2DA6C6B0D1.root": {
         "object_path": "Events",
-        "num_entries": 159924
+        "num_entries": 206000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/0D230229-644C-7943-91A3-1104EB6E3E62.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/5E698B95-0FCC-CB49-81B2-6AAE5F2CCA48.root": {
         "object_path": "Events",
-        "num_entries": 1916462
+        "num_entries": 864000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/ED4E02D7-E386-3A4C-AB5A-441D1DBDC907.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/622AEB95-BDD0-BC41-AFFF-7770EEA67283.root": {
         "object_path": "Events",
-        "num_entries": 566255
+        "num_entries": 10000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/5E6E5888-B155-1340-81FA-3CDB2C1E7BCE.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/653FA787-C843-3E46-AD04-68194826653A.root": {
         "object_path": "Events",
-        "num_entries": 1470801
+        "num_entries": 304000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/EF93B3FF-6807-3B43-9289-756FC0090DC6.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/669D57FE-E473-B54C-8A39-06E9DDBF6646.root": {
         "object_path": "Events",
-        "num_entries": 319376
+        "num_entries": 4000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/61801BDB-828F-9849-8E11-C23E6CD9DE9E.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/9156A8D3-328A-A044-B16F-DE0B936793A8.root": {
         "object_path": "Events",
-        "num_entries": 2156870
+        "num_entries": 332000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/BE083673-FB07-9F4B-9445-B1B7E3ACFE76.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/9B0627C2-D0E5-0B40-B40C-5E2BC33F934E.root": {
         "object_path": "Events",
-        "num_entries": 1252912
+        "num_entries": 22000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/EC5E5B0D-AE16-E94E-A655-9D245925DDDA.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/B41E1A69-8E31-D54A-9446-3C88F5490F82.root": {
         "object_path": "Events",
-        "num_entries": 798807
+        "num_entries": 4000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/C24175E7-C8C7-2643-B486-9DA4CC5594F4.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/DA427C7F-4B1C-FA49-80A6-223D51AAF53C.root": {
         "object_path": "Events",
-        "num_entries": 637519
+        "num_entries": 80000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/32906CDF-BCC2-9646-B166-1CDA9DB1A6B1.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/E577BAFE-5724-2340-A8C4-DF29CAC34458.root": {
         "object_path": "Events",
-        "num_entries": 563543
+        "num_entries": 165000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/36E3F44A-C143-1C4A-8A4F-35A3D7DBC5F1.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/E93A02F9-C857-FC44-B63E-E28DA4DA7FE6.root": {
         "object_path": "Events",
-        "num_entries": 458067
+        "num_entries": 202000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/B241D117-66F8-5641-9898-14D648CF7CED.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/FBFCBD58-2E3D-B542-8435-66404C6B3008.root": {
         "object_path": "Events",
-        "num_entries": 217796
+        "num_entries": 204000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/3D1B5F1E-8A9D-5E4D-9B00-BCE05F4E74F6.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/260000/FD647975-0939-1A45-9864-E379D9614C27.root": {
         "object_path": "Events",
-        "num_entries": 688974
+        "num_entries": 4000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/B244F89A-8F50-4E47-8A80-8DC11563D61A.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/270000/079137A4-E8C3-0343-B0D3-C269EF974102.root": {
         "object_path": "Events",
-        "num_entries": 97245
+        "num_entries": 8000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/9CDFCEBC-400A-DB4B-B976-266E2AE3D17B.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/270000/443DE54C-FA53-3446-8365-91BE9DD79D9D.root": {
         "object_path": "Events",
-        "num_entries": 221735
+        "num_entries": 16000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/8E986E5A-CCD1-8541-8790-94B113416397.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/270000/4D1897D8-80C4-AD48-97E7-45C216F14DC0.root": {
         "object_path": "Events",
-        "num_entries": 2052381
+        "num_entries": 56000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/57614D45-81F8-294D-BAF5-7EA4040F4D27.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/270000/80895318-F43B-B741-AE56-28D632DA3DD7.root": {
         "object_path": "Events",
-        "num_entries": 1438452
+        "num_entries": 2000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/47E542D9-3D24-664B-BA68-0E54F8471D48.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/270000/80FE7CAA-9A51-6C44-91E8-0760817CCB37.root": {
         "object_path": "Events",
-        "num_entries": 798893
+        "num_entries": 10000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/44542428-CE65-F849-89D4-198F404E5D20.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/270000/A8682A6D-A402-7047-B1A5-1C176B22CDB2.root": {
         "object_path": "Events",
-        "num_entries": 1864348
+        "num_entries": 10000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/AD880576-B8D1-3F44-8724-46943EE2887C.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/270000/C42A787C-1DEA-714D-8C7F-293D6797EB1A.root": {
         "object_path": "Events",
-        "num_entries": 1437199
+        "num_entries": 400000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/4BE76662-A69D-3B45-A0A2-5C6B2D46E1CA.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/270000/CBF904D8-B189-7044-A8FF-F8E2B807DED6.root": {
         "object_path": "Events",
-        "num_entries": 1277409
+        "num_entries": 274000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/0C3598F6-C34F-2D40-A351-F68DC293E9CC.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/270000/D8CA6723-FACD-304F-9074-88B95F176E0F.root": {
         "object_path": "Events",
-        "num_entries": 639975
+        "num_entries": 134000
       },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/067D26EE-2829-BC44-9164-C8C1B8D00516.root": {
+      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WWTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/270000/E1A25F01-338D-2F4E-951B-F8B9FAD37FCD.root": {
         "object_path": "Events",
-        "num_entries": 697238
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/DC149562-DFA6-C24E-A79C-BB387B6A95C3.root": {
-        "object_path": "Events",
-        "num_entries": 148944
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/F5F9EE3C-A6DA-B348-99E9-E704DB22FC23.root": {
-        "object_path": "Events",
-        "num_entries": 631262
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/E2F6A762-37E4-1344-921A-8314895721C5.root": {
-        "object_path": "Events",
-        "num_entries": 25431
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/A757BF74-F04D-A441-BF7D-D007D0AEC996.root": {
-        "object_path": "Events",
-        "num_entries": 682294
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/43EFD73E-3235-F44A-9038-3F2F0B5AB32B.root": {
-        "object_path": "Events",
-        "num_entries": 1458253
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/50B3C9BF-5D5C-8345-8DA4-76F34E664231.root": {
-        "object_path": "Events",
-        "num_entries": 1879210
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/1F1B30E0-28B6-4D47-8ECE-DF57070BD13D.root": {
-        "object_path": "Events",
-        "num_entries": 479629
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/8BC7F1A0-84DE-6E47-961A-E109222BD299.root": {
-        "object_path": "Events",
-        "num_entries": 1536562
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/05D60D71-5202-B642-8D31-590C07C85526.root": {
-        "object_path": "Events",
-        "num_entries": 639769
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/8656FA92-711B-5D47-9FD3-790342004DC5.root": {
-        "object_path": "Events",
-        "num_entries": 634045
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/2AD40EEE-6250-7344-A6C6-124AA35CC6E5.root": {
-        "object_path": "Events",
-        "num_entries": 1335966
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/225D7A53-BCA0-4D48-89B8-A8B55FBB11C2.root": {
-        "object_path": "Events",
-        "num_entries": 1118332
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/00139910-0BBD-8D4D-B54A-64D547785AF7.root": {
-        "object_path": "Events",
-        "num_entries": 105849
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/E0FFF6DB-AC27-F144-8972-B185AF8F74B8.root": {
-        "object_path": "Events",
-        "num_entries": 1233302
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/34D4CB7B-6A1B-8445-B5DD-D736D963D4A9.root": {
-        "object_path": "Events",
-        "num_entries": 639410
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/42B4F47C-2EE6-8948-84B7-4B0283D90843.root": {
-        "object_path": "Events",
-        "num_entries": 1259986
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/B6B461EA-786B-B944-92BC-A29B661BB1FF.root": {
-        "object_path": "Events",
-        "num_entries": 2237318
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/31F7F8F4-6677-3C4D-A5AD-B9AD68991813.root": {
-        "object_path": "Events",
-        "num_entries": 2237142
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/213D7849-B332-4540-A4E2-C2D010F3BE25.root": {
-        "object_path": "Events",
-        "num_entries": 2081972
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/C4B0A423-E8B5-8847-A8A0-3AC4FF6C0191.root": {
-        "object_path": "Events",
-        "num_entries": 2189977
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/D4CA4078-77E9-DB4B-B630-6A84B80AD0BF.root": {
-        "object_path": "Events",
-        "num_entries": 319637
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/1F770153-4B78-234A-8EA4-4C1BE7FE9318.root": {
-        "object_path": "Events",
-        "num_entries": 1689350
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/EA114603-3C64-4240-86DC-F12BCBFB2D3F.root": {
-        "object_path": "Events",
-        "num_entries": 2220092
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/D520878E-9A6D-6F48-A671-65CE15BD134D.root": {
-        "object_path": "Events",
-        "num_entries": 474210
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/B399DB0C-5BA0-414C-AFE0-EA5CBA953BC4.root": {
-        "object_path": "Events",
-        "num_entries": 465272
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/4DD236C7-397B-5143-A9B6-9A864222D981.root": {
-        "object_path": "Events",
-        "num_entries": 911211
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/DE670A7A-0B94-E84A-B765-0D17360CE36B.root": {
-        "object_path": "Events",
-        "num_entries": 159470
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000/1E7A8324-C1E6-9C40-AAC5-80F854529E4F.root": {
-        "object_path": "Events",
-        "num_entries": 798352
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/91CFB155-5A28-FF42-B937-1C921D4DD20E.root": {
-        "object_path": "Events",
-        "num_entries": 613875
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/130000/E2FE585E-6142-B042-9280-9F9B2296B61A.root": {
-        "object_path": "Events",
-        "num_entries": 479725
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/130000/8054BC13-3823-0440-978C-7652983D3FA4.root": {
-        "object_path": "Events",
-        "num_entries": 11095
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/CB3E2EAB-F11B-2649-B692-5D7FD8E4ACDD.root": {
-        "object_path": "Events",
-        "num_entries": 1203862
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/F1BAA526-780C-3447-B6AA-8B1ADD0D7BA7.root": {
-        "object_path": "Events",
-        "num_entries": 1598084
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/4F974A86-0B33-344A-B68A-E9271A8EB5A6.root": {
-        "object_path": "Events",
-        "num_entries": 2235958
-      },
-      "root://cmsxcache.crc.nd.edu//store/mc/RunIISummer20UL17NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/280000/17040790-FFE4-4146-9545-625045E2C904.root": {
-        "object_path": "Events",
-        "num_entries": 2237121
+        "num_entries": 18000
       }
     },
     "metadata": {}

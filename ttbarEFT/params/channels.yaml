@@ -1,0 +1,30 @@
+SR_CHANNELS: 
+  ee: 
+    jet_list:
+      - '=1'
+      - '=2' 
+      - '>2'
+    # bjet_list: []
+  mm: 
+    jet_list: 
+      - '=1'
+      - '=2'
+      - '>2'
+  em: 
+    jet_list: 
+      - '=1'
+      - '=2'
+      - '>2'
+
+CR_CHANNELS:
+  ee:
+    jet_list:
+      - exactly_0j
+      - atleast_1j
+  mm:
+    jet_list:
+      - exactly_0j
+      - atleast_1j
+  em:
+    jet_list:
+      - exactly_0j
