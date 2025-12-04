@@ -207,6 +207,8 @@ if __name__ == '__main__':
             )
             x509_proxy = None
 
+        mgr.declare_xrootd(source="root://cmsxrootd.crc.nd.edu")
+
         data = {}
         for sname in samplesdict.keys():
             data[sname] = preprocessing_for_ddr(samplesdict[sname])
@@ -220,6 +222,7 @@ if __name__ == '__main__':
             max_retries=5,
             show_progress=True,
             batch_size=5,
+            x509_proxy=x509_proxy,
         )
 
         with open(f"{inputFile}_preprocessed.json", "w") as f:
@@ -244,7 +247,7 @@ if __name__ == '__main__':
             extra_files = [proc_file, "/users/hnelson2/ttbarEFT-coffea2025/ttbarEFT/params/channels.json"],
             schema=NanoAODSchema,
             max_task_retries= 20, # default=10
-            # step_size=<INT>, #equivalent to chunksize, default=100k
+            step_size=200000, #equivalent to chunksize, default=100k
             resources_processing={"cores": 1},
             resources_accumualting={"cores": 1},
             results_directory=results_dir,
