@@ -1,6 +1,7 @@
 ### 2017 DATA ###
 
-redirector : 'root://cmsxcache.crc.nd.edu/' # xrootd access to non-ND files (`store/mc/` and `store/data`)
+# redirector : 'root://cmsxcache.crc.nd.edu/' # xrootd access to non-ND files (`store/mc/` and `store/data`)
+redirector : 'root://cmsxrootd.crc.nd.edu/' 
 # redirector : 'file:///cms/cephfs/data/' # direct file access
 jsonFiles:
   - '../input_samples/sample_jsons/data_samples/2017/DoubleEG_B-UL2017.json'
