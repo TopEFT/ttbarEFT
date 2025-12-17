@@ -86,6 +86,21 @@ conda activate ttbarEFT
 
 vine_submit_workers -T condor -M ${USER}-taskvine-coffea --python-env <PathToTarball> -t 900 --cores 4 --memory 16000 --disk 100000 10
 ```
+## Setup (for running with VineReduce) 
+dynamic data reduction repo: [repo](https://github.com/cooperative-computing-lab/dynamic_data_reduction)
+
+example usage: 
+```bash
+python run_processor_vineReduce.py -x ddr -p analysis_processor_ddr.py -o MC_CRs_ddr ../input_samples/cfgs/MC_CR_2017.yaml
+```
+
+submit workers: 
+```
+vine_submit_workers --extra-file with_oasis_certs --wrapper ./with_oasis_certs -T condor -M ${USER}-ddr-coffea --python-env /users/hnelson2/ttbarEFT-coffea2025/analysis/topeft-envs/env_spec_251e393e_edit_HEAD.tar.gz --cores 12 --memory 16000 --disk 300000 20
+```
+
+# Notes
+The version of the run script and analysis processor for usage with Coffea Executors (pre-refactoring) has been moved to `coffeaExector` so it's available if testing is needed.
 
 
 # Previous Analysis

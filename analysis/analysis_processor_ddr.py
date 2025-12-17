@@ -110,6 +110,11 @@ class AnalysisProcessor(processor.ProcessorABC):
         xsec            = self._samples[dataset]['xsec']
         sow             = self._samples[dataset]['nSumOfWeights']
 
+        print(f"\n\n histAxisName: {histAxisName}")
+        print(f"dataset: {dataset}")
+        print(f"year: {year}")
+        print(f"xsec: {xsec} \n\n")
+
         isEFT = hasattr(events, 'EFTfitCoefficients')    
         assert not (isEFT and isData), f"isEFT and isData cannot both be True. Check input samples."
 

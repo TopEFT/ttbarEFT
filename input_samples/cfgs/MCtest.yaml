@@ -1,0 +1,3 @@
+redirector : 'root://cmsxrootd.crc.nd.edu/'
+jsonFiles:
+  - "../input_samples/sample_jsons/tests/test2.json"

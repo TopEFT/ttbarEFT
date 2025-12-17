@@ -72,7 +72,7 @@ def make_cr_fig(h_data, h_mc, name, title):
     else: 
         ax.legend(loc='upper right', fontsize=14)
     # ax.legend(loc='best', bbox_to_anchor=(1.0, 0.8), fontsize=12)
-    
+
     if "eta" in name: 
         rax.set_xlim([-3, 3])
     elif "phi" in name: 
@@ -107,18 +107,27 @@ if __name__ == "__main__":
     hists_data = utils.get_hist_from_pkl(data_pkl, allow_empty=False)
     hists_mc = utils.get_hist_from_pkl(mc_pkl, allow_empty=False)
 
-    channels = ["ee", "mm"]
+    plot_title = {"ee_chan": r"$ee$",
+                    "mm_chan": r"$\mu\mu$",
+                    "em_chan": r"$e\mu$"}
 
-    for ch in channels: 
-        if ch == "mm":
-            plot_title = r"$\mu\mu$"
-        else: plot_title = ch
+    var_to_restrict = ['mll', 'ptll', 'l0pt', 'l1pt']
 
+
+
+    for ch in plot_title.keys(): 
         for name in hists_data: 
-            h_data = hists_data[name][{'process':sum}][{'systematic': "nominal"}].as_hist({})[{'channel':ch}]
-            h_mc = hists_mc[name][{'systematic': "nominal"}].as_hist({})[{'channel':ch}]
+            # h_data = hists_data[name][{'process':sum}][{'systematic': "nominal"}].as_hist({})[{'channel':ch}]
+            # h_mc = hists_mc[name][{'systematic': "nominal"}].as_hist({})[{'channel':ch}]
+
+            h_data = hists_data[ch][name][{'process':sum}][{'systematic': "nominal"}].as_hist({})
+            h_mc = hists_mc[ch][name][{'systematic': "nominal"}].as_hist({})
 
             fig, ax, rax = make_cr_fig(h_data, h_mc, name, plot_title)
+
+            if name in var_to_restrict:
+                ax.sel_xlim([0, 200])
+                rax.set_xlim([0, 200])
 
             figname = ""
             if title is not None: 
@@ -126,3 +135,4 @@ if __name__ == "__main__":
             figname += f"{name}_CR_{ch}"
 
             plt_tools.save_figure(fig, figname, outdir)
+            plt.close(fig)
