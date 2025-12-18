@@ -296,7 +296,7 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         selections.add("ee",  (events.is_ee & pass_trg))
         selections.add("em",  (events.is_em & pass_trg))
-        selections.add("mm",  (events.is_mm))
+        selections.add("mm",  (events.is_mm & pass_trg))
 
         selections.add('bmask_exactly0med', (nbtagsm==0))
         selections.add('bmask_exactly1med', (nbtagsm==1))
