@@ -70,7 +70,7 @@ def preprocessing_for_taskvine(samplesdict):
         redirector = samplesdict[sname]['redirector']
         flist[sname] = [(redirector+f) for f in samplesdict[sname]['files']]
 
-        return flist
+    return flist
 
 
 def data_for_preprocessing(samplesdict):
@@ -273,13 +273,24 @@ if __name__ == '__main__':
         )
         ddr.environment_variables["X509_USER_PROXY"] = "proxy.pem"
         
-        hists = ddr.compute()
+        ddr_hists = ddr.compute()
+
+        hists = {}
+        for ch in ddr_hists.keys():
+            hists[ch] = {}
+            variables = list(ddr_hists[ch][next(iter(ddr_hists[ch]))].keys())
+
+            for var in variables: 
+                h_list = [ddr_hists[ch][dataset][var] for dataset in ddr_hists[ch]]
+                hists[ch][var] = functools.reduce(operator.add, h_list)
+
+
         print(f"Computing done!")
 
 
     ### RUN PROCESSOR USING ITERATIVE EXECUTOR ###
     elif executor == 'iterative': 
-        
+
         flist = preprocessing_for_taskvine(samplesdict)
         proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst)
         exec_instance = processor.IterativeExecutor()
