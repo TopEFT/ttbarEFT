@@ -9,6 +9,8 @@ import pprint
 import json
 import yaml
 import cloudpickle
+import functools
+import operator 
 
 from coffea import processor
 from coffea.nanoevents import NanoAODSchema
@@ -283,7 +285,6 @@ if __name__ == '__main__':
             for var in variables: 
                 h_list = [ddr_hists[ch][dataset][var] for dataset in ddr_hists[ch]]
                 hists[ch][var] = functools.reduce(operator.add, h_list)
-
 
         print(f"Computing done!")
 
