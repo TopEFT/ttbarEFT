@@ -106,76 +106,62 @@ if __name__ == "__main__":
     if not os.path.exists(outdir):
         os.makedirs(outdir, exist_ok=True)
 
-    ### Hist pickle file format from VineReduce ### 
-    '''
-    hists = {
-        "channel": {
-            "dataset": {
-                "hist variables": histEFT,
-            }
-        }
-    }
-    '''
-
-    # hists_data = utils.get_hist_from_pkl(data_pkl, allow_empty=False)
-    # hists_mc = utils.get_hist_from_pkl(mc_pkl, allow_empty=False)
     hists_data = pickle.load(gzip.open(data_pkl))
     hists_mc = pickle.load(gzip.open(mc_pkl))
 
-    h_list = [hists_data[channel][dataset][var].as_hist({}) for dataset in hists_data[channel]]
-    data_hist = sum(h_list)
-
     channel = "ee_chan"
-    var = "njets"
+    var = "ptll"
 
     mc_process_styles = {
         'TTTo2L2Nu_centralUL17':{'label': r'TTTo2L2Nu', 'color': '#bd1f01'},
         'DYJetsToLL_centralUL17' :{'label': r'DYJetsToLL', 'color': '#3f90da'},
         'WWTo2L2Nu_centralUL17':{'label': r'WWTo2L2Nu', 'color': '#b9ac70'},
         'TW_5f':{'label': r'tW', 'color': '#832db6'},
-        'Others': {'label': 'Others', 'color': '#ffa90e'},
         'TTGJets_centralUL17':{'label': r'TTGJets', 'color': '#94a4a2'},
         'ttW_centralUL17':{'label': r'ttW', 'color': 'pink'},
         'ttZ_centralUL17':{'label': r'ttZ', 'color': '#a96b59'},
         'WJetsToLNu_centralUL17':{'label': r'WJetsToLNu', 'color': '#e76300'},
         'WZTo3LNu_centralUL17':{'label': r'WZTo3LNu', 'color': '#717581'},
         'ZZTo4L_centralUL17':{'label': r'ZZTo4L', 'color': '#92dadd'},
+        'Others': {'label': 'Others', 'color': '#ffa90e'},
     }
 
     other_processes = ['TTGJets_centralUL17', 'ttW_centralUL17', 'ttZ_centralUL17', 'WJetsToLNu_centralUL17', 'WZTo3LNu_centralUL17', 'ZZTo4L_centralUL17']
 
+    h_mc = hists_mc[channel][var].as_hist({})
+    h_data = hists_data[channel][var].as_hist({})
+    h_data = h_data.project(var)
 
+    all_mc_procs = list(h_mc.axes['process'])
+    sep_mc_procs = [p for p in all_mc_procs if p not in other_processes]
+    other_mc_procs = [p for p in all_mc_procs if p in other_processes] 
 
-    others_hists = []
-    separate_hists = []
+    h_mc_sep = h_mc[{'process': sep_mc_procs}]  # hist with processes that will be individually plotted
 
-    for dataset in hists_mc[channel]:
-        h = hists_mc[channel][dataset][var].as_hist({})
-        proc_name = h.axes["process"][0]
-        if proc_name in other_processes:
-            others_hists.append(h)
-        else: 
-            separate_hists.append(h)
+    if other_mc_procs: 
+        final_categories = sep_mc_procs + ['Others']
 
-    h_mc_others = sum(others_hists).project(var)
-    h_others_final = hist.Hist(
-        hist.axis.StrCategory(["Others"], name="process", growth=True),
-        h_mc_others.axes[0],
-        storage=h_mc_others.storage_type()
-    )
-    h_others_final.view(flow=True)[0] = h_mc_others.view(flow=True)
+        h_mc_all = hist.Hist(
+            hist.axis.StrCategory(final_categories, name= "process", growth=True),
+            h_mc.axes[1],
+            storage=h_mc.storage_type()
+        )
 
-    if others_hists: 
-        combined_mc = sum(separate_hists) + h_others_final
+        for proc in sep_mc_procs:
+            old_idx = h_mc.axes['process'].index(proc)
+            new_idx = h_mc_all.axes['process'].index(proc)
+            h_mc_all.view(flow=True)[new_idx] = h_mc.view(flow=True)[old_idx]
+
+        others_hist = h_mc[{'process': other_mc_procs}][{'process':sum}]
+        others_idx = h_mc_all.axes['process'].index('Others')
+        h_mc_all.view(flow=True)[others_idx] = others_hist.view(flow=True)
+
     else: 
-        combined_mc = sum(separate_hists)
+        h_mc_all = h_mc_sep
 
-    mc_stack = combined_mc.stack("process")
-    mc_list = list(mc_stack)
+    mc_stack = h_mc_all.stack("process") #for s in mc_stack: print(s.name)
     mc_labels = [mc_process_styles.get(s.name, {}).get('label', s.name) for s in mc_stack]
     mc_colors = [mc_process_styles.get(s.name, {}).get('color', 'gray') for s in mc_stack]
-    # for s in mc_stack:
-        # print(s.name)
 
     hep.style.use("CMS")
     fig, (ax, rax) = plt.subplots(
@@ -185,41 +171,39 @@ if __name__ == "__main__":
         gridspec_kw={'height_ratios': (3, 1), 'hspace':0.05},
         sharex=True
     )
-    # fig.subplots_adjust(hspace=.1)
 
+    # MC Plot
     hep.histplot(
-        mc_list,
+        list(mc_stack),
         stack=True,
         histtype="fill",
-        # label=[s.name for s in mc_stack],
-        label=mc_labels,
+        label=mc_labels, #label=[s.name for s in mc_stack],
         color=mc_colors,
         ax=ax
     )
 
+    # Data Plot
     hep.histplot(
-        data_hist[{'process':sum}], # should be the same as combined.project(var)
+        h_data, 
         histtype='errorbar',
         color='black',
         label='Data',
         ax=ax
     )
 
-    total_mc = sum(mc_list)
-    # ratio_hist = data_hist.project(var) / total_mc.project(var)
-    ratio_hist = data_hist.project(var) / total_mc
+    h_total_mc = h_mc_all.project(var)
+    ratio_hist = h_data / h_total_mc
+    # # ratio_err = (data_vals/mc_vals)*(sqrt((data_uncert/data_vals)^2 + (mc_uncert/mc_vals)^2))
+    data_vals = h_data.values()
+    mc_vals = h_total_mc.values()
+    data_uncert = np.sqrt(h_data.variances())
+    mc_uncert = np.sqrt(h_total_mc.variances())
 
-    # # ratio_err = (D/M)*sqrt((D_uncert/D)^2 + (M_uncert/M)^2)
-    # data_vals = data_hist.values()
-    # mc_vals = total_mc.values()
-    # data_uncert = np.sqrt(data_hist.variances())
-    # mc_uncert = np.sqrt(total_mc.variances())
+    # handle zeros
+    data_term = np.divide(data_uncert, data_vals, out=np.zeros_like(data_vals), where=data_vals>0)
+    mc_term = np.divide(mc_uncert, mc_vals, out=np.zeros_like(mc_vals), where=mc_vals>0)
 
-    # # handle zeros
-    # data_term = np.divide(data_uncert, data_vals, out=np.zeros_like(data_vals), where=data_vals>0)
-    # mc_term = np.divide(mc_uncert, mc_vals, out=np.zeros_like(mc_vals), where=mc_vals>0)
-
-    # ratio_errs = (ratio_hist.values)*np.sqrt(data_term**2 + mc_term**2)
+    ratio_errs = (ratio_hist.values())*np.sqrt(data_term**2 + mc_term**2)
 
     hep.histplot(
         ratio_hist,
@@ -230,14 +214,14 @@ if __name__ == "__main__":
     )  
 
     # ### add mc uncertainty band to ratio plot ###
-    # mc_vals = total_mc.project(var).values()
-    # mc_errs = np.sqrt(total_mc.project(var).variances())
+    # mc_vals = h_total_mc.values()
+    # mc_errs = np.sqrt(h_total_mc.variances())
     # rel_mc_err = np.divide(mc_errs, mc_vals, out=np.zeros_like(mc_vals), where=mc_vals>0)
 
     # rax.stairs(
-    #     values=1 + rel_mc_err,      # Upper boundary
-    #     baseline=1 - rel_mc_err,   # Lower boundary
-    #     edges=total_mc.project(var).axes[0].edges,
+    #     values= 1 + rel_mc_err,      # Upper boundary
+    #     baseline= 1 - rel_mc_err,   # Lower boundary
+    #     edges=h_total_mc.axes[0].edges,
     #     fill=True,
     #     color='gray',
     #     alpha=0.4,
@@ -249,37 +233,12 @@ if __name__ == "__main__":
     # ax.stairs(
     #     values=mc_vals + mc_errs,
     #     baseline=mc_vals - mc_errs,
-    #     edges=total_mc.project(var).axes[0].edges,
+    #     edges=h_total_mc.axes[0].edges,
     #     fill=True,
     #     color='gray',
     #     alpha=0.4,
     #     hatch='////'
     # )
-
-    ### make the ratio plot manually if needed ### 
-    # total_mc = sum(mc_list)
-    ## only for histograms that have correct stat uncertainties
-    # n_data = data_hist.values()
-    # var_data = data_hist.variances()
-    # n_mc = total_mc.values()
-    # var_mc = total_mc.variances()
-    # ratio_vals = np.divide(n_data, n_mc, out=np.full_like(n_data, np.nan), where=n_mc > 0)
-
-    # uncertatinty = ratio * sqrt( (unc_data/data)^2 + (unc_mc/mc)^2 )
-    # rel_data_unc = np.divide(np.sqrt(var_data), n_data, out=np.zeros_like(n_data), where=n_data > 0)
-    # rel_mc_unc = np.divide(np.sqrt(var_mc), n_mc, out=np.zeros_like(n_mc), where=n_mc > 0)
-    # ratio_errs = ratio_vals * np.sqrt(rel_data_unc**2 + rel_mc_unc**2)
-
-    # hep.histplot(
-    #     ratio[0], 
-    #     bins=data_hist.axes[1].edges,
-    #     yerr=None,
-    #     # yerr = ratio_errs,
-    #     histtype='errorbar',
-    #     color='black',
-    #     ax=rax,
-    # )   
-    ### 
 
     # General formatting
     hep.cms.label("Preliminary", data=True, loc=0, ax=ax) #if data=False adds "Simulation" to label
@@ -290,10 +249,13 @@ if __name__ == "__main__":
 
     # main plot formatting
     ax.set_ylabel("Events")
-    ax.legend(loc='best', fontsize=12)
+    handles, labels = ax.get_legend_handles_labels()
+    ax.legend(handles[::-1], labels[::-1], loc='best', fontsize=12) # Makes colors on plot appear top to bottom same order as plot 
+    # ax.legend(loc='best', fontsize=12)
     ax.set_xlabel("")
 
     # ratio plot formatting
+    rax.set_xlabel(h_total_mc.axes[0].label if h_total_mc.axes[0].label else h_total_mc.axes[0].name)
     rax.set_ylabel("Data / MC")
     # rax.set_xlabel(var)
     rax.set_ylim([0.5, 1.5])
@@ -305,8 +267,6 @@ if __name__ == "__main__":
 
     # for ch, ch_dict in hists_data.items():  # loop over channels
     #     for dataset, hist_dict in ch_dict.items(): # loop over datasets
-
-
 
 
     exit()
