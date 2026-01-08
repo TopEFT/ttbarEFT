@@ -40,6 +40,7 @@ def main():
 
     # load files and get list of wc names from first file
     files = utils.get_files(path)
+
     wc_names = utils.get_list_of_wc_names(files[0])
 
     # initialize empty counters
@@ -78,6 +79,7 @@ def main():
         print(f"\n New json file: {outputFile}") 
 
     print("If this is an EFT sample, the sow is incorrect and needs to be replaced with the sum of event weights at the SM")
+    print("If this is a skimmed sample, REPLACE the nEvents and nSumOfWeights with the unskimmed number!")
 
 if __name__ == '__main__':
     main()
