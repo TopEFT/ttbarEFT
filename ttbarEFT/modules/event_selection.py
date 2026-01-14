@@ -1,5 +1,6 @@
 import awkward as ak
 import numpy as np 
+import copy
 
 triggers_dict = {
     "2016APV": {
@@ -144,7 +145,6 @@ def addLepCatMasks(events):
     n_e_2l = ak.sum(is_e_mask[:,0:2],axis=-1) # Make sure we only look at first two leps
     n_m_2l = ak.sum(is_m_mask[:,0:2],axis=-1) # Make sure we only look at first two leps        
 
-
     # 1l masks
     events['is_e'] = ((n_e_2l==1) & (n_m_2l==0))
     events['is_m'] = ((n_e_2l==0) & (n_m_2l==1))
@@ -154,25 +154,24 @@ def addLepCatMasks(events):
     events['is_em'] = ((n_e_2l==1) & (n_m_2l==1))
     events['is_mm'] = ((n_e_2l==0) & (n_m_2l==2))
 
-
-def addLepSFs(events, ele, mu):
-    # TODO: probably need to change these to SF_2l_ee, SF_2l_mm, and add SF_2l_em 
-    # where SF_2l_em = leps[0].SF_ele * leps[0].SF_muon * leps[1].SF_ele * leps[1].SF_muon
+def add2losMask(events, year, isData):
     
     leps = events.leps_pt_sorted
-    padded_leps = ak.pad_none(leps, 2)
+    padded_leps = ak.pad_none(leps,2)
 
-    # leps = ak.concatenate([ele, mu], axis=1)
-    # padded_leps = ak.pad_none(leps[ak.argsort(leps.pt, axis=-1,ascending=False)], 2) 
+    filter_flags = events.Flag
+    filters = filter_flags.goodVertices & filter_flags.globalSuperTightHalo2016Filter & filter_flags.HBHENoiseFilter & filter_flags.HBHENoiseIsoFilter & filter_flags.EcalDeadCellTriggerPrimitiveFilter & filter_flags.BadPFMuonFilter & (((year == "2016")|(year == "2016APV")) | filter_flags.ecalBadCalibFilter) & (isData | filter_flags.eeBadScFilter)
 
-    events['SF_2l_ee'] = padded_leps[:,0].SF_ele_nom * padded_leps[:,1].SF_ele_nom
-    events['SF_2l_ee_up'] = padded_leps[:,0].SF_ele_up * padded_leps[:,1].SF_ele_up
-    events['SF_2l_ee_down'] = padded_leps[:,0].SF_ele_down * padded_leps[:,1].SF_ele_down
+    llpairs = ak.combinations(padded_leps, 2, fields=["l0","l1"])
+    events["minMllAFAS"] = ak.min( (llpairs.l0+llpairs.l1).mass, axis=-1)
+    cleanup = events.minMllAFAS > 12
 
-    events['SF_2l_mm'] = padded_leps[:,0].SF_muon_nom * padded_leps[:,1].SF_muon_nom
-    events['SF_2l_mm_up'] = padded_leps[:,0].SF_muon_up * padded_leps[:,1].SF_muon_up
-    events['SF_2l_mm_down'] = padded_leps[:,0].SF_muon_down * padded_leps[:,1].SF_muon_down
+    dilep = (ak.num(leps)) >= 2
+    exclusive = (ak.num(leps)) < 3
 
-    events['SF_2l_em'] = padded_leps[:,0].SF_ele_nom * padded_leps[:,0].SF_muon_nom * padded_leps[:,1].SF_ele_nom * padded_leps[:,1].SF_muon_nom
-    events['SF_2l_em_up'] = padded_leps[:,0].SF_ele_up * padded_leps[:,0].SF_muon_up * padded_leps[:,1].SF_ele_up * padded_leps[:,1].SF_muon_up
-    events['SF_2l_em_down'] = padded_leps[:,0].SF_ele_down * padded_leps[:,0].SF_muon_down * padded_leps[:,1].SF_ele_down * padded_leps[:,1].SF_muon_down
+    os = (padded_leps[:,0].charge + padded_leps[:,1].charge)==0
+
+    mask = (filters & cleanup & dilep & exclusive & os)
+
+    events['is2los'] = ak.fill_none(mask,False)
+

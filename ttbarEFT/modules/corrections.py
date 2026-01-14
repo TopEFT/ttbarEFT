@@ -23,35 +23,54 @@ clib_year_map = {
     "2023BPix": "2023_Summer23BPix",
 }
 
-def AttachElectronTrigSF(electrons, year):
 
-    extLepSF = lookup_tools.extractor()
+###################################
+######### Jet Corrections #########
+###################################
 
-    extLepSF.add_weight_sets([f"ElecSF_2016APV_barrel UL2016preVFP_Barrel_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
-    extLepSF.add_weight_sets([f"ElecSF_2016APV_endcap UL2016preVFP_Endcaps_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
-    extLepSF.add_weight_sets([f"ElecSF_2016_barrel UL2016postVFP_Barrel_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
-    extLepSF.add_weight_sets([f"ElecSF_2016_endcap UL2016postVFP_Endcaps_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
-    extLepSF.add_weight_sets([f"ElecSF_2017_barrel UL2017_Barrel_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
-    extLepSF.add_weight_sets([f"ElecSF_2017_endcap UL2017_Endcaps_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
-    extLepSF.add_weight_sets([f"ElecSF_2018_barrel UL2018_Barrel_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
-    extLepSF.add_weight_sets([f"ElecSF_2018_endcap UL2018_Endcaps_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+def ApplyJetVetoMaps(jets, year):
 
-    extLepSF.finalize()
-    SFevaluator = extLepSF.make_evaluator()
+    jet_veto_dict = {
+        "2016APV": "Summer19UL16_V1",
+        "2016": "Summer19UL16_V1",
+        "2017": "Summer19UL17_V1",
+        "2018": "Summer19UL18_V1",
+        "2022": "Summer22_23Sep2023_RunCD_V1",
+        "2022EE": "Summer22EE_23Sep2023_RunEFG_V1",
+        "2023": "Summer23Prompt23_RunC_V1",
+        "2023BPix": "Summer23BPixPrompt23_RunD_V1"
+    }
 
-    eta = electrons.eta
-    eta_barrel_mask = ak.flatten(abs(eta) < 1.4442)
+    jme_year = clib_year_map[year]
+    key = jet_veto_dict[year]
+    json_path = ttbarEFT_path(f"data/POG/JME/{jme_year}/jetvetomaps.json.gz")
+
+    # Grab the json
+    ceval = correctionlib.CorrectionSet.from_file(json_path)
+
+    # Flatten the inputs
+    eta_flat = ak.flatten(jets.eta)
+    phi_flat = ak.flatten(jets.phi)
+
+    #Put mins and maxes on the accepted values
+    eta_flat_bound = ak.where(eta_flat>5.19,5.19,ak.where(eta_flat<-5.19,-5.19,eta_flat))
+    phi_flat_bound = ak.where(phi_flat>3.14159,3.14159,ak.where(phi_flat<-3.14159,-3.14159,phi_flat))
+
+    #Get pass/fail values for each jet (0 is pass and >0 is fail)
+    jet_vetomap_flat = ceval[key].evaluate('jetvetomap',eta_flat_bound,phi_flat_bound)
     
-    Et = electrons.pt * electrons_scEtOverPt
+    #Unflatten the array
+    jet_vetomap_score = ak.unflatten(jet_vetomap_flat,ak.num(jets.phi))
 
-    ElecSF = ak.where(
-                eta_barrel_mask, 
-                SFevaluator[f"ElecSF_{year}_barrel"](Et, eta),
-                SFevaluator[f"ElecSF_{year}_endcap"](Et, eta)
-            )
+    #Sum the outputs for each event (if the sum is >0, the event will fail)
+    veto_map_event = ak.sum(jet_vetomap_score, axis=-1)
 
-    electrons['SF_elec_trig_nom'] = ElecSF 
+    return veto_map_event
 
+
+########################################
+######### Lepton Scale Factors #########
+########################################
 
 def AttachElectronSF(electrons, year):
     '''
@@ -224,45 +243,12 @@ def AttachElectronSF(electrons, year):
 
     # Attach SFs (reco*HEEP) to electrons
     electrons['SF_ele_nom'] = reco_nom * HEEPSF_nom
-    electrons['SF_ele_up'] = reco_up * HEEPSF_up
-    electrons['SF_ele_down'] = reco_up * HEEPSF_down
+    electrons['SF_ele_up'] = reco_up * HEEPSF_nom * HEEPSF_up 
+    electrons['SF_ele_down'] = reco_up * HEEPSF_nom * HEEPSF_down 
 
     electrons['SF_muon_nom'] = ak.ones_like(reco_nom)
     electrons['SF_muon_up'] = ak.ones_like(reco_nom)
     electrons['SF_muon_down'] = ak.ones_like(reco_nom)
-
-
-def AttachMuonTrigSF(muons, year):
-    if year not in clib_year_map.keys():
-        raise Exception(f"Error: Unknown year \"{year}\".")
-
-    # initialize muon variables 
-    abs_eta = np.abs(muons.eta) #For run3 abs(eta) should be changed to signed eta
-    pt = muons.pt 
-    phi = muons.phi 
-
-    abseta_flat = ak.flatten(abs_eta)
-    pt_flat = ak.flatten(pt)
-    phi_flat = ak.flatten(phi) 
-
-    clib_year = clib_year_map[year]
-    json_path_HighPt = ttbarEFT_path(f"data/POG/MUO/{clib_year}/muon_HighPt.json.gz")
-    json_path_z = ttbarEFT_path(f"data/POG/MUO/{clib_year}/muon_Z.json.gz")
-
-    ceval_HighPt = correctionlib.CorrectionSet.from_file(json_path_HighPt)
-    ceval_z = correctionlib.CorrectionSet.from_file(json_path_z)
-
-    trigger_norm_flat = ceval_HighPt["NUM_HLT_DEN_HighPtLooseRelIsoProbes"].evaluate(abseta_flat, pt_flat, "nominal")
-    trigger_up_flat = ceval_HighPt["NUM_HLT_DEN_HighPtLooseRelIsoProbes"].evaluate(abseta_flat, pt_flat, "systup")
-    trigger_down_flat = ceval_HighPt["NUM_HLT_DEN_HighPtLooseRelIsoProbes"].evaluate(abseta_flat, pt_flat, "systdown")
-
-    trigger_norm = ak.unflatten(trigger_norm_flat, ak.num(pt))
-    trigger_up = ak.unflatten(trigger_up_flat, ak.num(pt))
-    trigger_down = ak.unflatten(trigger_down_flat, ak.num(pt))
-
-    muons['SF_muon_trig_nom'] = trigger_norm
-    muons['SF_muon_trig_up'] = trigger_up
-    muons['SF_muon_trig_down'] = trigger_down
 
 
 def AttachMuonSF(muons, year): 
@@ -344,6 +330,64 @@ def AttachMuonSF(muons, year):
     muons['SF_ele_down'] = ak.ones_like(pt)    
 
 
+def AttachLepSF(events, ele, mu):
+    # TODO: probably need to change these to SF_2l_ee, SF_2l_mm, and add SF_2l_em 
+    # where SF_2l_em = leps[0].SF_ele * leps[0].SF_muon * leps[1].SF_ele * leps[1].SF_muon
+    
+    leps = events.leps_pt_sorted
+    padded_leps = ak.pad_none(leps, 2)
+
+    # leps = ak.concatenate([ele, mu], axis=1)
+    # padded_leps = ak.pad_none(leps[ak.argsort(leps.pt, axis=-1,ascending=False)], 2) 
+
+    events['SF_2l_ee'] = padded_leps[:,0].SF_ele_nom * padded_leps[:,1].SF_ele_nom
+    events['SF_2l_ee_up'] = padded_leps[:,0].SF_ele_up * padded_leps[:,1].SF_ele_up
+    events['SF_2l_ee_down'] = padded_leps[:,0].SF_ele_down * padded_leps[:,1].SF_ele_down
+
+    events['SF_2l_mm'] = padded_leps[:,0].SF_muon_nom * padded_leps[:,1].SF_muon_nom
+    events['SF_2l_mm_up'] = padded_leps[:,0].SF_muon_up * padded_leps[:,1].SF_muon_up
+    events['SF_2l_mm_down'] = padded_leps[:,0].SF_muon_down * padded_leps[:,1].SF_muon_down
+
+    events['SF_2l_em'] = padded_leps[:,0].SF_ele_nom * padded_leps[:,0].SF_muon_nom * padded_leps[:,1].SF_ele_nom * padded_leps[:,1].SF_muon_nom
+    events['SF_2l_em_up'] = padded_leps[:,0].SF_ele_up * padded_leps[:,0].SF_muon_up * padded_leps[:,1].SF_ele_up * padded_leps[:,1].SF_muon_up
+    events['SF_2l_em_down'] = padded_leps[:,0].SF_ele_down * padded_leps[:,0].SF_muon_down * padded_leps[:,1].SF_ele_down * padded_leps[:,1].SF_muon_down
+
+
+def GetLepSF(events, lep_cat):
+
+    # if lep_cat == 'ee':
+    #     nom = events.SF_2l_ee
+    #     up = copy.deepcopy(events.SF_2l_ee_up)
+    #     down = copy.deepcopy(events.SF_2l_ee_down)
+    # elif lep_cat == 'mm': 
+    #     nom = events.SF_2l_mm
+    #     up = copy.deepcopy(events.SF_2l_mm_up)
+    #     down = copy.deepcopy(events.SF_2l_mm_down)
+    # elif lep_cat == 'em': 
+    #     nom = events.SF_2l_em
+    #     up = copy.deepcopy(events.SF_2l_em_up)
+    #     down = copy.deepcopy(events.SF_2l_em_down)
+
+    # return nom, up, down
+
+    mapping = {
+        'ee': ('SF_2l_ee', 'SF_2l_ee_up', 'SF_2l_ee_down'),
+        'em': ('SF_2l_em', 'SF_2l_em_up', 'SF_2l_em_down'),
+        'mm': ('SF_2l_mm', 'SF_2l_mm_up', 'SF_2l_mm_down'),
+    }
+
+    if lep_cat not in mapping:
+        raise ValueError(f"Unknown lep_cat: {lep_cat}")
+
+    nom_name, up_name, down_name = mapping[lep_cat]
+
+    return getattr(events, nom_name), getattr(events, up_name), getattr(events, down_name)
+
+
+####################################
+######### Muon Corrections #########
+####################################
+
 def ApplyMuonPtCorr(muons, year, isData):
     '''
     For muons with pt<120, Rochester Corrections are applied 
@@ -365,51 +409,11 @@ def ApplyMuonPtCorr(muons, year, isData):
     return pt_corr
 
 
-def ApplyJetVetoMaps(jets, year):
-
-    jet_veto_dict = {
-        "2016APV": "Summer19UL16_V1",
-        "2016": "Summer19UL16_V1",
-        "2017": "Summer19UL17_V1",
-        "2018": "Summer19UL18_V1",
-        "2022": "Summer22_23Sep2023_RunCD_V1",
-        "2022EE": "Summer22EE_23Sep2023_RunEFG_V1",
-        "2023": "Summer23Prompt23_RunC_V1",
-        "2023BPix": "Summer23BPixPrompt23_RunD_V1"
-    }
-
-    jme_year = clib_year_map[year]
-    key = jet_veto_dict[year]
-    json_path = ttbarEFT_path(f"data/POG/JME/{jme_year}/jetvetomaps.json.gz")
-
-    # Grab the json
-    ceval = correctionlib.CorrectionSet.from_file(json_path)
-
-    # Flatten the inputs
-    eta_flat = ak.flatten(jets.eta)
-    phi_flat = ak.flatten(jets.phi)
-
-    #Put mins and maxes on the accepted values
-    eta_flat_bound = ak.where(eta_flat>5.19,5.19,ak.where(eta_flat<-5.19,-5.19,eta_flat))
-    phi_flat_bound = ak.where(phi_flat>3.14159,3.14159,ak.where(phi_flat<-3.14159,-3.14159,phi_flat))
-
-    #Get pass/fail values for each jet (0 is pass and >0 is fail)
-    jet_vetomap_flat = ceval[key].evaluate('jetvetomap',eta_flat_bound,phi_flat_bound)
-    
-    #Unflatten the array
-    jet_vetomap_score = ak.unflatten(jet_vetomap_flat,ak.num(jets.phi))
-
-    #Sum the outputs for each event (if the sum is >0, the event will fail)
-    veto_map_event = ak.sum(jet_vetomap_score, axis=-1)
-
-    return veto_map_event
-
-
-###### Muon Rochester corrections
-################################################################
-# https://gitlab.cern.ch/akhukhun/roccor
-# https://github.com/CoffeaTeam/coffea/blob/master/coffea/lookup_tools/rochester_lookup.py
 def ApplyRochesterCorrections(mu, year, isData):
+    # Muon Rochester corrections
+    # https://gitlab.cern.ch/akhukhun/roccor
+    # https://github.com/CoffeaTeam/coffea/blob/master/coffea/lookup_tools/rochester_lookup.py
+
     rocco_tag = None
 
     rocco_year_map = {
@@ -449,3 +453,81 @@ def ApplyRochesterCorrections(mu, year, isData):
         corrections = rochester.kScaleDT(mu.charge, mu.pt, mu.eta, mu.phi)
 
     return (mu.pt * corrections)
+
+
+#####################################
+######## Trigger Efficienies ########
+#####################################
+
+def AttachElecTrigEff(electrons, year):
+
+    extLepSF = lookup_tools.extractor()
+
+    extLepSF.add_weight_sets([f"ElecSF_2016APV_barrel UL2016preVFP_Barrel_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+    extLepSF.add_weight_sets([f"ElecSF_2016APV_endcap UL2016preVFP_Endcaps_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+    extLepSF.add_weight_sets([f"ElecSF_2016_barrel UL2016postVFP_Barrel_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+    extLepSF.add_weight_sets([f"ElecSF_2016_endcap UL2016postVFP_Endcaps_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+    extLepSF.add_weight_sets([f"ElecSF_2017_barrel UL2017_Barrel_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+    extLepSF.add_weight_sets([f"ElecSF_2017_endcap UL2017_Endcaps_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+    extLepSF.add_weight_sets([f"ElecSF_2018_barrel UL2018_Barrel_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+    extLepSF.add_weight_sets([f"ElecSF_2018_endcap UL2018_Endcaps_Et {ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')}"])
+
+    extLepSF.finalize()
+    SFevaluator = extLepSF.make_evaluator()
+
+    eta = electrons.eta
+    eta_barrel_mask = ak.flatten(abs(eta) < 1.4442)
+
+
+    eta_flat = ak.flatten(eta)
+    Et_flat = ak.flatten(electrons.pt * (electrons.scEtOverPt+1))
+
+    ElecSF_flat = ak.where(
+                eta_barrel_mask, 
+                SFevaluator[f"ElecSF_{year}_barrel"](Et_flat),
+                SFevaluator[f"ElecSF_{year}_endcap"](Et_flat)
+            )
+
+    # print(f"pt: {ak.flatten(electrons.pt)[0:30]}")
+    # print(f"electrons.scEtOverPt: {ak.flatten(electrons.scEtOverPt)[0:30]}")
+    # print(f"Et_flat: {Et_flat[0:30]}")
+    # print(f"ElecSF_flat: {ElecSF_flat[0:30]}")
+    # print(f"SFevaluator: {SFevaluator}")
+
+    electrons['SF_trig_elec_nom'] = ak.unflatten(ElecSF_flat, ak.num(eta))
+
+
+def AttachMuonTrigEff(muons, year):
+    if year not in clib_year_map.keys():
+        raise Exception(f"Error: Unknown year \"{year}\".")
+
+    # initialize muon variables 
+    abs_eta = np.abs(muons.eta) #For run3 abs(eta) should be changed to signed eta
+    pt = muons.pt 
+    phi = muons.phi 
+
+    abseta_flat = ak.flatten(abs_eta)
+    pt_flat = ak.flatten(pt)
+    phi_flat = ak.flatten(phi) 
+
+    clib_year = clib_year_map[year]
+    json_path_HighPt = ttbarEFT_path(f"data/POG/MUO/{clib_year}/muon_HighPt.json.gz")
+    json_path_z = ttbarEFT_path(f"data/POG/MUO/{clib_year}/muon_Z.json.gz")
+
+    ceval_HighPt = correctionlib.CorrectionSet.from_file(json_path_HighPt)
+    ceval_z = correctionlib.CorrectionSet.from_file(json_path_z)
+
+    trigger_norm_flat = ceval_HighPt["NUM_HLT_DEN_HighPtLooseRelIsoProbes"].evaluate(abseta_flat, pt_flat, "nominal")
+    trigger_up_flat = ceval_HighPt["NUM_HLT_DEN_HighPtLooseRelIsoProbes"].evaluate(abseta_flat, pt_flat, "systup")
+    trigger_down_flat = ceval_HighPt["NUM_HLT_DEN_HighPtLooseRelIsoProbes"].evaluate(abseta_flat, pt_flat, "systdown")
+
+    trigger_norm = ak.unflatten(trigger_norm_flat, ak.num(pt))
+    trigger_up = ak.unflatten(trigger_up_flat, ak.num(pt))
+    trigger_down = ak.unflatten(trigger_down_flat, ak.num(pt))
+
+    muons['SF_trig_muon_nom'] = trigger_norm
+    muons['SF_trig_muon_up'] = trigger_up
+    muons['SF_trig_muon_down'] = trigger_down
+
+# def AttachTrigSF()
+# def GetTrigSF(events, lep_cat):
