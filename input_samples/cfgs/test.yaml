@@ -1,3 +1,8 @@
-redirector : 'root://cmsxrootd.crc.nd.edu/'
+# redirector : 'root://cmsxrootd.crc.nd.edu/'
+redirector: 'file:///cms/cephfs/data/'
 jsonFiles:
-  - "../input_samples/sample_jsons/tests/ddr_test.json"
+  # - "../input_samples/sample_jsons/tests/ddr_test.json"
+  # - "../input_samples/sample_jsons/tests/powheg_test.json"
+  - "../input_samples/sample_jsons/tests/test.json"
+  # - "../input_samples/sample_jsons/tests/DoubleEG_test.json"
+

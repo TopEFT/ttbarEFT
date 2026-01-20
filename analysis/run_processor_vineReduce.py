@@ -292,8 +292,10 @@ if __name__ == '__main__':
     ### RUN PROCESSOR USING ITERATIVE EXECUTOR ###
     elif executor == 'iterative': 
 
+        leptoncat = 'ee'
+
         flist = preprocessing_for_taskvine(samplesdict)
-        proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst)
+        proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat=leptoncat, wc_names_lst=wc_lst, hist_lst=hist_lst)
         exec_instance = processor.IterativeExecutor()
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
         hists = runner(fileset=flist, processor_instance=proc_instance, treename=treename)

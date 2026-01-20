@@ -1,6 +1,7 @@
 name: coffea2025
 channels:
   - conda-forge
+  - nodefaults
 dependencies:
   - conda-forge::python
   - awkward=2.8.7

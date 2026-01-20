@@ -19,16 +19,16 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s:%(levelname)s:%(mess
 
 env_dir_cache = Path.cwd().joinpath(Path('topeft-envs'))
 
-py_version = "{}.{}.{}".format(
-    sys.version_info[0], sys.version_info[1], sys.version_info[2]
-)  # 3.8 or 3.9, or etc.
+# py_version = "{}.{}.{}".format(
+    # sys.version_info[0], sys.version_info[1], sys.version_info[2]
+# )  # 3.8 or 3.9, or etc.
 
 default_modules = {
     "conda": {
         "channels": ["conda-forge"],
         "packages": [
             # f"python={py_version}",
-            "python",
+            "python",   # python version comes from the pinning file which matches the current env version
             "awkward=2.8.7",
             "coffea=2025.7.3",
             "numpy",

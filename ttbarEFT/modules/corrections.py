@@ -529,5 +529,40 @@ def AttachMuonTrigEff(muons, year):
     muons['SF_trig_muon_up'] = trigger_up
     muons['SF_trig_muon_down'] = trigger_down
 
-# def AttachTrigSF()
-# def GetTrigSF(events, lep_cat):
+
+def AttachTrigSF(events, ele, mu):
+    
+    leps = events.leps_pt_sorted
+    padded_leps = ak.pad_none(leps, 2)
+
+    # for ee channel, SF=eff(elec1)*eff(elec2)
+    events['SF_trig_ee'] = padded_leps[:,0].SF_trig_elec_nom * padded_leps[:,1].SF_trig_elec_nom
+    events['SF_trig_ee_up'] = padded_leps[:,0].SF_trig_elec_nom * padded_leps[:,1].SF_trig_elec_nom
+    events['SF_trig_ee_down'] = padded_leps[:,0].SF_trig_elec_nom * padded_leps[:,1].SF_trig_elec_nom
+
+    # for em channel, SF=eff(muon1) or eff(muon2)
+    events['SF_trig_em'] = padded_leps[:,0].SF_trig_muon_nom * padded_leps[:,1].SF_trig_muon_nom
+    events['SF_trig_em_up'] = padded_leps[:,0].SF_trig_muon_up * padded_leps[:,1].SF_trig_muon_up
+    events['SF_trig_em_down'] = padded_leps[:,0].SF_trig_muon_down * padded_leps[:,1].SF_trig_muon_down
+
+    # TODO: for mm channel, handle efficiencies for each muon - until implemented this is just a simple muon SF mutliplication
+    events['SF_trig_mm'] = padded_leps[:,0].SF_trig_muon_nom * padded_leps[:,1].SF_trig_muon_nom
+    events['SF_trig_mm_up'] = padded_leps[:,0].SF_trig_muon_nom * padded_leps[:,1].SF_trig_muon_nom
+    events['SF_trig_mm_down'] = padded_leps[:,0].SF_trig_muon_nom * padded_leps[:,1].SF_trig_muon_nom
+
+
+def GetTrigSF(events, lep_cat):
+
+    # nominal, up, down scale factors
+    mapping = {
+        'ee': ('SF_trig_ee', 'SF_trig_ee_up', 'SF_trig_ee_down'),
+        'em': ('SF_trig_em', 'SF_trig_em_up', 'SF_trig_em_down'),
+        'mm': ('SF_trig_mm', 'SF_trig_mm_up', 'SF_trig_mm_down'),
+    }
+
+    if lep_cat not in mapping:
+        raise ValueError(f"Unknown lep_cat: {lep_cat}")
+
+    nom_name, up_name, down_name = mapping[lep_cat]
+
+    return getattr(events, nom_name), getattr(events, up_name), getattr(events, down_name)

@@ -5,7 +5,6 @@ import numpy as np
 import awkward as ak
 import json
 import hist
-import yaml
 
 # from mt2 import mt2
 
@@ -27,8 +26,7 @@ from ttbarEFT.modules.paths import ttbarEFT_path
 from ttbarEFT.modules.analysis_tools import make_mt2, get_lumi
 import ttbarEFT.modules.object_selection as tt_os
 import ttbarEFT.modules.event_selection as tt_es
-# from ttbarEFT.modules.corrections import AttachElectronSF, AttachMuonSF, ApplyMuonPtCorr, ApplyJetVetoMaps, AttachElecTrigEff, AttachMuonTrigEff, AttachTrigSF
-import ttbarEFT.modules.corrections as tt_cor 
+from ttbarEFT.modules.corrections import AttachElectronSF, AttachMuonSF, AttachMuonTrigSF, ApplyMuonPtCorr, ApplyJetVetoMaps
 
 from topcoffea.modules.get_param_from_jsons import GetParam
 
@@ -40,7 +38,7 @@ np.seterr(divide='ignore', invalid='ignore', over='ignore')
 
 
 class AnalysisProcessor(processor.ProcessorABC):
-    def __init__(self, samples, lep_cat, wc_names_lst=[], hist_lst=None, dtype=np.float32):
+    def __init__(self, samples, lep_cat, wc_names_lst=[], dtype=np.float32):
         self._samples = samples
         self._wc_names_lst = wc_names_lst
         self._dtype = dtype 
@@ -84,18 +82,31 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         self._accumulator = histograms
 
-        # set the list of hists to fill
-        if hist_lst is None:
-            self._hist_lst = list(self._accumulator.keys()) #fill all hists if not specified
-        else:
-            for hist_to_include in hist_lst:
-                if hist_to_include not in self._accumulator.keys():
-                    raise Exception(f"Error: Cannot specify hist \'{hist_to_include}\', it is not defined in the processor.")
-            self._hist_lst = hist_lst 
+        # # set the list of hists to fill
+        # if hist_lst is None:
+        #     self._hist_lst = list(self._accumulator.keys()) #fill all hists if not specified
+        # else:
+        #     for hist_to_include in hist_lst:
+        #         if hist_to_include not in self._accumulator.keys():
+        #             raise Exception(f"Error: Cannot specify hist \'{hist_to_include}\', it is not defined in the processor.")
+        #     self._hist_lst = hist_lst 
+
+        # print out basic info before running over filesrun2leptonselection
+        # print("\n\n")
+        # print("self._samples", self._samples)
+        # print("self._wc_names_lst", self._wc_names_lst)
+        # print("\n\n")
 
     @property
     def accumulator(self):
         return self._accumulator
+
+    def __call__(self, events):
+        """
+        Required by the CoffeaDynamicDataReduction (ddr) executor,
+        which calls the processor instance directly with the events chunk.
+        """
+        return self.process(events)
 
     @property
     def columns(self):
@@ -111,20 +122,15 @@ class AnalysisProcessor(processor.ProcessorABC):
         xsec            = self._samples[dataset]['xsec']
         sow             = self._samples[dataset]['nSumOfWeights']
 
-        print(f"\n\n histAxisName: {histAxisName}")
-        print(f"dataset: {dataset}")
-        print(f"year: {year}")
-        print(f"xsec: {xsec} \n\n")
-
         isEFT = hasattr(events, 'EFTfitCoefficients')    
         assert not (isEFT and isData), f"isEFT and isData cannot both be True. Check input samples."
 
         lep_cat = self._lep_cat
 
-        datasets = ["Muon", "SingleMuon", "SingleElectron", "EGamma", "MuonEG", "DoubleMuon", "DoubleElectron", "DoubleEG"]
-        for d in datasets:
-            if dataset.startswith(d):
-                dataset = dataset.split('_')[0]
+        # datasets = ["Muon", "SingleMuon", "SingleElectron", "EGamma", "MuonEG", "DoubleMuon", "DoubleElectron", "DoubleEG"]
+        # for d in datasets:
+        #     if dataset.startswith(d):
+        #         dataset = dataset.split('_')[0]
 
 
         ######### EFT coefficients ##########
@@ -141,12 +147,11 @@ class AnalysisProcessor(processor.ProcessorABC):
 
 
         ######### Create Lepton Categories ##########
-        cat_dict = None
-        with open(ttbarEFT_path("params/channels.yaml"), "r") as f:
-            cat_dict=yaml.safe_load(f)
+        select_cat_dict = None
+        with open(ttbarEFT_path("params/channels.json"), "r") as ch_json_test:
+            select_cat_dict = json.load(ch_json_test)
 
-        CR_cat_dict = cat_dict['CR_CHANNELS']
-        SR_cat_dict = cat_dict['SR_CHANNELS']
+        CR_cat_dict = select_cat_dict['CR_CHANNELS_JETS']
 
 
         ######### Initialize Objects #########
@@ -165,21 +170,24 @@ class AnalysisProcessor(processor.ProcessorABC):
         ele['isGoodElec']=leptonSelection.is_sel_ele(ele)
         ele_good = ele[ele.isGoodElec]
 
+
         ######### Muon Selection ##########
-        mu['pt'] = tt_cor.ApplyMuonPtCorr(mu, year, isData)
+        mu['pt'] = ApplyMuonPtCorr(mu, year, isData)
         mu['isGoodMuon']=leptonSelection.is_sel_muon(mu)
         mu_good = mu[mu.isGoodMuon]
+
 
         ######### Lepton Selection ##########
         # add lepton scale factors 
         if not isData: 
-            tt_cor.AttachElectronSF(ele_good, year)    
-            tt_cor.AttachMuonSF(mu_good, year)     
+            AttachElectronSF(ele_good, year)    
+            AttachMuonSF(mu_good, year)     
 
         leps = ak.concatenate([ele_good, mu_good], axis=1)
         leps_sorted = leps[ak.argsort(leps.pt, axis=-1,ascending=False)] 
 
         events['leps_pt_sorted'] = leps_sorted
+
 
         ######### Jet Selections #########
         jets['isPres'] = tt_os.is_pres_jet(jets) 
@@ -197,22 +205,11 @@ class AnalysisProcessor(processor.ProcessorABC):
         nbtagsm = ak.num(goodJets[isBtagJetsMedium])
 
         # JetVetoMaps applied
-        veto_map_array = tt_cor.ApplyJetVetoMaps(goodJets, year)   
+        veto_map_array = ApplyJetVetoMaps(goodJets, year)   
         veto_map_mask = (veto_map_array == 0)
 
 
-        ######### Add variables to EVENTS #########
-        events['njets'] = ak.num(jets)
-        tt_es.addLepCatMasks(events) 
-        tt_es.add2losMask(events, year, isData)
-
         ######### Systematics #########
-
-        data_syst_lst = []              #TODO
-        obj_correction_syst_lst = []    #TODO
-        wgt_correction_syst_lst = [
-            'lepSF_up', 'lepSF_down', 'trigSF_up', 'trigSF_down', # Exp systs
-        ]
 
         weights_obj_base = coffea.analysis_tools.Weights(len(events),storeIndividual=True)
 
@@ -227,12 +224,7 @@ class AnalysisProcessor(processor.ProcessorABC):
             norm = genw*(xsec/sow)*lumi
             weights_obj_base.add('norm', norm)
 
-            tt_cor.AttachLepSF(events, ele_good, mu_good) 
-
-            tt_cor.AttachElecTrigEff(ele_good, year)
-            tt_cor.AttachMuonTrigEff(mu_good, year)
-            tt_cor.AttachTrigSF(events, ele_good, mu_good)
-
+            tt_es.addLepSFs(events, ele_good, mu_good) 
             # AttachPSWeights(events)
             # AttachScaleWeights(events) 
             # AttachPdfWeights(events)
@@ -244,9 +236,14 @@ class AnalysisProcessor(processor.ProcessorABC):
             #weights_obj_base.add('Prefiring')...
             #weights_obj_base.add('PU')...
 
-            weights_obj_base.add('lepSF', *tt_cor.GetLepSF(events, lep_cat))
-            weights_obj_base.add('trigSF', **tt_cor.GetTrigSF(events, lep_cat))
+            # TODO: Are these the correct way to apply these? Might need to be applied based on lepton category
+            # weights_obj_base.add('lepSF_ele', events.SF_2l_ele, copy.deepcopy(events.SF_2l_ele_up), copy.deepcopy(events.SF_2l_ele_down))
+            # weights_obj_base.add('lepSF_muon', events.SF_2l_muon, copy.deepcopy(events.SF_2l_muon_up), copy.deepcopy(events.SF_2l_muon_down)) 
 
+
+        ######### Add variables to EVENTS #########
+        events['njets'] = ak.num(jets)
+        tt_es.addLepCatMasks(events) 
 
         ######### Create objects for dense axes ##########
         leps_sorted = ak.pad_none(leps_sorted, 2)
@@ -262,22 +259,31 @@ class AnalysisProcessor(processor.ProcessorABC):
         if isData:
             # Lumi Mask for Data    
             golden_json_path = {
-                "2016"      : topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
-                "2016APV"   : topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
-                "2017"      : topcoffea_path("data/goldenJsons/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"),
-                "2018"      : topcoffea_path("data/goldenJsons/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"),
+                "2016": topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
+                "2016APV": topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
+                "2017": topcoffea_path("data/goldenJsons/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"),
+                "2018": topcoffea_path("data/goldenJsons/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"),
             }
             lumi_mask = LumiMask(golden_json_path[year])(events.run,events.luminosityBlock)
+
+        # Charge masks
+        chargel0_p = ak.fill_none(((l0.charge)>0),False)
+        chargel0_m = ak.fill_none(((l0.charge)<0),False)
+        charge2l_os = ak.fill_none(((l0.charge+l1.charge)==0),False)
+        charge2l_ss = ak.fill_none(((l0.charge+l1.charge)!=0),False)
 
 
         ######### Selection Masks #########
         pass_trg = tt_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict, lep_cat)
+        # pass_trg = tc_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict)
+        # at_least_two_leps = ak.fill_none(nleps>=2, False)
 
         # Charge masks
-        # chargel0_p = ak.fill_none(((l0.charge)>0),False)
-        # chargel0_m = ak.fill_none(((l0.charge)<0),False)
-        # charge2l_os = ak.fill_none(((l0.charge+l1.charge)==0),False)
-        # charge2l_ss = ak.fill_none(((l0.charge+l1.charge)!=0),False)
+        chargel0_p = ak.fill_none(((l0.charge)>0),False)
+        chargel0_m = ak.fill_none(((l0.charge)<0),False)
+        charge2l_os = ak.fill_none(((l0.charge+l1.charge)==0),False)
+        charge2l_ss = ak.fill_none(((l0.charge+l1.charge)!=0),False)
+
 
         ######### Store boolean masks with PackedSelection ##########
         selections = PackedSelection(dtype='uint64')
@@ -289,8 +295,11 @@ class AnalysisProcessor(processor.ProcessorABC):
         selections.add('jetvetomap', veto_map_mask)
 
         # selections.add('2l', at_least_two_leps) 
-        # selections.add('2los', charge2l_os)
-        selections.add('2los', events.is2los)
+        selections.add('2los', charge2l_os)
+
+        selections.add("ee",  (events.is_ee & pass_trg))
+        selections.add("em",  (events.is_em & pass_trg))
+        selections.add("mm",  (events.is_mm))
 
         selections.add('bmask_exactly0med', (nbtagsm==0))
         selections.add('bmask_exactly1med', (nbtagsm==1))
@@ -302,10 +311,6 @@ class AnalysisProcessor(processor.ProcessorABC):
         selections.add("exactly_2j", (njets==2))
 
         selections.add("atleast_1j", (njets>=1))
-
-        selections.add("ee",  (events.is_ee & events.is2los & pass_trg))
-        selections.add("em",  (events.is_em & events.is2los & pass_trg))
-        selections.add("mm",  (events.is_mm & events.is2los & pass_trg))
 
         ######### Fill dense axes variables ##########
 
@@ -335,7 +340,7 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         for jet_cat in CR_cat_dict[lep_cat]['jet_list']: 
             # masks that are applied to all categories
-            cuts_list = ['jetvetomap', 'bmask_exactly0med']
+            cuts_list = ['jetvetomap', '2los', 'bmask_exactly0med']
 
             if isData:
                 cuts_list.append('is_good_lumi')
@@ -343,7 +348,9 @@ class AnalysisProcessor(processor.ProcessorABC):
             cuts_list.append(lep_cat)
             cuts_list.append(jet_cat)
 
+
             event_selection_mask = selections.all(*(cuts_list))
+            weights_cut = weight[event_selection_mask]
             eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
 
             for dense_axis_name, dense_axis_vals in dense_axis_variables.items():
@@ -360,7 +367,7 @@ class AnalysisProcessor(processor.ProcessorABC):
                 axes_fill_info_dict = {
                     dense_axis_name : dense_axis_vals[event_selection_mask],
                     "process"       : histAxisName,
-                    "weight"        : weight[event_selection_mask],
+                    "weight"        : weights_cut,
                     "eft_coeff"     : eft_coeffs_cut,
                 }
 
@@ -370,5 +377,4 @@ class AnalysisProcessor(processor.ProcessorABC):
 
     def postprocess(self, accumulator):
         return accumulator
-
 

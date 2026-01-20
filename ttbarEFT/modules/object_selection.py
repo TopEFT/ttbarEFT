@@ -7,7 +7,7 @@ class Run2LeptonSelection:
 
     def is_sel_ele(self, ele):
         # apply eta, HEEP cuts
-        pt_mask = ele.pt > 35
+        pt_mask = ele.pt > 40 # orig 35, inc to 40 b/c of trigger eff validity
         eta_mask = ((abs(ele.eta) < 1.4442) | (abs(ele.eta) > 1.556)) & (abs(ele.eta) < 2.4)
         HEEP_mask = ele.cutBased_HEEP #bool, a simple robust ID designed to be safe for high electrons
 
