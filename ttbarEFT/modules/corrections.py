@@ -277,30 +277,29 @@ def AttachMuonSF(muons, year):
     phi_flat = ak.flatten(phi)
 
     clib_year = clib_year_map[year]
-    json_path_HighPt = ttbarEFT_path(f"data/POG/MUO/{clib_year}/muon_HighPt.json.gz")
+    # json_path_HighPt = ttbarEFT_path(f"data/POG/MUO/{clib_year}/muon_HighPt.json.gz")
     json_path_z = ttbarEFT_path(f"data/POG/MUO/{clib_year}/muon_Z.json.gz")
-
-    ceval_HighPt = correctionlib.CorrectionSet.from_file(json_path_HighPt)
     ceval_z = correctionlib.CorrectionSet.from_file(json_path_z)
-
-    # pt_mask = ak.flatten(pt >= 50) # the lowest pT bin in muon_HighPt is 50 
+    ceval_RECO = correctionlib.CorrectionSet.from_file(ttbarEFT_path(f"data/POG/MUO/{clib_year}/ScaleFactors_Muon_highPt_RECO_{clib_year}_schemaV2.json"))
+    ceval_IDISO = correctionlib.CorrectionSet.from_file(ttbarEFT_path(f"data/POG/MUO/{clib_year}/ScaleFactors_Muon_highPt_IDISO_{clib_year}_schemaV2.json"))
+    
+    # pt_mask = ak.flatten(pt >= 50) # the lowest pT bin in muon_HighPt is 50 #
     # evaluate SFs
-
     tracking_nom_flat = ceval_z["NUM_TrackerMuons_DEN_genTracks"].evaluate(abseta_flat, pt_flat, "nominal")
     tracking_up_flat = ceval_z["NUM_TrackerMuons_DEN_genTracks"].evaluate(abseta_flat, pt_flat, "systup")
     tracking_down_flat = ceval_z["NUM_TrackerMuons_DEN_genTracks"].evaluate(abseta_flat, pt_flat, "systdown")
 
-    reco_nom_flat = ceval_HighPt["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "nominal")
-    reco_up_flat = ceval_HighPt["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "systup")
-    reco_down_flat = ceval_HighPt["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "systdown")
+    reco_nom_flat = ceval_RECO["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "nominal")
+    reco_up_flat = ceval_RECO["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "systup")
+    reco_down_flat = ceval_RECO["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "systdown")
 
-    ID_nom_flat = ceval_HighPt["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "nominal")
-    ID_up_flat = ceval_HighPt["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "systup")
-    ID_down_flat = ceval_HighPt["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "systdown")
+    ID_nom_flat = ceval_IDISO["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "nominal")
+    ID_up_flat = ceval_IDISO["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "systup")
+    ID_down_flat = ceval_IDISO["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "systdown")
     
-    ISO_nom_flat = ceval_HighPt["NUM_probe_LooseRelTkIso_DEN_HighPtProbes"].evaluate(abseta_flat, pt_flat, "nominal") 
-    ISO_up_flat = ceval_HighPt["NUM_probe_LooseRelTkIso_DEN_HighPtProbes"].evaluate(abseta_flat, pt_flat, "systup") 
-    ISO_down_flat = ceval_HighPt["NUM_probe_LooseRelTkIso_DEN_HighPtProbes"].evaluate(abseta_flat, pt_flat, "systdown") 
+    ISO_nom_flat = ceval_IDISO["NUM_probe_LooseRelTkIso_DEN_HighPtProbes"].evaluate(abseta_flat, pt_flat, "nominal") 
+    ISO_up_flat = ceval_IDISO["NUM_probe_LooseRelTkIso_DEN_HighPtProbes"].evaluate(abseta_flat, pt_flat, "systup") 
+    ISO_down_flat = ceval_IDISO["NUM_probe_LooseRelTkIso_DEN_HighPtProbes"].evaluate(abseta_flat, pt_flat, "systdown") 
 
     # unflatten arrays
 
@@ -330,58 +329,73 @@ def AttachMuonSF(muons, year):
     muons['SF_ele_down'] = ak.ones_like(pt)    
 
 
-def AttachLepSF(events, ele, mu):
-    # TODO: probably need to change these to SF_2l_ee, SF_2l_mm, and add SF_2l_em 
-    # where SF_2l_em = leps[0].SF_ele * leps[0].SF_muon * leps[1].SF_ele * leps[1].SF_muon
+# def AttachLepSF(events, ele, mu):
     
-    leps = events.leps_pt_sorted
-    padded_leps = ak.pad_none(leps, 2)
+#     leps = events.leps_pt_sorted
+#     padded_leps = ak.pad_none(leps, 2)
 
-    # leps = ak.concatenate([ele, mu], axis=1)
-    # padded_leps = ak.pad_none(leps[ak.argsort(leps.pt, axis=-1,ascending=False)], 2) 
+#     events['SF_2l_ee'] = padded_leps[:,0].SF_ele_nom * padded_leps[:,1].SF_ele_nom
+#     events['SF_2l_ee_up'] = padded_leps[:,0].SF_ele_up * padded_leps[:,1].SF_ele_up
+#     events['SF_2l_ee_down'] = padded_leps[:,0].SF_ele_down * padded_leps[:,1].SF_ele_down
 
-    events['SF_2l_ee'] = padded_leps[:,0].SF_ele_nom * padded_leps[:,1].SF_ele_nom
-    events['SF_2l_ee_up'] = padded_leps[:,0].SF_ele_up * padded_leps[:,1].SF_ele_up
-    events['SF_2l_ee_down'] = padded_leps[:,0].SF_ele_down * padded_leps[:,1].SF_ele_down
+#     events['SF_2l_mm'] = padded_leps[:,0].SF_muon_nom * padded_leps[:,1].SF_muon_nom
+#     events['SF_2l_mm_up'] = padded_leps[:,0].SF_muon_up * padded_leps[:,1].SF_muon_up
+#     events['SF_2l_mm_down'] = padded_leps[:,0].SF_muon_down * padded_leps[:,1].SF_muon_down
 
-    events['SF_2l_mm'] = padded_leps[:,0].SF_muon_nom * padded_leps[:,1].SF_muon_nom
-    events['SF_2l_mm_up'] = padded_leps[:,0].SF_muon_up * padded_leps[:,1].SF_muon_up
-    events['SF_2l_mm_down'] = padded_leps[:,0].SF_muon_down * padded_leps[:,1].SF_muon_down
-
-    events['SF_2l_em'] = padded_leps[:,0].SF_ele_nom * padded_leps[:,0].SF_muon_nom * padded_leps[:,1].SF_ele_nom * padded_leps[:,1].SF_muon_nom
-    events['SF_2l_em_up'] = padded_leps[:,0].SF_ele_up * padded_leps[:,0].SF_muon_up * padded_leps[:,1].SF_ele_up * padded_leps[:,1].SF_muon_up
-    events['SF_2l_em_down'] = padded_leps[:,0].SF_ele_down * padded_leps[:,0].SF_muon_down * padded_leps[:,1].SF_ele_down * padded_leps[:,1].SF_muon_down
+#     events['SF_2l_em'] = padded_leps[:,0].SF_ele_nom * padded_leps[:,0].SF_muon_nom * padded_leps[:,1].SF_ele_nom * padded_leps[:,1].SF_muon_nom
+#     events['SF_2l_em_up'] = padded_leps[:,0].SF_ele_up * padded_leps[:,0].SF_muon_up * padded_leps[:,1].SF_ele_up * padded_leps[:,1].SF_muon_up
+#     events['SF_2l_em_down'] = padded_leps[:,0].SF_ele_down * padded_leps[:,0].SF_muon_down * padded_leps[:,1].SF_ele_down * padded_leps[:,1].SF_muon_down
 
 
 def GetLepSF(events, lep_cat):
 
-    # if lep_cat == 'ee':
-    #     nom = events.SF_2l_ee
-    #     up = copy.deepcopy(events.SF_2l_ee_up)
-    #     down = copy.deepcopy(events.SF_2l_ee_down)
-    # elif lep_cat == 'mm': 
-    #     nom = events.SF_2l_mm
-    #     up = copy.deepcopy(events.SF_2l_mm_up)
-    #     down = copy.deepcopy(events.SF_2l_mm_down)
-    # elif lep_cat == 'em': 
-    #     nom = events.SF_2l_em
-    #     up = copy.deepcopy(events.SF_2l_em_up)
-    #     down = copy.deepcopy(events.SF_2l_em_down)
+    mask = events[f'is_{lep_cat}']
+    leps = ak.pad_none(events.leps_pt_sorted, 2)
+    l0 = leps[:,0]
+    l1 = leps[:,1]
+
+    # function to get lepton SF for em channel
+    def get_sf_for_lep(lep, variation):
+        is_ele = (abs(lep.pdgId) == 11)
+        ele_attr = f"SF_ele_{variation}"
+        mu_attr = f"SF_muon_{variation}"
+
+        return ak.where(is_ele, getattr(lep, ele_attr), getattr(lep, mu_attr))
+
+    # get nominal, up, down SFs based on channel 
+    if lep_cat == 'ee': 
+        nom = l0.SF_ele_nom * l1.SF_ele_nom
+        up = l0.SF_ele_up * l1.SF_ele_up
+        down = l0.SF_ele_down * l1.SF_ele_down
+
+    elif lep_cat == 'mm': 
+        nom = l0.SF_muon_nom * l1.SF_muon_nom
+        up = l0.SF_muon_up * l1.SF_muon_up
+        down = l0.SF_muon_down * l1.SF_muon_down
+
+    elif lep_cat == 'em': 
+        lepSF = {}
+        for var in ['nom', 'up', 'down']:
+            sf_l0 = get_sf_for_lep(l0, var)
+            sf_l1 = get_sf_for_lep(l1, var)
+
+            lepSF[var] = sf_l0 * sf_l1
+
+        nom = lepSF['nom']
+        up = lepSF['up']
+        down = lepSF['down']
 
     # return nom, up, down
 
-    mapping = {
-        'ee': ('SF_2l_ee', 'SF_2l_ee_up', 'SF_2l_ee_down'),
-        'em': ('SF_2l_em', 'SF_2l_em_up', 'SF_2l_em_down'),
-        'mm': ('SF_2l_mm', 'SF_2l_mm_up', 'SF_2l_mm_down'),
-    }
+    nom_all  = (l0.SF_ele_nom * l0.SF_muon_nom) * (l1.SF_ele_nom * l1.SF_muon_nom)
+    up_all   = (l0.SF_ele_up  * l0.SF_muon_up)  * (l1.SF_ele_up  * l1.SF_muon_up)
+    down_all = (l0.SF_ele_down * l0.SF_muon_down) * (l1.SF_ele_down * l1.SF_muon_down)
 
-    if lep_cat not in mapping:
-        raise ValueError(f"Unknown lep_cat: {lep_cat}")
+    nom = ak.fill_none(ak.where(mask, nom_all, 1.0), 1.0)
+    up  = ak.fill_none(ak.where(mask, up_all, 1.0), 1.0)
+    down  = ak.fill_none(ak.where(mask, down_all, 1.0), 1.0)
 
-    nom_name, up_name, down_name = mapping[lep_cat]
-
-    return getattr(events, nom_name), getattr(events, up_name), getattr(events, down_name)
+    return nom, up, down
 
 
 ####################################
@@ -488,13 +502,15 @@ def AttachElecTrigEff(electrons, year):
                 SFevaluator[f"ElecSF_{year}_endcap"](Et_flat)
             )
 
-    # print(f"pt: {ak.flatten(electrons.pt)[0:30]}")
-    # print(f"electrons.scEtOverPt: {ak.flatten(electrons.scEtOverPt)[0:30]}")
-    # print(f"Et_flat: {Et_flat[0:30]}")
-    # print(f"ElecSF_flat: {ElecSF_flat[0:30]}")
-    # print(f"SFevaluator: {SFevaluator}")
+    electrons['trig_eff_ele_nom'] = ak.unflatten(ElecSF_flat, ak.num(eta))
 
-    electrons['SF_trig_elec_nom'] = ak.unflatten(ElecSF_flat, ak.num(eta))
+    # fill muon trig efficiencies as 1.0
+    electrons['trig_MCeff_mu_nom'] = ak.ones_like(electrons.pt)
+    electrons['trig_DATAeff_mu_nom'] = ak.ones_like(electrons.pt)
+    electrons['trig_MCeff_mu_up'] = ak.ones_like(electrons.pt)
+    electrons['trig_DATAeff_mu_up'] = ak.ones_like(electrons.pt)
+    electrons['trig_MCeff_mu_down'] = ak.ones_like(electrons.pt)
+    electrons['trig_DATAeff_mu_down'] = ak.ones_like(electrons.pt)
 
 
 def AttachMuonTrigEff(muons, year):
@@ -511,58 +527,92 @@ def AttachMuonTrigEff(muons, year):
     phi_flat = ak.flatten(phi) 
 
     clib_year = clib_year_map[year]
-    json_path_HighPt = ttbarEFT_path(f"data/POG/MUO/{clib_year}/muon_HighPt.json.gz")
-    json_path_z = ttbarEFT_path(f"data/POG/MUO/{clib_year}/muon_Z.json.gz")
+    ceval_HLT = correctionlib.CorrectionSet.from_file(ttbarEFT_path(f"data/POG/MUO/{clib_year}/ScaleFactors_Muon_highPt_HLT_{clib_year}_schemaV2.json"))
 
-    ceval_HighPt = correctionlib.CorrectionSet.from_file(json_path_HighPt)
-    ceval_z = correctionlib.CorrectionSet.from_file(json_path_z)
+    # NUM_HLT_DEN_HighPtLooseRelIsoProbes (SF), NUM_HLT_DEN_HighPtLooseRelIsoProbes_MCeff, NUM_HLT_DEN_HighPtLooseRelIsoProbes_DATAeff
+    MCeff_nom_flat = ceval_HLT["NUM_HLT_DEN_HighPtLooseRelIsoProbes_MCeff"].evaluate(abseta_flat, pt_flat, "nominal")
+    DATAeff_nom_flat = ceval_HLT["NUM_HLT_DEN_HighPtLooseRelIsoProbes_DATAeff"].evaluate(abseta_flat, pt_flat, "nominal")
 
-    trigger_norm_flat = ceval_HighPt["NUM_HLT_DEN_HighPtLooseRelIsoProbes"].evaluate(abseta_flat, pt_flat, "nominal")
-    trigger_up_flat = ceval_HighPt["NUM_HLT_DEN_HighPtLooseRelIsoProbes"].evaluate(abseta_flat, pt_flat, "systup")
-    trigger_down_flat = ceval_HighPt["NUM_HLT_DEN_HighPtLooseRelIsoProbes"].evaluate(abseta_flat, pt_flat, "systdown")
+    MCeff_up_flat = ceval_HLT["NUM_HLT_DEN_HighPtLooseRelIsoProbes_MCeff"].evaluate(abseta_flat, pt_flat, "systup")
+    DATAeff_up_flat = ceval_HLT["NUM_HLT_DEN_HighPtLooseRelIsoProbes_DATAeff"].evaluate(abseta_flat, pt_flat, "systup")   
 
-    trigger_norm = ak.unflatten(trigger_norm_flat, ak.num(pt))
-    trigger_up = ak.unflatten(trigger_up_flat, ak.num(pt))
-    trigger_down = ak.unflatten(trigger_down_flat, ak.num(pt))
+    MCeff_down_flat = ceval_HLT["NUM_HLT_DEN_HighPtLooseRelIsoProbes_MCeff"].evaluate(abseta_flat, pt_flat, "systdown")
+    DATAeff_down_flat = ceval_HLT["NUM_HLT_DEN_HighPtLooseRelIsoProbes_DATAeff"].evaluate(abseta_flat, pt_flat, "systdown")    
 
-    muons['SF_trig_muon_nom'] = trigger_norm
-    muons['SF_trig_muon_up'] = trigger_up
-    muons['SF_trig_muon_down'] = trigger_down
+    muons['trig_MCeff_mu_nom'] = ak.unflatten(MCeff_nom_flat, ak.num(pt))
+    muons['trig_DATAeff_mu_nom'] = ak.unflatten(DATAeff_nom_flat, ak.num(pt))
+    muons['trig_MCeff_mu_up'] = ak.unflatten(MCeff_up_flat, ak.num(pt))
+    muons['trig_DATAeff_mu_up'] = ak.unflatten(DATAeff_up_flat, ak.num(pt))
+    muons['trig_MCeff_mu_down'] = ak.unflatten(MCeff_down_flat, ak.num(pt))
+    muons['trig_DATAeff_mu_down'] = ak.unflatten(DATAeff_down_flat, ak.num(pt))
 
-
-def AttachTrigSF(events, ele, mu):
-    
-    leps = events.leps_pt_sorted
-    padded_leps = ak.pad_none(leps, 2)
-
-    # for ee channel, SF=eff(elec1)*eff(elec2)
-    events['SF_trig_ee'] = padded_leps[:,0].SF_trig_elec_nom * padded_leps[:,1].SF_trig_elec_nom
-    events['SF_trig_ee_up'] = padded_leps[:,0].SF_trig_elec_nom * padded_leps[:,1].SF_trig_elec_nom
-    events['SF_trig_ee_down'] = padded_leps[:,0].SF_trig_elec_nom * padded_leps[:,1].SF_trig_elec_nom
-
-    # for em channel, SF=eff(muon1) or eff(muon2)
-    events['SF_trig_em'] = padded_leps[:,0].SF_trig_muon_nom * padded_leps[:,1].SF_trig_muon_nom
-    events['SF_trig_em_up'] = padded_leps[:,0].SF_trig_muon_up * padded_leps[:,1].SF_trig_muon_up
-    events['SF_trig_em_down'] = padded_leps[:,0].SF_trig_muon_down * padded_leps[:,1].SF_trig_muon_down
-
-    # TODO: for mm channel, handle efficiencies for each muon - until implemented this is just a simple muon SF mutliplication
-    events['SF_trig_mm'] = padded_leps[:,0].SF_trig_muon_nom * padded_leps[:,1].SF_trig_muon_nom
-    events['SF_trig_mm_up'] = padded_leps[:,0].SF_trig_muon_nom * padded_leps[:,1].SF_trig_muon_nom
-    events['SF_trig_mm_down'] = padded_leps[:,0].SF_trig_muon_nom * padded_leps[:,1].SF_trig_muon_nom
+    # fill ele trig eff with ones 
+    muons['trig_eff_ele_nom'] = ak.ones_like(pt)
 
 
 def GetTrigSF(events, lep_cat):
 
-    # nominal, up, down scale factors
-    mapping = {
-        'ee': ('SF_trig_ee', 'SF_trig_ee_up', 'SF_trig_ee_down'),
-        'em': ('SF_trig_em', 'SF_trig_em_up', 'SF_trig_em_down'),
-        'mm': ('SF_trig_mm', 'SF_trig_mm_up', 'SF_trig_mm_down'),
-    }
+    # Select events based on lepton category
+    mask = events[f'is_{lep_cat}']
+    # leps = events[mask].leps_pt_sorted
+    leps = ak.pad_none(events.leps_pt_sorted, 2)
+    l0 = leps[:,0]
+    l1 = leps[:,1]
 
-    if lep_cat not in mapping:
-        raise ValueError(f"Unknown lep_cat: {lep_cat}")
+    def calculate_trigSF_mm(m1, m2, var):
+        '''
+        m1 : muon1 
+        m2 : muon2 
+        var: nom, up, down
+        '''
+        ed1 = getattr(m1, f"trig_DATAeff_mu_{var}") # eff data muon1
+        ed2 = getattr(m2, f"trig_DATAeff_mu_{var}") # eff data muon2
+        em1 = getattr(m1, af"trig_MCeff_mu_{var}")   # eff MC muon1
+        em2 = getattr(m2, f"trig_MCeff_mu_{var}")   # eff MC muon2
 
-    nom_name, up_name, down_name = mapping[lep_cat]
+        DATA_eff = 1-(1-ed1)*(1-ed2)
+        MC_eff   = 1-(1-em1)*(1-em2)
 
-    return getattr(events, nom_name), getattr(events, up_name), getattr(events, down_name)
+        return DATA_eff / MC_eff
+
+
+    def calculate_trigSF_em(l0, l1, var):
+        '''
+        l0 : ele or mu
+        l1 : ele or mu
+        var: nom, up, down
+        '''        
+        # is_mu0 = (abs(l0.pdgId) == 13)
+        # is_mu1 = (abs(l1.pdgId) == 13)
+
+        # DATA_eff = ak.where(is_mu0, getattr(l0, f"trig_DATAeff_mu_{var}"), getattr(l1, f"trig_DATAeff_mu_{var}"))
+        # MC_eff = ak.where(is_mu0, getattr(l0, f"trig_MCeff_mu_{var}"), getattr(l1, f"trig_MCeff_mu_{var}"))
+
+        DATA_eff = getattr(l0, f"trig_DATAeff_mu_{var}") * getattr(l1, f"trig_DATAeff_mu_{var}")
+        MC_eff = getattr(l0, f"trig_MCeff_mu_{var}") * getattr(l1, f"trig_MCeff_mu_{var}")
+
+        return DATA_eff / MC_eff
+
+
+    # calculate trigger SFs from already saved efficiencies
+    if lep_cat == 'ee': 
+        raw_nom = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom
+        raw_up = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom
+        raw_down = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom 
+        
+    elif lep_cat == 'mm': 
+        raw_nom = calculate_trigSF_mm(l0, l1, "nom")
+        raw_up = calculate_trigSF_mm(l0, l1, "up")
+        raw_down = calculate_trigSF_mm(l0, l1, "down")
+
+    elif lep_cat == 'em': 
+        raw_nom = calculate_trigSF_em(l0, l1, "nom")
+        raw_up = calculate_trigSF_em(l0, l1, "up")
+        raw_down = calculate_trigSF_em(l0, l1, "down")
+
+    # mask = events[f'is_{lep_cat}']
+    # nom = ak.fill_none(ak.where(mask, raw_nom, 1.0), 1.0)
+    # up = ak.fill_none(ak.where(mask, raw_up, 1.0), 1.0)
+    # down = ak.fill_none(ak.where(mask, raw_down, 1.0), 1.0)
+
+    return nom, up, down

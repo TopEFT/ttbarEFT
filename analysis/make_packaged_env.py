@@ -6,10 +6,10 @@ if __name__ == '__main__':
 
     tstart = time.time()
     remote_environment.get_environment(
-                extra_pip_local = {"ttbarEFT": ['ttbarEFT', 'setup.py'],},
-                # extra_pip_local = {"ttbarEFT": ["ttbarEFT", "setup.py"],
-                #                     "dynamic_data_reduction": ["src", "pyproject.toml"]},
-                extra_pip = ['dynamic-data-reduction'],
+                # extra_pip_local = {"ttbarEFT": ['ttbarEFT', 'setup.py'],},
+                extra_pip_local = {"ttbarEFT": ["ttbarEFT", "setup.py"],
+                                    "dynamic_data_reduction": ["src", "pyproject.toml"]},
+                # extra_pip = ['dynamic-data-reduction'],
                 # extra_pip=['mt2'],
                 extra_conda=["fsspec-xrootd"]
             )
