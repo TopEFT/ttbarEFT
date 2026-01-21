@@ -329,71 +329,38 @@ def AttachMuonSF(muons, year):
     muons['SF_ele_down'] = ak.ones_like(pt)    
 
 
-# def AttachLepSF(events, ele, mu):
-    
-#     leps = events.leps_pt_sorted
-#     padded_leps = ak.pad_none(leps, 2)
-
-#     events['SF_2l_ee'] = padded_leps[:,0].SF_ele_nom * padded_leps[:,1].SF_ele_nom
-#     events['SF_2l_ee_up'] = padded_leps[:,0].SF_ele_up * padded_leps[:,1].SF_ele_up
-#     events['SF_2l_ee_down'] = padded_leps[:,0].SF_ele_down * padded_leps[:,1].SF_ele_down
-
-#     events['SF_2l_mm'] = padded_leps[:,0].SF_muon_nom * padded_leps[:,1].SF_muon_nom
-#     events['SF_2l_mm_up'] = padded_leps[:,0].SF_muon_up * padded_leps[:,1].SF_muon_up
-#     events['SF_2l_mm_down'] = padded_leps[:,0].SF_muon_down * padded_leps[:,1].SF_muon_down
-
-#     events['SF_2l_em'] = padded_leps[:,0].SF_ele_nom * padded_leps[:,0].SF_muon_nom * padded_leps[:,1].SF_ele_nom * padded_leps[:,1].SF_muon_nom
-#     events['SF_2l_em_up'] = padded_leps[:,0].SF_ele_up * padded_leps[:,0].SF_muon_up * padded_leps[:,1].SF_ele_up * padded_leps[:,1].SF_muon_up
-#     events['SF_2l_em_down'] = padded_leps[:,0].SF_ele_down * padded_leps[:,0].SF_muon_down * padded_leps[:,1].SF_ele_down * padded_leps[:,1].SF_muon_down
-
-
 def GetLepSF(events, lep_cat):
 
+    # Select events based on lepton category
     mask = events[f'is_{lep_cat}']
+
     leps = ak.pad_none(events.leps_pt_sorted, 2)
     l0 = leps[:,0]
     l1 = leps[:,1]
 
-    # function to get lepton SF for em channel
-    def get_sf_for_lep(lep, variation):
-        is_ele = (abs(lep.pdgId) == 11)
-        ele_attr = f"SF_ele_{variation}"
-        mu_attr = f"SF_muon_{variation}"
+    def get_flavor_sf(lep, var):
+        return ak.where(abs(lep.pdgId) == 11, 
+                        getattr(lep, f"SF_ele_{var}"), 
+                        getattr(lep, f"SF_muon_{var}"))
 
-        return ak.where(is_ele, getattr(lep, ele_attr), getattr(lep, mu_attr))
-
-    # get nominal, up, down SFs based on channel 
     if lep_cat == 'ee': 
-        nom = l0.SF_ele_nom * l1.SF_ele_nom
-        up = l0.SF_ele_up * l1.SF_ele_up
-        down = l0.SF_ele_down * l1.SF_ele_down
+        calc_nom = l0.SF_ele_nom * l1.SF_ele_nom
+        calc_up = l0.SF_ele_up * l1.SF_ele_up
+        calc_down = l0.SF_ele_down * l1.SF_ele_down
 
     elif lep_cat == 'mm': 
-        nom = l0.SF_muon_nom * l1.SF_muon_nom
-        up = l0.SF_muon_up * l1.SF_muon_up
-        down = l0.SF_muon_down * l1.SF_muon_down
+        calc_nom = l0.SF_muon_nom * l1.SF_muon_nom
+        calc_up = l0.SF_muon_up * l1.SF_muon_up
+        calc_down = l0.SF_muon_down * l1.SF_muon_down
 
-    elif lep_cat == 'em': 
-        lepSF = {}
-        for var in ['nom', 'up', 'down']:
-            sf_l0 = get_sf_for_lep(l0, var)
-            sf_l1 = get_sf_for_lep(l1, var)
+    elif lep_cat == 'em':
+        calc_nom = get_flavor_sf(l0, 'nom') * get_flavor_sf(l1, 'nom')
+        calc_up = get_flavor_sf(l0, 'up') * get_flavor_sf(l1, 'up')
+        calc_down = get_flavor_sf(l0, 'down') * get_flavor_sf(l1, 'down')
 
-            lepSF[var] = sf_l0 * sf_l1
-
-        nom = lepSF['nom']
-        up = lepSF['up']
-        down = lepSF['down']
-
-    # return nom, up, down
-
-    nom_all  = (l0.SF_ele_nom * l0.SF_muon_nom) * (l1.SF_ele_nom * l1.SF_muon_nom)
-    up_all   = (l0.SF_ele_up  * l0.SF_muon_up)  * (l1.SF_ele_up  * l1.SF_muon_up)
-    down_all = (l0.SF_ele_down * l0.SF_muon_down) * (l1.SF_ele_down * l1.SF_muon_down)
-
-    nom = ak.fill_none(ak.where(mask, nom_all, 1.0), 1.0)
-    up  = ak.fill_none(ak.where(mask, up_all, 1.0), 1.0)
-    down  = ak.fill_none(ak.where(mask, down_all, 1.0), 1.0)
+    nom = ak.where(mask, calc_nom, 1.0)
+    up = ak.where(mask, calc_up, 1.0)
+    down = ak.where(mask, calc_down, 1.0)
 
     return nom, up, down
 
@@ -554,20 +521,20 @@ def GetTrigSF(events, lep_cat):
 
     # Select events based on lepton category
     mask = events[f'is_{lep_cat}']
-    # leps = events[mask].leps_pt_sorted
+
     leps = ak.pad_none(events.leps_pt_sorted, 2)
     l0 = leps[:,0]
     l1 = leps[:,1]
 
     def calculate_trigSF_mm(m1, m2, var):
         '''
-        m1 : muon1 
-        m2 : muon2 
+        m1 : muon1
+        m2 : muon2
         var: nom, up, down
         '''
         ed1 = getattr(m1, f"trig_DATAeff_mu_{var}") # eff data muon1
         ed2 = getattr(m2, f"trig_DATAeff_mu_{var}") # eff data muon2
-        em1 = getattr(m1, af"trig_MCeff_mu_{var}")   # eff MC muon1
+        em1 = getattr(m1, f"trig_MCeff_mu_{var}")   # eff MC muon1
         em2 = getattr(m2, f"trig_MCeff_mu_{var}")   # eff MC muon2
 
         DATA_eff = 1-(1-ed1)*(1-ed2)
@@ -582,37 +549,29 @@ def GetTrigSF(events, lep_cat):
         l1 : ele or mu
         var: nom, up, down
         '''        
-        # is_mu0 = (abs(l0.pdgId) == 13)
-        # is_mu1 = (abs(l1.pdgId) == 13)
-
-        # DATA_eff = ak.where(is_mu0, getattr(l0, f"trig_DATAeff_mu_{var}"), getattr(l1, f"trig_DATAeff_mu_{var}"))
-        # MC_eff = ak.where(is_mu0, getattr(l0, f"trig_MCeff_mu_{var}"), getattr(l1, f"trig_MCeff_mu_{var}"))
-
         DATA_eff = getattr(l0, f"trig_DATAeff_mu_{var}") * getattr(l1, f"trig_DATAeff_mu_{var}")
         MC_eff = getattr(l0, f"trig_MCeff_mu_{var}") * getattr(l1, f"trig_MCeff_mu_{var}")
 
         return DATA_eff / MC_eff
 
-
     # calculate trigger SFs from already saved efficiencies
     if lep_cat == 'ee': 
-        raw_nom = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom
-        raw_up = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom
-        raw_down = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom 
+        calc_nom = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom
+        calc_up = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom
+        calc_down = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom 
         
     elif lep_cat == 'mm': 
-        raw_nom = calculate_trigSF_mm(l0, l1, "nom")
-        raw_up = calculate_trigSF_mm(l0, l1, "up")
-        raw_down = calculate_trigSF_mm(l0, l1, "down")
+        calc_nom = calculate_trigSF_mm(l0, l1, "nom")
+        calc_up = calculate_trigSF_mm(l0, l1, "up")
+        calc_down = calculate_trigSF_mm(l0, l1, "down")
 
     elif lep_cat == 'em': 
-        raw_nom = calculate_trigSF_em(l0, l1, "nom")
-        raw_up = calculate_trigSF_em(l0, l1, "up")
-        raw_down = calculate_trigSF_em(l0, l1, "down")
+        calc_nom = calculate_trigSF_em(l0, l1, "nom")
+        calc_up = calculate_trigSF_em(l0, l1, "up")
+        calc_down = calculate_trigSF_em(l0, l1, "down")
 
-    # mask = events[f'is_{lep_cat}']
-    # nom = ak.fill_none(ak.where(mask, raw_nom, 1.0), 1.0)
-    # up = ak.fill_none(ak.where(mask, raw_up, 1.0), 1.0)
-    # down = ak.fill_none(ak.where(mask, raw_down, 1.0), 1.0)
+    nom = ak.where(mask, calc_nom, 1.0)
+    up = ak.where(mask, calc_up, 1.0)
+    down = ak.where(mask, calc_down, 1.0)
 
     return nom, up, down

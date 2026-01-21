@@ -133,7 +133,6 @@ def trg_pass_no_overlap(events,is_data,dataset,year,dataset_dict,exclude_dict,le
 def addLepCatMasks(events):
     
     leps = events.leps_pt_sorted
-    more2leps = (ak.num(leps)) >= 2
 
     padded_leps = ak.pad_none(leps, 2)
     padded_leps_id = padded_leps.pdgId

@@ -171,15 +171,15 @@ class AnalysisProcessor(processor.ProcessorABC):
         mu_good = mu[mu.isGoodMuon]
 
         ######### Lepton Selection ##########
-        # add lepton scale factors 
+        # add lepton scale factors and lepton trigger efficiencies
         if not isData: 
             tt_cor.AttachElectronSF(ele_good, year)    
-            tt_cor.AttachMuonSF(mu_good, year)     
+            tt_cor.AttachMuonSF(mu_good, year)    
+            tt_cor.AttachElecTrigEff(ele_good, year)
+            tt_cor.AttachMuonTrigEff(mu_good, year) 
 
         leps = ak.concatenate([ele_good, mu_good], axis=1)
         leps_sorted = leps[ak.argsort(leps.pt, axis=-1,ascending=False)] 
-
-        print(leps_sorted.fields)
 
         events['leps_pt_sorted'] = leps_sorted
 
@@ -229,11 +229,8 @@ class AnalysisProcessor(processor.ProcessorABC):
             norm = genw*(xsec/sow)*lumi
             weights_obj_base.add('norm', norm)
 
-            # tt_cor.AttachLepSF(events, ele_good, mu_good) 
-
-            tt_cor.AttachElecTrigEff(ele_good, year)
-            tt_cor.AttachMuonTrigEff(mu_good, year)
-            # tt_cor.AttachTrigSF(events, ele_good, mu_good)
+            # weights_obj_base.add('lepSF', *tt_cor.GetLepSF(events, lep_cat))
+            # weights_obj_base.add('trigSF', *tt_cor.GetTrigSF(events, lep_cat))
 
             # AttachPSWeights(events)
             # AttachScaleWeights(events) 
@@ -245,9 +242,6 @@ class AnalysisProcessor(processor.ProcessorABC):
             #weights_obj_base.add('fact')...
             #weights_obj_base.add('Prefiring')...
             #weights_obj_base.add('PU')...
-
-            weights_obj_base.add('lepSF', *tt_cor.GetLepSF(events, lep_cat))
-            weights_obj_base.add('trigSF', *tt_cor.GetTrigSF(events, lep_cat))
 
 
         ######### Create objects for dense axes ##########
