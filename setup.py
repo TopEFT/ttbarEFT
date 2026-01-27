@@ -11,7 +11,9 @@ setuptools.setup(
             "params/*.yaml",
             "data/POG/JME/*/*.json.gz",
             "data/POG/EGM/*/*.json.gz",
-            "data/POG/MUO/*/*.json.gz"
+            "data/POG/MUO/*/*.json.gz",
+            "data/POG/MUO/*/*.json",
+            "data/leptonSF/elec/*.root"
         ]
     }
 )

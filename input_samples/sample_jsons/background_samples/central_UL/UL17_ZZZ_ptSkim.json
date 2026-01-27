@@ -1,0 +1,23 @@
+{
+    "xsec": 0.01398,
+    "year": "2017",
+    "treeName": "Events",
+    "histAxisName": "ZZZ_centralUL17",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_ZZZ/output_1368.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_ZZZ/output_1510.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_ZZZ/output_1830.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_ZZZ/output_1701.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_ZZZ/output_1920.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_ZZZ/output_2253.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_ZZZ/output_2168.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_ZZZ/output_2231.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_ZZZ/output_1511.root"
+    ],
+    "nEvents": 9702000,
+    "nSumOfWeights": 143257.87493360604,
+    "isData": false,
+    "path": "/store/mc/RunIISummer20UL17NanoAODv9/ZZZ_TuneCP5_13TeV-amcatnlo-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000"
+}

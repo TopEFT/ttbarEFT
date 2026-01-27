@@ -1,0 +1,26 @@
+{
+    "xsec": 0.2086,
+    "year": "2017",
+    "treeName": "Events",
+    "histAxisName": "WWW_centralUL17",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_WWW_4F/output_1717.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_WWW_4F/output_1003.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_WWW_4F/output_658.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_WWW_4F/output_1563.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_WWW_4F/output_1880.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_WWW_4F/output_1002.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_WWW_4F/output_1496.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_WWW_4F/output_2041.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_WWW_4F/output_1887.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_WWW_4F/output_659.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_WWW_4F/output_2227.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_WWW_4F/output_657.root"
+    ],
+    "nEvents": 10025000,
+    "nSumOfWeights": 2163969.515073101,
+    "isData": false,
+    "path": "/store/mc/RunIISummer20UL17NanoAODv9/WWW_4F_TuneCP5_13TeV-amcatnlo-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/70000"
+}

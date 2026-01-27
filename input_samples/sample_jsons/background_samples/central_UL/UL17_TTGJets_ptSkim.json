@@ -1,0 +1,20 @@
+{
+    "xsec": 3.697,
+    "year": "2017",
+    "treeName": "Events",
+    "histAxisName": "TTGJets_centralUL17",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_TTGJets/output_613.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_TTGJets/output_171.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_TTGJets/output_349.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_TTGJets/output_54.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_TTGJets/output_959.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_TTGJets/output_614.root"
+    ],
+    "nEvents": 3534208,
+    "nSumOfWeights": 22157555.754240006,
+    "isData": false,
+    "path": "/store/mc/RunIISummer20UL17NanoAODv9/TTGJets_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/270000"
+}

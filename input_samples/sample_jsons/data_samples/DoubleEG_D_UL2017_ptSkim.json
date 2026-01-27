@@ -1,0 +1,27 @@
+{
+    "xsec": 1.0,
+    "year": "2017",
+    "treeName": "Events",
+    "histAxisName": "dataUL17",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_D_UL2017/output_3188.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_D_UL2017/output_945.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_D_UL2017/output_1203.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_D_UL2017/output_1471.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_D_UL2017/output_1297.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_D_UL2017/output_7.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_D_UL2017/output_504.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_D_UL2017/output_30.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_D_UL2017/output_153.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_D_UL2017/output_884.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_D_UL2017/output_765.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_D_UL2017/output_2385.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_D_UL2017/output_505.root"
+    ],
+    "nEvents": 25911432.0,
+    "nSumOfWeights": 25911432.0,
+    "isData": true,
+    "path": "/DoubleEG/Run2017D-UL2017_MiniAODv2_NanoAODv9-v1/NANOAOD"
+}

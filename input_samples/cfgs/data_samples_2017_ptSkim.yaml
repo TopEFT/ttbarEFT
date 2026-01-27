@@ -1,0 +1,17 @@
+### 2017 DATA ###
+
+# redirector : 'root://cmsxcache.crc.nd.edu/' # xrootd access to non-ND files (`store/mc/` and `store/data`)
+# redirector : 'root://cmsxrootd.crc.nd.edu/' 
+# redirector : 'file:///cms/cephfs/data/' # direct file access
+redirector: 'file:///project01/ndcms/hnelson2/' # access to files on vast
+jsonFiles:
+  - '../input_samples/sample_jsons/data_samples/DoubleEG_B_UL2017_ptSkim.json'
+  - '../input_samples/sample_jsons/data_samples/DoubleEG_C_UL2017_ptSkim.json'
+  - '../input_samples/sample_jsons/data_samples/DoubleEG_D_UL2017_ptSkim.json'
+  - '../input_samples/sample_jsons/data_samples/DoubleEG_E_UL2017_ptSkim.json'
+  - '../input_samples/sample_jsons/data_samples/DoubleEG_F_UL2017_ptSkim.json'
+  - '../input_samples/sample_jsons/data_samples/SingleMuon_B_UL2017_ptSkim.json'
+  - '../input_samples/sample_jsons/data_samples/SingleMuon_C_UL2017_ptSkim.json'
+  - '../input_samples/sample_jsons/data_samples/SingleMuon_D_UL2017_ptSkim.json'
+  - '../input_samples/sample_jsons/data_samples/SingleMuon_E_UL2017_ptSkim.json'
+  - '../input_samples/sample_jsons/data_samples/SingleMuon_F_UL2017_ptSkim.json'
