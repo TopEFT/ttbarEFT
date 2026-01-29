@@ -1,0 +1,18 @@
+{
+    "xsec": 19.47,
+    "year": "2016APV",
+    "treeName": "Events",
+    "histAxisName": "tW",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL16APV_TW_antitop_5f_NoFullyHadronicDecays/output_116.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL16APV_TW_antitop_5f_NoFullyHadronicDecays/output_18.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL16APV_TW_antitop_5f_NoFullyHadronicDecays/output_114.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL16APV_TW_antitop_5f_NoFullyHadronicDecays/output_15.root"
+    ],
+    "nEvents": 3176485,
+    "nSumOfWeights": 103260109.782,
+    "isData": false,
+    "path": "/cms/cephfs/data/store/mc/RunIISummer20UL16NanoAODAPVv9/ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/"
+}

@@ -1,0 +1,24 @@
+{
+    "xsec": 19.47,
+    "year": "2018",
+    "treeName": "Events",
+    "histAxisName": "tW",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_top_5f_NoFullyHadronicDecays/output_90.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_top_5f_NoFullyHadronicDecays/output_89.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_top_5f_NoFullyHadronicDecays/output_108.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_top_5f_NoFullyHadronicDecays/output_122.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_top_5f_NoFullyHadronicDecays/output_107.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_top_5f_NoFullyHadronicDecays/output_117.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_top_5f_NoFullyHadronicDecays/output_128.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_top_5f_NoFullyHadronicDecays/output_85.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_top_5f_NoFullyHadronicDecays/output_110.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_top_5f_NoFullyHadronicDecays/output_104.root"
+    ],
+    "nEvents": 11270430,
+    "nSumOfWeights": 365675749.6428,
+    "isData": false,
+    "path": "/cms/cephfs/data/store/mc/RunIISummer20UL18NanoAODv9/ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8"
+}

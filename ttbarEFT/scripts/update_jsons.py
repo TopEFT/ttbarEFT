@@ -61,6 +61,20 @@ bkgd_2017_dict = {
 	'UL17_ZZZ.json'				: 'UL17_ZZZ',
 }
 
-update_multiple_jsons(data_ref_dir, data_path_dir, data_2017_dict)
-update_multiple_jsons(bkgd_ref_dir, DY_path_dir, DY_dict)
-update_multiple_jsons(bkgd_ref_dir, bkgd_path_dir, bkgd_2017_dict)
+tW_path_dir = "/cms/cephfs/data/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/"
+tW_dict = {
+	'UL16APV_TW_antitop_5f_NoFullyHadronicDecays.json'	: 'UL16APV_TW_antitop_5f_NoFullyHadronicDecays',
+	'UL16APV_TW_top_5f_NoFullyHadronicDecays.json'		: 'UL16APV_TW_top_5f_NoFullyHadronicDecays',
+	'UL16_TW_antitop_5f_NoFullyHadronicDecays.json'		: 'UL16_TW_antitop_5f_NoFullyHadronicDecays',
+	'UL16_TW_top_5f_NoFullyHadronicDecays.json'			: 'UL16_TW_top_5f_NoFullyHadronicDecays',
+	'UL17_TW_antitop_5f_NoFullyHadronicDecays.json'		: 'UL17_TW_antitop_5f_NoFullyHadronicDecays',
+	'UL17_TW_top_5f_NoFullyHadronicDecays.json'			: 'UL17_TW_top_5f_NoFullyHadronicDecays',
+	'UL18_TW_antitop_5f_NoFullyHadronicDecays.json'		: 'UL18_TW_antitop_5f_NoFullyHadronicDecays',
+	'UL18_TW_top_5f_NoFullyHadronicDecays.json'			: 'UL18_TW_top_5f_NoFullyHadronicDecays',
+}
+
+# update_multiple_jsons(data_ref_dir, data_path_dir, data_2017_dict)
+# update_multiple_jsons(bkgd_ref_dir, DY_path_dir, DY_dict)
+# update_multiple_jsons(bkgd_ref_dir, bkgd_path_dir, bkgd_2017_dict)
+update_multiple_jsons(bkgd_ref_dir, tW_path_dir, tW_dict)
+

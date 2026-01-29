@@ -1,0 +1,23 @@
+{
+    "xsec": 19.47,
+    "year": "2017",
+    "treeName": "Events",
+    "histAxisName": "tW",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL17_TW_antitop_5f_NoFullyHadronicDecays/output_60.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL17_TW_antitop_5f_NoFullyHadronicDecays/output_55.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL17_TW_antitop_5f_NoFullyHadronicDecays/output_58.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL17_TW_antitop_5f_NoFullyHadronicDecays/output_59.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL17_TW_antitop_5f_NoFullyHadronicDecays/output_7.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL17_TW_antitop_5f_NoFullyHadronicDecays/output_54.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL17_TW_antitop_5f_NoFullyHadronicDecays/output_92.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL17_TW_antitop_5f_NoFullyHadronicDecays/output_57.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL17_TW_antitop_5f_NoFullyHadronicDecays/output_56.root"
+    ],
+    "nEvents": 8433998,
+    "nSumOfWeights": 274168353.77039987,
+    "isData": false,
+    "path": "/cms/cephfs/data/store/mc/RunIISummer20UL17NanoAODv9/ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8/"
+}

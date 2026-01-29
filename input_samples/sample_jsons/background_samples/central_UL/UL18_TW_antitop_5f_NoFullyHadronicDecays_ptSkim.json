@@ -1,0 +1,27 @@
+{
+    "xsec": 19.47,
+    "year": "2018",
+    "treeName": "Events",
+    "histAxisName": "tW",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_antitop_5f_NoFullyHadronicDecays/output_119.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_antitop_5f_NoFullyHadronicDecays/output_83.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_antitop_5f_NoFullyHadronicDecays/output_100.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_antitop_5f_NoFullyHadronicDecays/output_75.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_antitop_5f_NoFullyHadronicDecays/output_127.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_antitop_5f_NoFullyHadronicDecays/output_80.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_antitop_5f_NoFullyHadronicDecays/output_78.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_antitop_5f_NoFullyHadronicDecays/output_102.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_antitop_5f_NoFullyHadronicDecays/output_82.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_antitop_5f_NoFullyHadronicDecays/output_118.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_antitop_5f_NoFullyHadronicDecays/output_9.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_antitop_5f_NoFullyHadronicDecays/output_76.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL18_TW_antitop_5f_NoFullyHadronicDecays/output_77.root"
+    ],
+    "nEvents": 10949620,
+    "nSumOfWeights": 355945896.5544,
+    "isData": false,
+    "path": "/cms/cephfs/data/store/mc/RunIISummer20UL18NanoAODv9/ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8"
+}
