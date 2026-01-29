@@ -18,6 +18,8 @@ analysis/*/*.pkl.gz
 analysis/topeft-envs/
 analysis/vine-run-info/
 
+input_samples/cfgs/*preprocessed.json
+
 # Distribution / packaging
 *.egg
 *.egg-info
