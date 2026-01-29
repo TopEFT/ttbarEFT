@@ -41,7 +41,7 @@ mc_process_styles = {
     'Others': {'label': 'Others', 'color': '#ffa90e'},
 }
 
-procs_other = ['TTGJets_centralUL17', 'ttW_centralUL17', 'ttZ_centralUL17', 'WJetsToLNu_centralUL17', 'WZTo3LNu_centralUL17', 'ZZTo4L_centralUL17']
+procs_other = ['TTGJets_centralUL17', 'ttW_centralUL17', 'ttZ_centralUL17', 'WJetsToLNu_centralUL17', 'WWW_centralUL17', 'WWZ_centralUL17', 'WZTo3LNu_centralUL17', 'WZZ_centralUL17', 'ZZTo4L_centralUL17', 'ZZZ_centralUL17']
 
 
 def make_cr_fig(h_data, h_mc, var, procs_to_group=procs_other, plot_err=False):
