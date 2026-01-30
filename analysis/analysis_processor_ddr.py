@@ -231,6 +231,8 @@ class AnalysisProcessor(processor.ProcessorABC):
 
             weights_obj_base.add('lepSF', *tt_cor.GetLepSF(events, lep_cat))
             weights_obj_base.add('trigSF', *tt_cor.GetTrigSF(events, lep_cat))
+            weights_obj_base.add('L1prefire', events.L1PreFiringWeight.Nom, events.L1PreFiringWeight.Up, events.L1PreFiringWeight.Dn)
+            weights_obj_base.add('PU', tt_cor.GetPUSF((events.Pileup.nTrueInt), year), tt_cor.GetPUSF(events.Pileup.nTrueInt, year, 'up'), tt_cor.GetPUSF(events.Pileup.nTrueInt, year, 'down'))
 
             # AttachPSWeights(events)
             # AttachScaleWeights(events) 
@@ -240,8 +242,6 @@ class AnalysisProcessor(processor.ProcessorABC):
             #weights_obj_base.add('FSR')...
             #weights_obj_base.add('renorm')...
             #weights_obj_base.add('fact')...
-            #weights_obj_base.add('Prefiring')...
-            #weights_obj_base.add('PU')...
 
 
         ######### Create objects for dense axes ##########
@@ -268,12 +268,6 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         ######### Selection Masks #########
         pass_trg = tt_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict, lep_cat)
-
-        # Charge masks
-        # chargel0_p = ak.fill_none(((l0.charge)>0),False)
-        # chargel0_m = ak.fill_none(((l0.charge)<0),False)
-        # charge2l_os = ak.fill_none(((l0.charge+l1.charge)==0),False)
-        # charge2l_ss = ak.fill_none(((l0.charge+l1.charge)!=0),False)
 
         ######### Store boolean masks with PackedSelection ##########
         selections = PackedSelection(dtype='uint64')

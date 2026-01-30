@@ -13,6 +13,7 @@ setuptools.setup(
             "data/POG/EGM/*/*.json.gz",
             "data/POG/MUO/*/*.json.gz",
             "data/POG/MUO/*/*.json",
+            "data/POG/LUM/*/*.json.gz",
             "data/leptonSF/elec/*.root"
         ]
     }

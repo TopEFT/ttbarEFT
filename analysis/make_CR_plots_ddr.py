@@ -31,7 +31,7 @@ mc_process_styles = {
     'TTTo2L2Nu_centralUL17':{'label': r'TTTo2L2Nu', 'color': '#bd1f01'},
     'DYJetsToLL_centralUL17' :{'label': r'DYJetsToLL', 'color': '#3f90da'},
     'WWTo2L2Nu_centralUL17':{'label': r'WWTo2L2Nu', 'color': '#b9ac70'},
-    'TW_5f':{'label': r'tW', 'color': '#832db6'},
+    'tW':{'label': r'tW', 'color': '#832db6'},
     'TTGJets_centralUL17':{'label': r'TTGJets', 'color': '#94a4a2'},
     'ttW_centralUL17':{'label': r'ttW', 'color': 'pink'},
     'ttZ_centralUL17':{'label': r'ttZ', 'color': '#a96b59'},
@@ -217,7 +217,8 @@ if __name__ == "__main__":
     hists_data = pickle.load(gzip.open(data_pkl))
     hists_mc = pickle.load(gzip.open(mc_pkl))
 
-    for channel, ch_dict in hists_data.items():
+    # for channel, ch_dict in hists_data.items():
+    for channel, ch_dict in hists_mc.items():
         for var in ch_dict.keys():
             h_mc = hists_mc[channel][var].as_hist({})
             h_data = hists_data[channel][var].as_hist({}).project(var) # equiv to [{'process':sum}]

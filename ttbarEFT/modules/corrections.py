@@ -23,6 +23,31 @@ clib_year_map = {
     "2023BPix": "2023_Summer23BPix",
 }
 
+goldenJSON_map = {
+    "2016APV": "Collisions16_UltraLegacy_goldenJSON",
+    "2016": "Collisions16_UltraLegacy_goldenJSON",
+    "2017": "Collisions17_UltraLegacy_goldenJSON",
+    "2018": "Collisions18_UltraLegacy_goldenJSON",
+    "2022": "Collisions2022_355100_357900_eraBCD_GoldenJson",
+    "2022EE": "Collisions2022_359022_362760_eraEFG_GoldenJson",
+    "2023": "Collisions2023_366403_369802_eraBC_GoldenJson",
+    "2023BPix": "Collisions2023_369803_370790_eraD_GoldenJson",
+}
+
+
+def GetPUSF(nTrueInt, year, var='nominal'):
+    year = str(year)
+    if year not in clib_year_map.keys():
+        raise Exception(f"Error: Unknown year \"{year}\".")
+
+    clib_year = clib_year_map[year]
+    json_path = ttbarEFT_path(f"data/POG/LUM/{clib_year}/puWeights.json.gz")
+    ceval = correctionlib.CorrectionSet.from_file(json_path)
+
+    pucorr_tag = goldenJSON_map[year]
+    pu_corr = ceval[pucorr_tag].evaluate(nTrueInt, var)
+    return pu_corr
+
 
 ###################################
 ######### Jet Corrections #########
@@ -372,7 +397,7 @@ def GetLepSF(events, lep_cat):
 def ApplyMuonPtCorr(muons, year, isData):
     '''
     For muons with pt<120, Rochester Corrections are applied 
-    For muons with pt>120, the tunep correction is applied
+    For all muons, the tunep correction is applied
     Returns corrected pt
     '''
 
@@ -384,7 +409,7 @@ def ApplyMuonPtCorr(muons, year, isData):
     rocco_pt = ak.flatten(ApplyRochesterCorrections(muons, year, isData)) #output of rocco is correction*orig_pt
     tunep_pt = tunep_factor * pt_flat   # calculate correction*orig_pt
 
-    pt_corr_flat = ak.where(pt_mask, tunep_pt, rocco_pt) #if pt mask, pt_corr=tunep_pt, else pt_corr=rocco_pt
+    pt_corr_flat = ak.where(pt_mask, tunep_pt, rocco_pt*tunep_factor) #if pt>120, pt_=tunep_pt, else pt=rocco_pt*tunep_factor
     pt_corr = ak.unflatten(pt_corr_flat, ak.num(pt))
 
     return pt_corr
