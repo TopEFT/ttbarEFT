@@ -234,8 +234,13 @@ class AnalysisProcessor(processor.ProcessorABC):
             weights_obj_base.add('L1prefire', events.L1PreFiringWeight.Nom, events.L1PreFiringWeight.Up, events.L1PreFiringWeight.Dn)
             weights_obj_base.add('PU', tt_cor.GetPUSF((events.Pileup.nTrueInt), year), tt_cor.GetPUSF(events.Pileup.nTrueInt, year, 'up'), tt_cor.GetPUSF(events.Pileup.nTrueInt, year, 'down'))
 
+            tt_cor.AttachScaleWeights(events) 
+            weights_obj_base.add('renorm', events.nom, events.renormUp, events.renormDown)
+            weights_obj_base.add('fact', events.nom, events.factUp, events.factDown)
+            # weights_obj_base.add('renorm', events.nom, events.renormUp*(sow/sow_renormUp), events.renormDown*(sow/sow_renormDown))
+            # weights_obj_base.add('fact', events.nom, events.factUp*(sow/sow_factUp), events.factDown*(sow/sow_factDown))
+            
             # AttachPSWeights(events)
-            # AttachScaleWeights(events) 
             # AttachPdfWeights(events)
 
             #weights_obj_base.add('ISR')...

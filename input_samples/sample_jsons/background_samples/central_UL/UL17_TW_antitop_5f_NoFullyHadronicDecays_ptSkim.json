@@ -19,5 +19,5 @@
     "nEvents": 8433998,
     "nSumOfWeights": 274168353.77039987,
     "isData": false,
-    "path": "/cms/cephfs/data/store/mc/RunIISummer20UL17NanoAODv9/ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8/"
+    "path": "/store/mc/RunIISummer20UL17NanoAODv9/ST_tW_antitop_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8/"
 }
