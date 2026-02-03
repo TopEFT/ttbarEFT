@@ -98,8 +98,6 @@ class AnalysisProcessor(processor.ProcessorABC):
         tc_cor.AttachPSWeights(events)
         tt_cor.AttachScaleWeights(events)
 
-        print(f"\n\n events.fields: {events.fields} \n\n")
-
         ####### Fill Histogram #######
         hout = self._histo_dict
 

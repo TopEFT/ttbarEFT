@@ -1,16 +1,26 @@
 {
-    "xsec": 5.284311882352942,
-    "year": "2017",
-    "treeName": "Events",
-    "histAxisName": "WZTo3LNu_centralUL17",
-    "options": "",
-    "WCnames": [],
-    "files": [
-        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_WZTo3LNu/output_2042.root",
-        "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_WZTo3LNu/output_2043.root"
-    ],
-    "nEvents": 1994000,
-    "nSumOfWeights": 9298956.964159999,
-    "isData": false,
-    "path": "/store/mc/RunIISummer20UL17NanoAODv9/WZTo3LNu_mllmin4p0_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v2/"
+  "xsec": 5.284311882352942,
+  "year": "2017",
+  "treeName": "Events",
+  "histAxisName": "WZTo3LNu_centralUL17",
+  "options": "",
+  "WCnames": [],
+  "files": [
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_WZTo3LNu/output_2042.root",
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL17_WZTo3LNu/output_2043.root"
+  ],
+  "nEvents": 1994000,
+  "nSumOfWeights": 9298956.91991806,
+  "isData": false,
+  "path": "/store/mc/RunIISummer20UL17NanoAODv9/WZTo3LNu_mllmin4p0_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/",
+  "nSumOfWeights_ISRUp": 9298091.675498981,
+  "nSumOfWeights_ISRDown": 9299848.292695746,
+  "nSumOfWeights_FSRUp": 9298296.919724047,
+  "nSumOfWeights_FSRDown": 9297824.481272101,
+  "nSumOfWeights_renormUp": 9096876.405384671,
+  "nSumOfWeights_renormDown": 9543458.669339737,
+  "nSumOfWeights_factUp": 9512659.415858917,
+  "nSumOfWeights_factDown": 8980991.502358405,
+  "nSumOfWeights_renormfactUp": 9343678.623454014,
+  "nSumOfWeights_renormfactDown": 9261752.746458244
 }

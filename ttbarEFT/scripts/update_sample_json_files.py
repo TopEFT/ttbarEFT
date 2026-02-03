@@ -22,7 +22,7 @@ def update_json(path, refpath, outname):
 
     newjson_dict = {}
     # load files and get list of wc names from first file
-    files = utils.get_files(path)
+    files = utils.get_files(path, recursive=True)
     wc_names = utils.get_list_of_wc_names(files[0])
     treeName = "Events"
 

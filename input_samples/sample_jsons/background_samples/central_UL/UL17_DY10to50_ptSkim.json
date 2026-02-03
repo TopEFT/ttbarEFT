@@ -1,15 +1,25 @@
 {
-    "xsec": 18610.0,
-    "year": "2017",
-    "treeName": "Events",
-    "histAxisName": "DYJetsToLL_centralUL17",
-    "options": "",
-    "WCnames": [],
-    "files": [
-        "/store/user/hnelson2/skims/mc/ptSkim/DY/UL17_DY10to50/output_685.root"
-    ],
-    "nEvents": 68480179,
-    "nSumOfWeights": 68480179.0,
-    "isData": false,
-    "path": "/store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_mc2017_realistic_v9-v1/"
+  "xsec": 18610.0,
+  "year": "2017",
+  "treeName": "Events",
+  "histAxisName": "DYJetsToLL_centralUL17",
+  "options": "",
+  "WCnames": [],
+  "files": [
+    "/store/user/hnelson2/skims/mc/ptSkim/DY/UL17_DY10to50/output_685.root"
+  ],
+  "nEvents": 68480179,
+  "nSumOfWeights": 68480179.0,
+  "isData": false,
+  "path": "/store/mc/RunIISummer20UL17NanoAODv9/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/",
+  "nSumOfWeights_ISRUp": 68797939.74104977,
+  "nSumOfWeights_ISRDown": 68061104.79588823,
+  "nSumOfWeights_FSRUp": 68510019.48392868,
+  "nSumOfWeights_FSRDown": 68438539.35893536,
+  "nSumOfWeights_renormUp": 68247810.52835083,
+  "nSumOfWeights_renormDown": 68789116.85742188,
+  "nSumOfWeights_factUp": 94243206.58441162,
+  "nSumOfWeights_factDown": 45987267.88833851,
+  "nSumOfWeights_renormfactUp": 93987464.66044617,
+  "nSumOfWeights_renormfactDown": 46259858.731813855
 }
