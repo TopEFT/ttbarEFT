@@ -1,8 +1,8 @@
 import os
 import argparse
 
-# import pickle
-# import gzip
+import pickle
+import gzip
 import numpy as np
 import awkward as ak
 
@@ -29,10 +29,11 @@ if __name__ == '__main__':
         
     for file in files: 
         print(f"FILENAME: {file} \n")
-        hists = utils.get_hist_from_pkl(file, allow_empty=False)
+        hists = pickle.load(gzip.open(file))['sow']
+        # hists = utils.get_hist_from_pkl(file, allow_empty=False)
         for name in hists.keys():
             h_main=hists[name]
-            axes=h_main.axes[0]
+            axes=h_main.axes['process']
             print(f"HISTOGRAM: {name}")
             for ax in axes: 
                 h_temp = h_main[ax]
