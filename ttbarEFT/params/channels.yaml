@@ -28,3 +28,4 @@ CR_CHANNELS:
   em:
     jet_list:
       - exactly_0j
+      - atleast_1j

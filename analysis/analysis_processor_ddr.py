@@ -66,21 +66,17 @@ class AnalysisProcessor(processor.ProcessorABC):
 
             histograms[name] = HistEFT(
                 proc_axis, 
-                # chan_axis,
-                # syst_axis,
                 dense_axis,
                 wc_names = wc_names_lst, 
                 label=r'Events',
             )
 
-            # histograms[name+'_sumw2'] = HistEFT(
-            #     proc_axis, 
-            #     # chan_axis,
-            #     # syst_axis,
-            #     sumw2_axis,
-            #     wc_names = wc_names_lst, 
-            #     label=r'Events',
-            # )
+            histograms[name+'_sumw2'] = HistEFT(
+                proc_axis, 
+                sumw2_axis,
+                wc_names = wc_names_lst, 
+                label=r'Events',
+            )
 
         self._accumulator = histograms
 
@@ -110,6 +106,18 @@ class AnalysisProcessor(processor.ProcessorABC):
         year            = self._samples[dataset]['year']
         xsec            = self._samples[dataset]['xsec']
         sow             = self._samples[dataset]['nSumOfWeights']
+
+        if not isData: 
+            sow_ISRUp          = self._samples[dataset]["nSumOfWeights_ISRUp"          ]
+            sow_ISRDown        = self._samples[dataset]["nSumOfWeights_ISRDown"        ]
+            sow_FSRUp          = self._samples[dataset]["nSumOfWeights_FSRUp"          ]
+            sow_FSRDown        = self._samples[dataset]["nSumOfWeights_FSRDown"        ]
+            sow_renormUp       = self._samples[dataset]["nSumOfWeights_renormUp"       ]
+            sow_renormDown     = self._samples[dataset]["nSumOfWeights_renormDown"     ]
+            sow_factUp         = self._samples[dataset]["nSumOfWeights_factUp"         ]
+            sow_factDown       = self._samples[dataset]["nSumOfWeights_factDown"       ]
+            sow_renormfactUp   = self._samples[dataset]["nSumOfWeights_renormfactUp"   ]
+            sow_renormfactDown = self._samples[dataset]["nSumOfWeights_renormfactDown" ]
 
         print(f"\n\n histAxisName: {histAxisName}")
         print(f"dataset: {dataset}")
@@ -171,7 +179,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         mu_good = mu[mu.isGoodMuon]
 
         ######### Lepton Selection ##########
-        # add lepton scale factors and lepton trigger efficiencies
+        # add lepton scale factors and trigger efficiencies
         if not isData: 
             tt_cor.AttachElectronSF(ele_good, year)    
             tt_cor.AttachMuonSF(mu_good, year)    
@@ -187,8 +195,8 @@ class AnalysisProcessor(processor.ProcessorABC):
         jets['isPres'] = tt_os.is_pres_jet(jets) 
         goodJets = jets[jets.isPres] 
 
-        njets = ak.num(goodJets)
-        ht = ak.sum(goodJets.pt,axis=-1)
+        # njets = ak.num(goodJets)
+        # ht = ak.sum(goodJets.pt,axis=-1)
         j0 = goodJets[ak.argmax(goodJets.pt,axis=-1,keepdims=True)]
 
         # Medium DeepJet WP
@@ -196,7 +204,9 @@ class AnalysisProcessor(processor.ProcessorABC):
         btagwpm = get_tc_param(medium_tag)
         isBtagJetsMedium = (goodJets.btagDeepFlavB > btagwpm)
         isNotBtagJetsMedium = np.invert(isBtagJetsMedium)
+        
         nbtagsm = ak.num(goodJets[isBtagJetsMedium])
+        njets = ak.num(goodJets[isNotBtagJetsMedium])
 
         # JetVetoMaps applied
         veto_map_array = tt_cor.ApplyJetVetoMaps(goodJets, year)   
@@ -230,24 +240,18 @@ class AnalysisProcessor(processor.ProcessorABC):
             weights_obj_base.add('norm', norm)
 
             weights_obj_base.add('lepSF', *tt_cor.GetLepSF(events, lep_cat))
-            weights_obj_base.add('trigSF', *tt_cor.GetTrigSF(events, lep_cat))
+            weights_obj_base.add('trigSF', *tt_cor.GetTrigSF(events, lep_cat)) # a bit misleading, ee is trigger efficiencies so up/down is set to ones
+
             weights_obj_base.add('L1prefire', events.L1PreFiringWeight.Nom, events.L1PreFiringWeight.Up, events.L1PreFiringWeight.Dn)
             weights_obj_base.add('PU', tt_cor.GetPUSF((events.Pileup.nTrueInt), year), tt_cor.GetPUSF(events.Pileup.nTrueInt, year, 'up'), tt_cor.GetPUSF(events.Pileup.nTrueInt, year, 'down'))
 
             tt_cor.AttachScaleWeights(events) 
-            weights_obj_base.add('renorm', events.nom, events.renormUp, events.renormDown)
-            weights_obj_base.add('fact', events.nom, events.factUp, events.factDown)
-            # weights_obj_base.add('renorm', events.nom, events.renormUp*(sow/sow_renormUp), events.renormDown*(sow/sow_renormDown))
-            # weights_obj_base.add('fact', events.nom, events.factUp*(sow/sow_factUp), events.factDown*(sow/sow_factDown))
+            weights_obj_base.add('renorm', events.nom, events.renormUp*(sow/sow_renormUp), events.renormDown*(sow/sow_renormDown))
+            weights_obj_base.add('fact', events.nom, events.factUp*(sow/sow_factUp), events.factDown*(sow/sow_factDown))
             
-            # AttachPSWeights(events)
-            # AttachPdfWeights(events)
-
-            #weights_obj_base.add('ISR')...
-            #weights_obj_base.add('FSR')...
-            #weights_obj_base.add('renorm')...
-            #weights_obj_base.add('fact')...
-
+            tc_cor.AttachPSWeights(events)
+            weights_obj_base.add('ISR', events.nom, events.ISRUp*(sow/sow_ISRUp), events.ISRDown*(sow/sow_ISRDown))
+            weights_obj_base.add('FSR', events.nom, events.FSRUp*(sow/sow_FSRUp), events.FSRDown*(sow/sow_FSRDown))
 
         ######### Create objects for dense axes ##########
         leps_sorted = ak.pad_none(leps_sorted, 2)
@@ -257,9 +261,12 @@ class AnalysisProcessor(processor.ProcessorABC):
         ptll = (l0+l1).pt
         mll = (l0+l1).mass
 
-
         ######### Selection Masks #########
+        selections = PackedSelection(dtype='uint64')
 
+        pass_trg = tt_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict, lep_cat)
+
+        ######### Store boolean masks with PackedSelection ##########
         if isData:
             # Lumi Mask for Data    
             golden_json_path = {
@@ -268,23 +275,12 @@ class AnalysisProcessor(processor.ProcessorABC):
                 "2017"      : topcoffea_path("data/goldenJsons/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"),
                 "2018"      : topcoffea_path("data/goldenJsons/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"),
             }
-            lumi_mask = LumiMask(golden_json_path[year])(events.run,events.luminosityBlock)
-
-
-        ######### Selection Masks #########
-        pass_trg = tt_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict, lep_cat)
-
-        ######### Store boolean masks with PackedSelection ##########
-        selections = PackedSelection(dtype='uint64')
-        
-        if isData: 
+            lumi_mask = LumiMask(golden_json_path[year])(events.run,events.luminosityBlock) 
             selections.add('is_good_lumi', lumi_mask)
 
         selections.add('pass_trg', pass_trg)
         selections.add('jetvetomap', veto_map_mask)
 
-        # selections.add('2l', at_least_two_leps) 
-        # selections.add('2los', charge2l_os)
         selections.add('2los', events.is2los)
 
         selections.add('bmask_exactly0med', (nbtagsm==0))
@@ -298,9 +294,13 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         selections.add("atleast_1j", (njets>=1))
 
-        selections.add("ee",  (events.is_ee & events.is2los & pass_trg))
-        selections.add("em",  (events.is_em & events.is2los & pass_trg))
-        selections.add("mm",  (events.is_mm & events.is2los & pass_trg))
+        if isData: 
+            selections.add("ee",  (events.is_ee & events.is2los & pass_trg)) # data always has trig pass requirement
+        else: 
+            selections.add("ee",  (events.is_ee & events.is2los))           # MC for ee has efficiencies, so no pass_trg requirement
+        
+        selections.add("em",  (events.is_em & events.is2los & pass_trg))    # MC for emu has SF, so use pass_trg requirement 
+        selections.add("mm",  (events.is_mm & events.is2los & pass_trg))    # MC for mumu has SF, so use pass_trg requirement
 
         ######### Fill dense axes variables ##########
 
@@ -338,6 +338,10 @@ class AnalysisProcessor(processor.ProcessorABC):
             cuts_list.append(lep_cat)
             cuts_list.append(jet_cat)
 
+            print(f"\n\n lep_cat: {lep_cat}")
+            print(f"jet_cat: {jet_cat}")
+            print(f"cuts list: {cuts_list}\n\n")
+
             event_selection_mask = selections.all(*(cuts_list))
             eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
 
@@ -359,7 +363,15 @@ class AnalysisProcessor(processor.ProcessorABC):
                     "eft_coeff"     : eft_coeffs_cut,
                 }
 
+                sumw2axes_fill_info_dict = {
+                    dense_axis_name+"_sumw2" : dense_axis_vals[event_selection_mask],
+                    "process"       : histAxisName,
+                    "weight"        : np.square(weight[event_selection_mask]),
+                    "eft_coeff"     : eft_coeffs_cut,
+                }
+
                 hout[dense_axis_name].fill(**axes_fill_info_dict)
+                hout[dense_axis_name+"_sumw2"].fill(**sumw2axes_fill_info_dict)
 
         return hout
 

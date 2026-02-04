@@ -263,7 +263,7 @@ if __name__ == '__main__':
                 "mm_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='mm', wc_names_lst=wc_lst, hist_lst=hist_lst),
                 "em_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst),
             },
-            extra_files = [proc_file, "/users/hnelson2/ttbarEFT-coffea2025/ttbarEFT/params/channels.json", "proxy.pem"],
+            extra_files = [proc_file, "proxy.pem"], #"/users/hnelson2/ttbarEFT-coffea2025/ttbarEFT/params/channels.json", 
             schema=NanoAODSchema,
             max_task_retries= 20, # default=10
             step_size=800000, #equivalent to chunksize, default=100k
@@ -292,7 +292,7 @@ if __name__ == '__main__':
     ### RUN PROCESSOR USING ITERATIVE EXECUTOR ###
     elif executor == 'iterative': 
 
-        leptoncat = 'ee'
+        leptoncat = 'em'
 
         flist = preprocessing_for_taskvine(samplesdict)
         proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat=leptoncat, wc_names_lst=wc_lst, hist_lst=hist_lst)
