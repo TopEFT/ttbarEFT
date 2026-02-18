@@ -111,7 +111,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='You can customize your run')
     parser.add_argument('inputFile'        , nargs='?', help = 'Json file(s) containing files and metadata')
     parser.add_argument('--executor','-x'  , default='work_queue', help = 'Which executor to use')
-    parser.add_argument('--prefix', '-r'   , nargs='?', default='file:///cms/cephfs/data/', help = 'Prefix or redirector to look for the files')
+    parser.add_argument('--prefix', '-r'   , default='', help = 'Prefix or redirector to look for the files')
     # parser.add_argument('--pretend'        , action='store_true', help = 'Read json files but, not execute the analysis')
     # parser.add_argument('--nworkers','-n' , default=8  , help = 'Number of workers')
     parser.add_argument('--chunksize','-s', default=100000  , help = 'Number of events per chunk')
@@ -122,6 +122,7 @@ if __name__ == '__main__':
     parser.add_argument('--hist-list', action='extend', nargs='+', help = 'Specify a list of histograms to fill.')
     parser.add_argument('--port', default='9123-9130', help = 'Specify the Work Queue port. An integer PORT or an integer range PORT_MIN-PORT_MAX.')
     parser.add_argument('--processor', '-p', default='analysis_processor.py', help='Specify processor file name')
+    parser.add_argument('--aggregate', default=True, help='Specify if output historgrams from different datasets should be combined')
 
     args        = parser.parse_args()
     inputFile   = args.inputFile
@@ -138,6 +139,7 @@ if __name__ == '__main__':
     proc_name   = args.processor[:-3]
     hist_lst    = args.hist_list
     ports       = args.port
+    aggregate   = args.aggregate
 
     print("\n\nrunning with processor: ", proc_file, '\n')
     analysis_processor = importlib.import_module(proc_name)
@@ -253,15 +255,17 @@ if __name__ == '__main__':
                 save_to_file = preprocessed_data_path,
             )
 
+        # preprocessed_data = read_json_file("/users/hnelson2/ttbarEFT-coffea2025/input_samples/cfgs/sow_test_preprocessed.json")
+
         ### Dynamic Data Reduction ### 
         print(f"\n\nProcessing data with VineReduce...")
         ddr = CoffeaDynamicDataReduction(
             mgr, #taskvine manager,
             data = preprocessed_data,
             processors = {
-                "sow": analysis_processor.AnalysisProcessor(samples=samplesdict, wc_names_lst=wc_lst, hist_lst=hist_lst),
+                "mtt": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst),
             },
-            extra_files = [proc_file, "/users/hnelson2/ttbarEFT-coffea2025/ttbarEFT/params/channels.json", "proxy.pem"],
+            extra_files = [proc_file, "proxy.pem"], #"/users/hnelson2/ttbarEFT-coffea2025/ttbarEFT/params/channels.json", 
             schema=NanoAODSchema,
             max_task_retries= 20, # default=10
             step_size=800000, #equivalent to chunksize, default=100k
@@ -275,14 +279,19 @@ if __name__ == '__main__':
         
         ddr_hists = ddr.compute()
 
-        hists = {}
-        for ch in ddr_hists.keys():
-            hists[ch] = {}
-            variables = list(ddr_hists[ch][next(iter(ddr_hists[ch]))].keys())
+        if aggregate: 
+            print(f"Combining histograms from different datasets...")
+            hists = {}
+            for ch in ddr_hists.keys():
+                hists[ch] = {}
+                variables = list(ddr_hists[ch][next(iter(ddr_hists[ch]))].keys())
 
-            for var in variables: 
-                h_list = [ddr_hists[ch][dataset][var] for dataset in ddr_hists[ch]]
-                hists[ch][var] = functools.reduce(operator.add, h_list)
+                for var in variables: 
+                    h_list = [ddr_hists[ch][dataset][var] for dataset in ddr_hists[ch]]
+                    hists[ch][var] = functools.reduce(operator.add, h_list)
+
+        else: 
+            hists = ddr_hists
 
         print(f"Computing done!")
 
@@ -290,8 +299,10 @@ if __name__ == '__main__':
     ### RUN PROCESSOR USING ITERATIVE EXECUTOR ###
     elif executor == 'iterative': 
 
+        leptoncat = 'ee'
+
         flist = preprocessing_for_taskvine(samplesdict)
-        proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, wc_names_lst=wc_lst, hist_lst=hist_lst)
+        proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat=leptoncat, wc_names_lst=wc_lst, hist_lst=hist_lst)
         exec_instance = processor.IterativeExecutor()
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
         hists = runner(fileset=flist, processor_instance=proc_instance, treename=treename)

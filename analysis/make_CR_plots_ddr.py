@@ -94,6 +94,7 @@ def make_cr_fig(h_data, h_mc, var, procs_to_group=procs_other, plot_err=False, h
         list(mc_stack),
         stack=True,
         histtype="fill",
+        yerr=False,
         label=mc_labels, #label=[s.name for s in mc_stack],
         color=mc_colors,
         ax=ax
@@ -103,6 +104,7 @@ def make_cr_fig(h_data, h_mc, var, procs_to_group=procs_other, plot_err=False, h
     hep.histplot(
         h_data, 
         histtype='errorbar',
+        yerr=True,
         color='black',
         label='Data',
         ax=ax
@@ -168,7 +170,7 @@ def make_cr_fig(h_data, h_mc, var, procs_to_group=procs_other, plot_err=False, h
             # alpha=0.2,
             hatch='\\\\\\\\\\\\\\',
             linewidth= 0,
-            label='Stat err'
+            label='Stat. Unc.'
         )
 
         # err_m = np.append(err_m, err_m[-1])
@@ -178,8 +180,8 @@ def make_cr_fig(h_data, h_mc, var, procs_to_group=procs_other, plot_err=False, h
 
     # General formatting
     hep.cms.label("Preliminary", data=True, loc=0, ax=ax)                   #if data=False adds "Simulation" to label
-    hep.cms.lumitext(fr"(13 TeV)", ax=ax)                                   #TODO add lumi to this
-    ax.ticklabel_format(style="sci", scilimits=(-3, 3), useMathText=True)   # Scientific notation
+    hep.cms.lumitext(f"(13 TeV)", ax=ax)                                   #TODO add lumi to this
+    ax.ticklabel_format(axis='y', style="sci", scilimits=(-3, 3), useMathText=True)   # Scientific notation
     ax.get_yaxis().get_offset_text().set_position((-0.085, 1.05))           # Shift multiplier position out
     # ax.set_ylim(0, ax.get_ylim()[1] * 1.3                                 # or add this, move label inside (loc=2), and put sci ticklabel in default spot
 
@@ -218,6 +220,7 @@ if __name__ == "__main__":
     parser.add_argument("--outdir", default='.', help="output directory")
     parser.add_argument("--outtitle", default='', help="extra title to add to png file names")
     parser.add_argument("--doerror", action='store_true', help="plot uncertainties")
+    parser.add_argument("--ylog", action='store_true', help="make plots with log scale on yaxis")
 
     args = parser.parse_args()
     data_pkl = args.data
@@ -225,6 +228,7 @@ if __name__ == "__main__":
     outdir = args.outdir
     outtitle = args.outtitle 
     doerror = args.doerror
+    ylog = args.ylog
 
     # make output directory if it doesn't already exist (for running locally)
     if not os.path.exists(outdir):
@@ -250,7 +254,6 @@ if __name__ == "__main__":
             if doerror and f"{var}_sumw2" in hists_mc[channel]:
                 plot_err = True
                 h_sumw2 = hists_mc[channel][f"{var}_sumw2"].as_hist({})
-                print(f"Creating plots with statistical error included.")
             else:
                 plot_err = False 
                 h_sumw2 = None
@@ -259,11 +262,16 @@ if __name__ == "__main__":
             title = f"{plot_title[channel]}"
             ax.set_title(f"{title}")
 
-            if var in var_to_restrict:
-                ax.set_xlim([0, 200])
-                rax.set_xlim([0, 200])
+            # if var in var_to_restrict:
+                # ax.set_xlim([0, 200])
+                # rax.set_xlim([0, 200])
 
             figname = f"{channel}_{var}_CR{outtitle}"
-
             plt_tools.save_figure(fig, figname, outdir)
+
+            if ylog: 
+                ax.set_yscale('log')
+                figname = f"{channel}_{var}_CR{outtitle}_log"
+                plt_tools.save_figure(fig, figname, outdir)
+            
             plt.close(fig)

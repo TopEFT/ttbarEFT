@@ -95,8 +95,8 @@ class AnalysisProcessor(processor.ProcessorABC):
         
         norm = xsec/sow
 
-        tc_cor.AttachPSWeights(events)
-        tt_cor.AttachScaleWeights(events)
+        # tc_cor.AttachPSWeights(events)
+        # tt_cor.AttachScaleWeights(events)
 
         ####### Fill Histogram #######
         hout = self._histo_dict
@@ -123,18 +123,18 @@ class AnalysisProcessor(processor.ProcessorABC):
         hout["SumOfWeights"].fill(process=dataset, SumOfWeights=counts, weight=wgts, eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
         
         # Fill ISR/FSR histos
-        hout["SumOfWeights_ISRUp"].fill(process=dataset,   SumOfWeights=counts, weight=wgts*events.ISRUp,   eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
-        hout["SumOfWeights_ISRDown"].fill(process=dataset, SumOfWeights=counts, weight=wgts*events.ISRDown, eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
-        hout["SumOfWeights_FSRUp"].fill(process=dataset,   SumOfWeights=counts, weight=wgts*events.FSRUp,   eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
-        hout["SumOfWeights_FSRDown"].fill(process=dataset, SumOfWeights=counts, weight=wgts*events.FSRDown, eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs) 
+        # hout["SumOfWeights_ISRUp"].fill(process=dataset,   SumOfWeights=counts, weight=wgts*events.ISRUp,   eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
+        # hout["SumOfWeights_ISRDown"].fill(process=dataset, SumOfWeights=counts, weight=wgts*events.ISRDown, eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
+        # hout["SumOfWeights_FSRUp"].fill(process=dataset,   SumOfWeights=counts, weight=wgts*events.FSRUp,   eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
+        # hout["SumOfWeights_FSRDown"].fill(process=dataset, SumOfWeights=counts, weight=wgts*events.FSRDown, eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs) 
        
-        # Fill renorm/fact histos
-        hout["SumOfWeights_renormUp"].fill(process=dataset,       SumOfWeights=counts, weight=wgts*events.renormUp,       eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
-        hout["SumOfWeights_renormDown"].fill(process=dataset,     SumOfWeights=counts, weight=wgts*events.renormDown,     eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
-        hout["SumOfWeights_factUp"].fill(process=dataset,         SumOfWeights=counts, weight=wgts*events.factUp,         eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
-        hout["SumOfWeights_factDown"].fill(process=dataset,       SumOfWeights=counts, weight=wgts*events.factDown,       eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
-        hout["SumOfWeights_renormfactUp"].fill(process=dataset,   SumOfWeights=counts, weight=wgts*events.renormfactUp,   eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
-        hout["SumOfWeights_renormfactDown"].fill(process=dataset, SumOfWeights=counts, weight=wgts*events.renormfactDown, eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)        
+        # # Fill renorm/fact histos
+        # hout["SumOfWeights_renormUp"].fill(process=dataset,       SumOfWeights=counts, weight=wgts*events.renormUp,       eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
+        # hout["SumOfWeights_renormDown"].fill(process=dataset,     SumOfWeights=counts, weight=wgts*events.renormDown,     eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
+        # hout["SumOfWeights_factUp"].fill(process=dataset,         SumOfWeights=counts, weight=wgts*events.factUp,         eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
+        # hout["SumOfWeights_factDown"].fill(process=dataset,       SumOfWeights=counts, weight=wgts*events.factDown,       eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
+        # hout["SumOfWeights_renormfactUp"].fill(process=dataset,   SumOfWeights=counts, weight=wgts*events.renormfactUp,   eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)
+        # hout["SumOfWeights_renormfactDown"].fill(process=dataset, SumOfWeights=counts, weight=wgts*events.renormfactDown, eft_coeff=eft_coeffs, eft_err_coeff=eft_w2_coeffs)        
 
         return hout
 

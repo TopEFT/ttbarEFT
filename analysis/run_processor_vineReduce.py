@@ -122,6 +122,7 @@ if __name__ == '__main__':
     parser.add_argument('--hist-list', action='extend', nargs='+', help = 'Specify a list of histograms to fill.')
     parser.add_argument('--port', default='9123-9130', help = 'Specify the Work Queue port. An integer PORT or an integer range PORT_MIN-PORT_MAX.')
     parser.add_argument('--processor', '-p', default='analysis_processor.py', help='Specify processor file name')
+    parser.add_argument('--aggregate', default=True, help='Specify if output historgrams from different datasets should be combined')
 
     args        = parser.parse_args()
     inputFile   = args.inputFile
@@ -138,6 +139,7 @@ if __name__ == '__main__':
     proc_name   = args.processor[:-3]
     hist_lst    = args.hist_list
     ports       = args.port
+    aggregate   = args.aggregate
 
     print("\n\nrunning with processor: ", proc_file, '\n')
     analysis_processor = importlib.import_module(proc_name)
@@ -277,14 +279,19 @@ if __name__ == '__main__':
         
         ddr_hists = ddr.compute()
 
-        hists = {}
-        for ch in ddr_hists.keys():
-            hists[ch] = {}
-            variables = list(ddr_hists[ch][next(iter(ddr_hists[ch]))].keys())
+        if aggregate: 
+            print(f"Combining histograms from different datasets...")
+            hists = {}
+            for ch in ddr_hists.keys():
+                hists[ch] = {}
+                variables = list(ddr_hists[ch][next(iter(ddr_hists[ch]))].keys())
 
-            for var in variables: 
-                h_list = [ddr_hists[ch][dataset][var] for dataset in ddr_hists[ch]]
-                hists[ch][var] = functools.reduce(operator.add, h_list)
+                for var in variables: 
+                    h_list = [ddr_hists[ch][dataset][var] for dataset in ddr_hists[ch]]
+                    hists[ch][var] = functools.reduce(operator.add, h_list)
+
+        else: 
+            hists = ddr_hists
 
         print(f"Computing done!")
 

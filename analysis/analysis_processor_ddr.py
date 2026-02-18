@@ -38,6 +38,28 @@ get_tt_param = GetParam(ttbarEFT_path("params/params.json"))
 NanoAODSchema.warn_missing_crossrefs = False
 np.seterr(divide='ignore', invalid='ignore', over='ignore')
 
+# compare against topcoffea.modules.eft_helper.calc_eft_weights
+def calc_eft_weights(eft_coeffs, wc_vals):
+    '''
+    Returns an array that contains the event weight for each event.
+    eft_coeffs: Array of eft fit coefficients for each event
+    wc_vals: wilson coefficient values desired for the event weight calculation, listed in the same order as the wc_lst
+             such that the multiplication with eft_coeffs is correct
+             The correct ordering can be achieved with the order_wc_values function
+    '''
+    event_weight = np.empty_like(eft_coeffs)
+
+    wcs = np.hstack((np.ones(1),wc_vals))
+    wc_cross_terms = []
+    index = 0
+    for j in range(len(wcs)):
+        for k in range (j+1):
+            term = wcs[j]*wcs[k]
+            wc_cross_terms.append(term)
+    event_weight = np.sum(np.multiply(wc_cross_terms, eft_coeffs), axis=1)
+
+    return event_weight
+
 
 class AnalysisProcessor(processor.ProcessorABC):
     def __init__(self, samples, lep_cat, wc_names_lst=[], hist_lst=None, dtype=np.float32):
@@ -193,7 +215,8 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         ######### Jet Selections #########
         jets['isPres'] = tt_os.is_pres_jet(jets) 
-        goodJets = jets[jets.isPres] 
+        jets['isClean'] = tt_os.isClean(jets, ele_good, drmin=0.4)& tt_os.isClean(jets, mu_good, drmin=0.4)
+        goodJets = jets[jets.isPres & jets.isClean]
 
         # njets = ak.num(goodJets)
         # ht = ak.sum(goodJets.pt,axis=-1)
@@ -223,7 +246,8 @@ class AnalysisProcessor(processor.ProcessorABC):
         data_syst_lst = []              #TODO
         obj_correction_syst_lst = []    #TODO
         wgt_correction_syst_lst = [
-            'lepSF_up', 'lepSF_down', 'trigSF_up', 'trigSF_down', # Exp systs
+            'lepSFUp', 'lepSFDown', 'trigSFUp', 'trigSFDown', # Exp systs
+            'FSRUp', 'FSRDown', 'ISRUp', 'ISRDown', 'renormUp', 'renormDown', 'factUp', 'factDown', # Theory systs
         ]
 
         weights_obj_base = coffea.analysis_tools.Weights(len(events),storeIndividual=True)
@@ -243,7 +267,7 @@ class AnalysisProcessor(processor.ProcessorABC):
             weights_obj_base.add('trigSF', *tt_cor.GetTrigSF(events, lep_cat)) # a bit misleading, ee is trigger efficiencies so up/down is set to ones
 
             weights_obj_base.add('L1prefire', events.L1PreFiringWeight.Nom, events.L1PreFiringWeight.Up, events.L1PreFiringWeight.Dn)
-            weights_obj_base.add('PU', tt_cor.GetPUSF((events.Pileup.nTrueInt), year), tt_cor.GetPUSF(events.Pileup.nTrueInt, year, 'up'), tt_cor.GetPUSF(events.Pileup.nTrueInt, year, 'down'))
+            weights_obj_base.add('PU', tt_cor.GetPUSF(events.Pileup.nTrueInt, year), tt_cor.GetPUSF(events.Pileup.nTrueInt, year, 'up'), tt_cor.GetPUSF(events.Pileup.nTrueInt, year, 'down'))
 
             tt_cor.AttachScaleWeights(events) 
             weights_obj_base.add('renorm', events.nom, events.renormUp*(sow/sow_renormUp), events.renormDown*(sow/sow_renormDown))
@@ -308,6 +332,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         dense_axis_variables['njets'] = njets
         dense_axis_variables['nbjets'] = nbtagsm
         dense_axis_variables['mll'] = mll
+        dense_axis_variables['mllZ'] = mll
         dense_axis_variables['ptll'] = ptll
         dense_axis_variables['l0pt'] = l0.pt
         dense_axis_variables['l0eta'] = l0.eta 
@@ -330,7 +355,9 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         for jet_cat in CR_cat_dict[lep_cat]['jet_list']: 
             # masks that are applied to all categories
-            cuts_list = ['jetvetomap', 'bmask_exactly0med']
+            # cuts_list = ['jetvetomap', 'bmask_exactly0med']
+            cuts_list = ['jetvetomap']
+
 
             if isData:
                 cuts_list.append('is_good_lumi')
@@ -363,19 +390,27 @@ class AnalysisProcessor(processor.ProcessorABC):
                     "eft_coeff"     : eft_coeffs_cut,
                 }
 
+                hout[dense_axis_name].fill(**axes_fill_info_dict)
+
+                # in the future add this as an option
+                if eft_coeffs is not None:
+                    event_weights_SM = calc_eft_weights(eft_coeffs,np.zeros(len(self._wc_names_lst)))
+                    sumw2 = np.square(weight*event_weights_SM)
+                else: 
+                    sumw2 = np.square(weight)
+
                 sumw2axes_fill_info_dict = {
-                    dense_axis_name+"_sumw2" : dense_axis_vals[event_selection_mask],
-                    "process"       : histAxisName,
-                    "weight"        : np.square(weight[event_selection_mask]),
-                    "eft_coeff"     : eft_coeffs_cut,
+                    dense_axis_name+"_sumw2"    : dense_axis_vals[event_selection_mask],
+                    "process"                   : histAxisName,
+                    "weight"                    : sumw2[event_selection_mask],
+                    "eft_coeff"                 : None,
                 }
 
-                hout[dense_axis_name].fill(**axes_fill_info_dict)
                 hout[dense_axis_name+"_sumw2"].fill(**sumw2axes_fill_info_dict)
 
         return hout
 
+
     def postprocess(self, accumulator):
         return accumulator
-
 
