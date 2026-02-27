@@ -22,9 +22,40 @@ from ttbarEFT.modules import plotting_tools_histEFT as plt_tools
 
 np.seterr(divide='ignore', invalid='ignore')
 
+def get_binomial_error(h_eff, h_tot):
+        """
+        Calculates the binomial error
+        """
+        eff = np.array(h_eff)
+        tot = np.array(h_tot)
+        
+        with np.errstate(divide='ignore', invalid='ignore'):
+            error = np.sqrt(eff * (1 - eff) / tot)
+            
+        return error.tolist()
+
+def make_err_plot(h_val, xbins, ybins, title, hmin=None, hmax=None, ncolors=20):
+
+    # fig, ax = plt.subplots(figsize=(16, 8))
+    fig, ax = plt.subplots(figsize=(16, 8))
+
+    if hmin==None:
+        hmin = np.nanmin(h_val)
+    if hmax==None:
+        hmax = np.nanmax(h_val)
+
+    cmap = plt.get_cmap("viridis", ncolors) #18
+
+    hep.hist2dplot(h_val, xbins=xbins, ybins=ybins,labels=True, labels_round=3, labels_fontsize=6, cbarextend=True, cmap=cmap, cmin=hmin, cmax=hmax)
+    ax.set_title(f"{title}")
+    ax.set_xlim([30, 1000])
+
+    return fig, ax
+
 
 def make_2d_plot(h_2d, title, hmin=None, hmax=None, ncolors=20):
 
+    # fig, ax = plt.subplots(figsize=(16, 8))
     fig, ax = plt.subplots(figsize=(16, 8))
 
     if hmin==None:
@@ -78,10 +109,31 @@ if __name__ == "__main__":
             fig, ax = make_2d_plot(h_eff, title=f"{p}_Eff_{flav}", hmin=hmin, hmax=hmax, ncolors=19)
             plt_tools.save_figure(fig, f"{p}_Eff_{flav}", outdir)
 
-            fig, ax = make_2d_plot(h_num, title=f"{p}_Nbtag_{flav}", hmin=hmin, hmax=hmax, ncolors=19)
+            fig, ax = make_2d_plot(h_num, title=f"{p}_Nbtag_{flav}", ncolors=19)
             plt_tools.save_figure(fig, f"{p}_Nbtag_{flav}", outdir)
 
-            fig, ax = make_2d_plot(h_den, title=f"{p}_Ntotal_{flav}", hmin=hmin, hmax=hmax, ncolors=19)
+            fig, ax = make_2d_plot(h_den, title=f"{p}_Ntotal_{flav}", ncolors=19)
             plt_tools.save_figure(fig, f"{p}_Ntotal_{flav}", outdir)
 
+            pt_bins = [20, 30, 50, 70, 100, 140, 200, 300, 600, 1000]
+            eta_bins = [0, 0.6, 1.2, 2.4]
+
+            fig, ax = make_err_plot(get_binomial_error(h_eff.values(), h_den.values()), xbins=pt_bins, ybins=eta_bins, title=f"{p}_uncert_{flav}", hmin=0, hmax=0.25)
+            plt_tools.save_figure(fig, f"{p}_uncert_{flav}", outdir)
+
+            # print(f"h_ref: {h_ref.values()}")
+            # print(f"h_denom: {hists[{'process': 'TTTo2L2Nu_centralUL17', 'flav': 'b', 'WP':'all'}].values()}")
+
+            # h_eff_vals = h_ref.values()
+            # h_denom_vals = hists[{'process': 'TTTo2L2Nu_centralUL17', 'flav': 'b', 'WP':'all'}].values()
+
+    # make diff plots
+    h_ref = hists[{'process': 'TTTo2L2Nu_centralUL17', 'flav': 'b', 'WP':'medium'}]/hists[{'process': 'TTTo2L2Nu_centralUL17', 'flav': 'b', 'WP':'all'}]
+    h_sub1 = hists[{'process': 'DYJetsToLL_centralUL17', 'flav':'b', 'WP':'medium'}]/hists[{'process': 'DYJetsToLL_centralUL17', 'flav': 'b', 'WP':'all'}]
+    h_sub2 = hists[{'process': 'tW', 'flav':'b', 'WP':'medium'}]/hists[{'process': 'tW', 'flav': 'b', 'WP':'all'}]
+
+    fig, ax = make_2d_plot(h_ref-h_sub1, title=f"Powheg bEff - DYJets bEff", hmin=-0.1, hmax=0.12, ncolors=6)
+    plt_tools.save_figure(fig, f"Diff_bEff_DYJets", outdir)
+    fig, ax = make_2d_plot(h_ref-h_sub2, title=f"Powheg bEff - tW bEff", hmin=-0.1, hmax=0.12, ncolors=6)
+    plt_tools.save_figure(fig, f"Diff_bEff_tW", outdir)
 
