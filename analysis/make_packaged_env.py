@@ -1,5 +1,4 @@
-import topcoffea.modules.remote_environment as remote_environment
-# import ttbarEFT.modules.new_remote_environment as remote_environment
+import ttbarEFT.modules.remote_environment as remote_environment
 import time
 
 if __name__ == '__main__':
