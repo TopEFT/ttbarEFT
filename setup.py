@@ -14,6 +14,8 @@ setuptools.setup(
             "data/POG/MUO/*/*.json.gz",
             "data/POG/MUO/*/*.json",
             "data/POG/LUM/*/*.json.gz",
+            "data/POG/BTV/*/*.json.gz",
+            "data/btagSF/UL/*",
             "data/leptonSF/elec/*.root"
         ]
     }
