@@ -27,9 +27,9 @@ def is_pres_jet(jet):
 
     pt_mask = jet.pt > 30
     eta_mask = (abs(jet.eta) < 2.4)
-    id_mask = jet.jetId >= 6 #using jet.isTightLeptonVeto==True should be equivalent
-    puId_mask = jet.puId > 1 
-    
+    id_mask = jet.jetId >= 6 #2016: jetID==7 means pass loose, tight, tightLepVeto ID; 2017-2018: jetID==6 means pass tight and tightLepVeto ID
+    # puId_mask = jet.puId > 1 
+    puId_mask = (jet.puId > 1) | (jet.pt >= 50) # Jets with pT>=50 always pass 
 
     return (pt_mask & eta_mask & id_mask & puId_mask)
 

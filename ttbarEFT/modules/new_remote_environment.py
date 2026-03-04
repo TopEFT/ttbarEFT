@@ -8,6 +8,8 @@ import logging
 import glob
 import os
 import re
+import conda_pack
+import time
 from pathlib import Path
 
 from typing import Dict, List, Optional
@@ -19,16 +21,16 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s:%(levelname)s:%(mess
 
 env_dir_cache = Path.cwd().joinpath(Path('topeft-envs'))
 
-# py_version = "{}.{}.{}".format(
-    # sys.version_info[0], sys.version_info[1], sys.version_info[2]
-# )  # 3.8 or 3.9, or etc.
+py_version = "{}.{}.{}".format(
+    sys.version_info[0], sys.version_info[1], sys.version_info[2]
+)  # 3.8 or 3.9, or etc.
 
 default_modules = {
     "conda": {
         "channels": ["conda-forge"],
         "packages": [
             # f"python={py_version}",
-            "python",   # python version comes from the pinning file which matches the current env version
+            "python",
             "awkward=2.8.7",
             "coffea=2025.7.3",
             "numpy",
@@ -89,14 +91,17 @@ def _check_current_env(spec: Dict):
     return spec
 
 
-def _create_env(env_name: str, spec: Dict, force: bool = False):
+def _create_env(env_name: str, spec: Dict, force: bool, quick: bool, pip_paths: Dict):
     if force:
         logger.info("Forcing rebuilding of {}".format(env_name))
+        if quick:
+            if check_quick_rebuild(env_name, pip_paths):
+                return env_name 
         Path(env_name).unlink(missing_ok=True)
     elif Path(env_name).exists():
         logger.info("Found in cache {}".format(env_name))
         return env_name
-
+    # check if we can just install local pip
     with tempfile.NamedTemporaryFile() as f:
         logger.info("Checking current conda environment")
         spec = _check_current_env(spec)
@@ -108,6 +113,33 @@ def _create_env(env_name: str, spec: Dict, force: bool = False):
         subprocess.check_call(['poncho_package_create', f.name, env_name])
         return env_name
 
+
+def check_quick_rebuild(env_name: str, pip_paths: Dict):
+    logger.info("Checking quick rebuild of {}".format(env_name))
+    if not Path(env_name).exists():
+        return False
+    # attempt quick update
+    # 1. extract existing environment
+    with tempfile.TemporaryDirectory(prefix="poncho_env") as env_dir:
+        logger.info("unpacking existing environment {} to {}".format(env_name, env_dir))
+        subprocess.check_call(['tar', '-xzf', env_name, '-C', env_dir])
+    # 2. Remove editable pip packages 
+        logger.info("Removing local pip packages from {}".format(env_dir))
+        for k, v in pip_paths.items():
+            subprocess.check_call([f'{env_dir}/bin/python', '-m', 'pip', 'uninstall', '-y', k])
+    # 3. Reinstall editable pip packages
+        logger.info("Reinstalling local pip packages to {}".format(env_dir))
+        for k, v in pip_paths.items():
+            logger.info("Reinstalling local pip package {} to {}".format(k, env_dir))
+            subprocess.check_call([f'{env_dir}/bin/python', '-m', 'pip', 'install', v])
+    # 4. Conda pack updated environment
+        logger.info("Packaging new environment file from {}".format(env_dir))
+        Path(env_name).unlink(missing_ok=True)
+        tmp_path = Path(env_name).with_suffix("").with_suffix("")
+        subprocess.check_call(['cp', '-r', env_dir, tmp_path])
+        subprocess.check_call(['poncho_package_create', '--ignore-editable-packages', str(tmp_path), env_name])
+        Path(tmp_path).unlink(missing_ok=True)
+    return True
 
 def _find_local_pip():
     edit_raw = subprocess.check_output([sys.executable, '-m' 'pip', 'list', '--editable']).decode()
@@ -188,6 +220,7 @@ def get_environment(
     extra_pip: Optional[List[str]] = None,
     extra_pip_local: Optional[dict[str]] = None,
     force: bool = False,
+    quick: bool = False,
     unstaged: str = "rebuild",
     cache_size: int = 3,
 ):
@@ -197,21 +230,25 @@ def get_environment(
     spec = dict(default_modules)
     spec_pip_local_to_watch = dict(pip_local_to_watch)
     if extra_conda:
-        spec["conda"]["packages"].extend(extra_conda)
+        spec["conda"]["packages"].extend(extra_conda) 
     if extra_pip:
         spec["pip"].extend(extra_pip)
     if extra_pip_local:
         spec["pip"].extend(extra_pip_local)
         spec_pip_local_to_watch.update(extra_pip_local)
-
+    
     packages_hash = hashlib.sha256(json.dumps(spec).encode()).hexdigest()[0:8]
+    conda_hash = hashlib.sha256(json.dumps(spec["conda"]["packages"]).encode()).hexdigest()[0:8]
+    pip_hash = hashlib.sha256(json.dumps(spec["pip"]).encode()).hexdigest()[0:8]
+
     pip_paths = _find_local_pip()
     pip_commits = _commits_local_pip(pip_paths)
     pip_check = _compute_commit(pip_paths, pip_commits)
 
-    env_name = str(Path(env_dir_cache).joinpath("env_spec_{}_edit_{}".format(packages_hash, pip_check)).with_suffix(".tar.gz"))
+    #env_name = str(Path(env_dir_cache).joinpath("env_spec_{}_edit_{}".format(packages_hash, pip_check)).with_suffix(".tar.gz"))
+    env_name = str(Path(env_dir_cache).joinpath("env_spec_{}_{}_edit_{}".format(conda_hash, pip_hash, pip_check)).with_suffix(".tar.gz"))
     _clean_cache(cache_size, env_name)
-
+    print(env_name)
     if pip_check == 'HEAD':
         changed = [p for p in pip_commits if pip_commits[p] == 'HEAD']
         if unstaged == 'fail':
@@ -220,7 +257,7 @@ def get_environment(
             force = True
             logger.warning("Rebuilding environment because unstaged changes in {}".format(', '.join([Path(p).name for p in changed])))
 
-    return _create_env(env_name, spec, force)
+    return _create_env(env_name, spec, force, quick, pip_paths)
 
 
 class UnstagedChanges(Exception):

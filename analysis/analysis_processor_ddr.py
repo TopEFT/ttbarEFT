@@ -277,6 +277,28 @@ class AnalysisProcessor(processor.ProcessorABC):
             weights_obj_base.add('ISR', events.nom, events.ISRUp*(sow/sow_ISRUp), events.ISRDown*(sow/sow_ISRDown))
             weights_obj_base.add('FSR', events.nom, events.FSRUp*(sow/sow_FSRUp), events.FSRDown*(sow/sow_FSRDown))
 
+
+            # # Workaround to use UL16APV SFs for UL16 for light jets #from topEFT
+            #     if year == "2016":
+            #         year_light = "2016APV"
+            #     else:
+            #         year_light = year
+
+            # btag_effM_light = GetBtagEff({which jets here?}, year, 'medium')
+            # get SF from correction lib t
+            light_jets = goodJets[goodJets.hadronFlavour == 0]
+            light_eff = tt_cor.GetBtagEff(year=year, jets=light_jets, wp='medium')
+            light_bSF = tt_cor.GetBtagSF(jet_collection=light_jets, wp='M', year=year, method='deepJet_incl', syst='central')
+            light_btagweight = tt_cor.GetBtag_method1a_wgt_singlewp(light_eff, light_bSF, passes_tag=light_jets.btagDeepFlavB > btagwpm)
+
+            bc_jets = goodJets[goodJets.hadronFlavour > 0]
+            bc_eff = tt_cor.GetBtagEff(year=year, jets=bc_jets, wp='medium')
+            bc_bSF = tt_cor.GetBtagSF(jet_collection=bc_jets, wp='M', year=year, method='deepJet_comb', syst='central')
+            bc_btagweight = tt_cor.GetBtag_method1a_wgt_singlewp(bc_eff, bc_bSF, passes_tag=bc_jets.btagDeepFlavB > btagwpm)
+
+            weights_obj_base.add('btagSF', light_btagweight*bc_btagweight)
+
+
         ######### Create objects for dense axes ##########
         leps_sorted = ak.pad_none(leps_sorted, 2)
         l0 = leps_sorted[:,0]
@@ -319,12 +341,12 @@ class AnalysisProcessor(processor.ProcessorABC):
         selections.add("atleast_1j", (njets>=1))
 
         if isData: 
-            selections.add("ee",  (events.is_ee & events.is2los & pass_trg)) # data always has trig pass requirement
+            selections.add("ee",  (events.is_ee & events.is2los & pass_trg))    # data always has trig pass requirement
         else: 
-            selections.add("ee",  (events.is_ee & events.is2los))           # MC for ee has efficiencies, so no pass_trg requirement
+            selections.add("ee",  (events.is_ee & events.is2los))               # MC for ee has efficiencies, so no pass_trg requirement
         
-        selections.add("em",  (events.is_em & events.is2los & pass_trg))    # MC for emu has SF, so use pass_trg requirement 
-        selections.add("mm",  (events.is_mm & events.is2los & pass_trg))    # MC for mumu has SF, so use pass_trg requirement
+        selections.add("em",  (events.is_em & events.is2los & pass_trg))        # MC for emu has SF, so use pass_trg requirement 
+        selections.add("mm",  (events.is_mm & events.is2los & pass_trg))        # MC for mumu has SF, so use pass_trg requirement
 
         ######### Fill dense axes variables ##########
 
@@ -355,8 +377,8 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         for jet_cat in CR_cat_dict[lep_cat]['jet_list']: 
             # masks that are applied to all categories
-            # cuts_list = ['jetvetomap', 'bmask_exactly0med']
-            cuts_list = ['jetvetomap']
+            cuts_list = ['jetvetomap', 'bmask_exactly0med']
+            # cuts_list = ['jetvetomap']
 
 
             if isData:

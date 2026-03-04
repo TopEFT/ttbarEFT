@@ -43,12 +43,15 @@ class AnalysisProcessor(processor.ProcessorABC):
         jet_pt_axis = hist.axis.Variable([20, 30, 50, 70, 100, 140, 200, 300, 600, 1000], name='jpt', label=r'Jet p_{T} [GeV]')
         jet_eta_axis = hist.axis.Variable([0, 0.6, 1.2, 2.4], name='jeta', label=r'Jet \eta [GeV]')
         jet_flav_axis = hist.axis.StrCategory([], name='flav', growth=True)
+        # jet_flavor_axis = hist.axis.Regular(5, 0, 5, name="flavour", label="jet flavour (int)")
+        jet_flavor_axis = hist.axis.IntCategory([0,1,2,3,4,5], name="flavour", label="jet flavour (int)")
         wp_axis = hist.axis.StrCategory([], name="WP", growth=True)
 
         histograms = {}
         histograms['jetpt'] = hist.Hist(wp_axis, proc_axis, jet_flav_axis, jet_pt_axis)
         histograms['jeteta'] = hist.Hist(wp_axis, proc_axis, jet_flav_axis, jet_eta_axis)
         histograms['jetpteta'] = hist.Hist(wp_axis, proc_axis, jet_flav_axis, jet_pt_axis, jet_eta_axis)
+        histograms['jetptetaflav'] = hist.Hist(wp_axis, jet_flavor_axis, jet_pt_axis, jet_eta_axis)
 
         self._accumulator = histograms
 
@@ -122,21 +125,39 @@ class AnalysisProcessor(processor.ProcessorABC):
             'l': (np.abs(goodJets.hadronFlavour) <= 3), 
         }
 
-        for jetflav in flavSelection.keys():
-            for wp in btagSelection.keys():
-                mask = (flavSelection[jetflav])&(btagSelection[wp])&(events.is2los)
-                selectedJets = goodJets[mask]
+        # for jetflav in flavSelection.keys():
+        #     for wp in btagSelection.keys():
+        #         mask = (flavSelection[jetflav])&(btagSelection[wp])&(events.is2los)
+        #         selectedJets = goodJets[mask]
 
-                pts = ak.flatten(selectedJets.pt)
-                etas = ak.flatten(selectedJets.eta)
-                absetas = ak.flatten(np.abs(selectedJets.eta))
+        #         pts = ak.flatten(selectedJets.pt)
+        #         etas = ak.flatten(selectedJets.eta)
+        #         absetas = ak.flatten(np.abs(selectedJets.eta))
 
-                flavarray = np.zeros_like(pts) if jetflav == 'l' else (np.ones_like(pts)*(4 if jetflav=='c' else 5))
-                weights = np.ones_like(pts)
+        #         flavarray = np.zeros_like(pts) if jetflav == 'l' else (np.ones_like(pts)*(4 if jetflav=='c' else 5))
+        #         weights = np.ones_like(pts)
 
-                hout['jetpt'].fill(WP=wp, process=histAxisName, flav=jetflav, jpt=pts, weight=weights)
-                hout['jeteta'].fill(WP=wp, process=histAxisName, flav=jetflav, jeta=etas, weight=weights)
-                hout['jetpteta'].fill(WP=wp, process=histAxisName, flav=jetflav, jpt=pts, jeta=absetas, weight=weights)
+        #         hout['jetpt'].fill(WP=wp, process=histAxisName, flav=jetflav, jpt=pts, weight=weights)
+        #         hout['jeteta'].fill(WP=wp, process=histAxisName, flav=jetflav, jeta=etas, weight=weights)
+        #         hout['jetpteta'].fill(WP=wp, process=histAxisName, flav=jetflav, jpt=pts, jeta=absetas, weight=weights)
+        #         hout['jetptetaflav'].fill(WP=wp, process=histAxisName, flavour=flavarray, jpt=pts, jeta=absetas, weight=weights)
+
+        for wp in btagSelection.keys():
+            mask = (btagSelection[wp])&(events.is2los)
+            selectedJets = goodJets[mask]
+
+            pts = ak.flatten(selectedJets.pt)
+            etas = ak.flatten(selectedJets.eta)
+            absetas = ak.flatten(np.abs(selectedJets.eta))
+            flavarray = ak.flatten(selectedJets.hadronFlavour)
+
+            # flavarray = np.zeros_like(pts) if jetflav == 'l' else (np.ones_like(pts)*(4 if jetflav=='c' else 5))
+            # weights = np.ones_like(pts)
+
+            # hout['jetpt'].fill(WP=wp, process=histAxisName, flav=jetflav, jpt=pts, weight=weights)
+            # hout['jeteta'].fill(WP=wp, process=histAxisName, flav=jetflav, jeta=etas, weight=weights)
+            # hout['jetpteta'].fill(WP=wp, process=histAxisName, flav=jetflav, jpt=pts, jeta=absetas, weight=weights)
+            hout['jetptetaflav'].fill(WP=wp, flavour=flavarray, jpt=pts, jeta=absetas)
 
 
         return hout

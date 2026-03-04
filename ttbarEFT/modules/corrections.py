@@ -3,6 +3,7 @@ import pickle
 import gzip
 import awkward as ak
 import re
+import yaml
 
 import correctionlib
 
@@ -55,25 +56,6 @@ def AttachScaleWeights(events):
     Dynamically retrieves scale weights from LHEScaleWeight based on its __doc__.
 
     LHE scale variation weights (w_var / w_nominal)
-    Case 1: If there are 9 weights:
-        [0] is renscfact = 0.5d0 facscfact = 0.5d0
-        [1] is renscfact = 0.5d0 facscfact = 1d0
-        [2] is renscfact = 0.5d0 facscfact = 2d0
-        [3] is renscfact =   1d0 facscfact = 0.5d0
-        [4] is renscfact =   1d0 facscfact = 1d0
-        [5] is renscfact =   1d0 facscfact = 2d0
-        [6] is renscfact =   2d0 facscfact = 0.5d0
-        [7] is renscfact =   2d0 facscfact = 1d0
-        [8] is renscfact =   2d0 facscfact = 2d0
-    Case 2: If there are 8 weights:
-        [0] is MUF = "0.5" MUR = "0.5"
-        [1] is MUF = "1.0" MUR = "0.5"
-        [2] is MUF = "2.0" MUR = "0.5"
-        [3] is MUF = "0.5" MUR = "1.0"
-        [4] is MUF = "2.0" MUR = "1.0"
-        [5] is MUF = "0.5" MUR = "2.0"
-        [6] is MUF = "1.0" MUR = "2.0"
-        [7] is MUF = "2.0" MUR = "2.0"
     """
 
     # Check if LHEScaleWeight exists in the event
@@ -236,6 +218,78 @@ def ApplyJetVetoMaps(jets, year):
     veto_map_event = ak.sum(jet_vetomap_score, axis=-1)
 
     return veto_map_event
+
+
+def GetBtagEff(year, jets, wp='medium'):
+    # similar to GetMCeffFunc in topeft.modules.corrections
+    if year not in clib_year_map.keys():
+        raise Exception(f"Error: Unknown year \"{year}\".")
+
+    pathToBtagMCeff = ttbarEFT_path('data/btagSF/UL/btagMCeff_%s.pkl.gz'%year)
+    hists = {}
+    with gzip.open(pathToBtagMCeff) as fin:
+        hists = pickle.load(fin)['btag']
+
+    h = hists['jetptetaflav']
+    hnum = h[{'WP': wp}]
+    hden = h[{'WP': 'all'}]
+
+    eff = hnum/hden
+    eff_lookup = lookup_tools.dense_lookup.dense_lookup(
+        eff.values(), 
+        [
+            eff.axes['jpt'].edges,
+            eff.axes['jeta'].edges,
+            eff.axes['flavour'].edges
+        ]
+    )
+
+    # fun = lambda pt, abseta, flav: eff_lookup(pt,abseta,flav)
+    # return fun
+    return eff_lookup(jets.pt, np.abs(jets.eta), jets.hadronFlavour)
+
+
+def GetBtag_method1a_wgt_singlewp(eff,sf,passes_tag):
+    """
+    Evaluate btag method 1a weight for a single WP (https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagSFMethods)
+    - Takes as input a given array of eff and sf and a mask for whether or not the events pass a tag
+    - Returns P(DATA)/P(MC)
+    - Where P(MC) = Product over tagged (eff) * Product over not tagged (1-eff)
+    - Where P(DATA) = Product over tagged (eff*sf) * Product over not tagged (1-eff*sf)
+    """
+
+    p_mc = ak.prod(eff[passes_tag],axis=-1) * ak.prod(1-eff[~passes_tag],axis=-1)
+    p_data = ak.prod(eff[passes_tag]*sf[passes_tag],axis=-1) * ak.prod(1-eff[~passes_tag]*sf[~passes_tag],axis=-1)
+    wgt = p_data/p_mc
+
+    return wgt
+
+
+def GetBtagSF(jet_collection,wp,year,method,syst):
+    """
+    Get btag SF from central correctionlib json
+    - similar to topcoffea.modules.corrections.btag_sf_eval()
+    - usage: btag_sfL_up   = tc_cor.btag_sf_eval(jets_flav, "L",sys_year,f"deepJet_{dJ_tag}",f"up_{corrtype}")
+    - usage: weights_obj_base_for_kinematic_syst.add(f"btagSF{b_syst}", events.nom, btag_w_up, btag_w_down)
+    """
+
+    clib_year = clib_year_map[year]
+    fname = ttbarEFT_path(f"data/POG/BTV/{clib_year}/btagging.json.gz")
+
+    # Flatten the input (until correctionlib handles jagged data natively)
+    abseta_flat = ak.flatten(abs(jet_collection.eta))
+    pt_flat = ak.flatten(jet_collection.pt)
+    flav_flat = ak.flatten(jet_collection.hadronFlavour)
+
+    # For now, cap all pt at 1000 https://cms-talk.web.cern.ch/t/question-about-evaluating-sfs-with-correctionlib/31763
+    pt_flat = ak.where(pt_flat>1000.0,1000.0,pt_flat)
+
+    # Evaluate the SF
+    ceval = correctionlib.CorrectionSet.from_file(fname)
+    sf_flat = ceval[method].evaluate(syst,wp,flav_flat,abseta_flat,pt_flat)
+    sf = ak.unflatten(sf_flat,ak.num(jet_collection.pt))
+
+    return sf
 
 
 ########################################
