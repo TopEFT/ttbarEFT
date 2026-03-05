@@ -237,16 +237,13 @@ def GetBtagEff(year, jets, wp='medium'):
     eff = hnum/hden
     eff_lookup = lookup_tools.dense_lookup.dense_lookup(
         eff.values(), 
-        [
-            eff.axes['jpt'].edges,
-            eff.axes['jeta'].edges,
-            eff.axes['flavour'].edges
-        ]
+        [ax.edges for ax in eff.axes]
     )
 
-    # fun = lambda pt, abseta, flav: eff_lookup(pt,abseta,flav)
-    # return fun
-    return eff_lookup(jets.pt, np.abs(jets.eta), jets.hadronFlavour)
+    print(f"\n\n eff_lookup: {eff_lookup}")
+
+    # this order must match the order of ax in eff, which is based on btagMCeff_processor order when the hist is initialized
+    return eff_lookup(jets.hadronFlavour, jets.pt, np.abs(jets.eta))
 
 
 def GetBtag_method1a_wgt_singlewp(eff,sf,passes_tag):

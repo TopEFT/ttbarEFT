@@ -44,7 +44,8 @@ class AnalysisProcessor(processor.ProcessorABC):
         jet_eta_axis = hist.axis.Variable([0, 0.6, 1.2, 2.4], name='jeta', label=r'Jet \eta [GeV]')
         jet_flav_axis = hist.axis.StrCategory([], name='flav', growth=True)
         # jet_flavor_axis = hist.axis.Regular(5, 0, 5, name="flavour", label="jet flavour (int)")
-        jet_flavor_axis = hist.axis.IntCategory([0,1,2,3,4,5], name="flavour", label="jet flavour (int)")
+        # jet_flavor_axis = hist.axis.IntCategory([0,1,2,3,4,5], name="flavour", label="jet flavour (int)")
+        jet_flavor_axis = hist.axis.IntCategory([0,4,5], name="flavour", label="jet flavour (int)")
         wp_axis = hist.axis.StrCategory([], name="WP", growth=True)
 
         histograms = {}
@@ -157,7 +158,7 @@ class AnalysisProcessor(processor.ProcessorABC):
             # hout['jetpt'].fill(WP=wp, process=histAxisName, flav=jetflav, jpt=pts, weight=weights)
             # hout['jeteta'].fill(WP=wp, process=histAxisName, flav=jetflav, jeta=etas, weight=weights)
             # hout['jetpteta'].fill(WP=wp, process=histAxisName, flav=jetflav, jpt=pts, jeta=absetas, weight=weights)
-            hout['jetptetaflav'].fill(WP=wp, flavour=flavarray, jpt=pts, jeta=absetas)
+            hout['jetptetaflav'].fill(WP=wp, jpt=pts, jeta=absetas, flavour=flavarray)
 
 
         return hout

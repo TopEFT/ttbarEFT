@@ -62,11 +62,14 @@ def calc_eft_weights(eft_coeffs, wc_vals):
 
 
 class AnalysisProcessor(processor.ProcessorABC):
-    def __init__(self, samples, lep_cat, wc_names_lst=[], hist_lst=None, dtype=np.float32):
+    def __init__(self, samples, lep_cat, wc_names_lst=[], hist_lst=None, do_errors=False, do_systematics=False, dtype=np.float32):
         self._samples = samples
-        self._wc_names_lst = wc_names_lst
-        self._dtype = dtype 
         self._lep_cat = lep_cat
+        self._wc_names_lst = wc_names_lst
+        self._do_errors = do_errors
+        self._do_systematics = do_systematics
+        self._dtype = dtype 
+        
 
         proc_axis = hist.axis.StrCategory([], name="process", growth=True)
         chan_axis = hist.axis.StrCategory([], name="channel", growth=True)
@@ -88,17 +91,20 @@ class AnalysisProcessor(processor.ProcessorABC):
 
             histograms[name] = HistEFT(
                 proc_axis, 
+                syst_axis,
                 dense_axis,
                 wc_names = wc_names_lst, 
                 label=r'Events',
             )
 
-            histograms[name+'_sumw2'] = HistEFT(
-                proc_axis, 
-                sumw2_axis,
-                wc_names = wc_names_lst, 
-                label=r'Events',
-            )
+            if self._do_errors: 
+                histograms[name+'_sumw2'] = HistEFT(
+                    proc_axis, 
+                    syst_axis,
+                    sumw2_axis,
+                    wc_names = wc_names_lst, 
+                    label=r'Events',
+                )
 
         self._accumulator = histograms
 
@@ -246,8 +252,11 @@ class AnalysisProcessor(processor.ProcessorABC):
         data_syst_lst = []              #TODO
         obj_correction_syst_lst = []    #TODO
         wgt_correction_syst_lst = [
-            'lepSFUp', 'lepSFDown', 'trigSFUp', 'trigSFDown', # Exp systs
-            'FSRUp', 'FSRDown', 'ISRUp', 'ISRDown', 'renormUp', 'renormDown', 'factUp', 'factDown', # Theory systs
+            'lepSFUp', 'lepSFDown',                                                                                         # lepton systs
+            'trigSFUp', 'trigSFDown', 'L1prefireUp', 'L1prefireDown', "PUUp", "PUDown",                                     # Exp systs
+            'btagSFbc_correlatedUp', 'btagSFbc_correlatedDown', 'btagSFlight_correlatedUp', 'btagSFlight_correlatedDown',   # btag correlated systs
+            f'btagSFbc_{year}Up',f'btagSFbc_{year}Down',f'btagSFlight_{year}Up',f'btagSFlight_{year}Down',                  # btag uncorrelated systs
+            'FSRUp', 'FSRDown', 'ISRUp', 'ISRDown', 'renormUp', 'renormDown', 'factUp', 'factDown',                         # Theory systs
         ]
 
         weights_obj_base = coffea.analysis_tools.Weights(len(events),storeIndividual=True)
@@ -284,8 +293,6 @@ class AnalysisProcessor(processor.ProcessorABC):
             #     else:
             #         year_light = year
 
-            # btag_effM_light = GetBtagEff({which jets here?}, year, 'medium')
-            # get SF from correction lib t
             light_jets = goodJets[goodJets.hadronFlavour == 0]
             light_eff = tt_cor.GetBtagEff(year=year, jets=light_jets, wp='medium')
             light_bSF = tt_cor.GetBtagSF(jet_collection=light_jets, wp='M', year=year, method='deepJet_incl', syst='central')
@@ -296,7 +303,50 @@ class AnalysisProcessor(processor.ProcessorABC):
             bc_bSF = tt_cor.GetBtagSF(jet_collection=bc_jets, wp='M', year=year, method='deepJet_comb', syst='central')
             bc_btagweight = tt_cor.GetBtag_method1a_wgt_singlewp(bc_eff, bc_bSF, passes_tag=bc_jets.btagDeepFlavB > btagwpm)
 
-            weights_obj_base.add('btagSF', light_btagweight*bc_btagweight)
+            btag_eventweight = light_btagweight*bc_btagweight
+
+            weights_obj_base.add('btagSF', btag_eventweight)
+
+
+        # if self._do_systematics and not isData: syst_var_list = ["nominal"] + obj_correction_syst_lst
+        # else: syst_var_list = ['nominal']
+
+        # for syst_var in syst_var_list:
+
+            # must be inside `if not isData:` 
+            if self._do_systematics: # and syst_var=='nominal': 
+
+                for b_syst in ['bc_correlated', 'light_correlated', f"bc_{year}", f"light_{year}"]:
+                    if b_syst.endswith("correlated"): 
+                        corrtype = "correlated"
+                    else: 
+                        corrtype = "uncorrelated"
+
+                    if b_syst.startswith("light_"):
+                        syst_jets = light_jets
+                        syst_method= "deepJet_incl"
+                        syst_year = year
+                        btag_effM = light_eff
+                        fixed_btag_w = bc_btagweight
+                    elif b_syst.startswith("bc_"):
+                        syst_jets = bc_jets
+                        syst_method= "deepJet_comb"
+                        syst_year = year
+                        btag_effM = bc_eff
+                        fixed_btag_w = light_btagweight
+
+
+                    btag_SF_up = tt_cor.GetBtagSF(jet_collection=syst_jets, wp='M', year=year, method=syst_method, syst=f'up_{corrtype}')
+                    btag_SF_down = tt_cor.GetBtagSF(jet_collection=syst_jets, wp='M', year=year, method=syst_method, syst=f'down_{corrtype}')
+
+                    btagweight_up = tt_cor.GetBtag_method1a_wgt_singlewp(btag_effM, btag_SF_up, passes_tag=bc_jets.btagDeepFlavB > btagwpm)
+                    btagweight_down = tt_cor.GetBtag_method1a_wgt_singlewp(btag_effM, btag_SF_down, passes_tag=bc_jets.btagDeepFlavB > btagwpm)
+
+                    eventweight_up = fixed_btag_w * btagweight_up
+                    event_weight_down = fixed_btag_w * btagweight_down
+
+                    # TODO: maybe change events.nom to btag_eventweight? depends on how this will be used in combine
+                    weights_obj_base.add(f'btagSF{b_syst}', events.nom, eventweight_up/btag_eventweight, event_weight_down/btag_eventweight)
 
 
         ######### Create objects for dense axes ##########
@@ -380,7 +430,6 @@ class AnalysisProcessor(processor.ProcessorABC):
             cuts_list = ['jetvetomap', 'bmask_exactly0med']
             # cuts_list = ['jetvetomap']
 
-
             if isData:
                 cuts_list.append('is_good_lumi')
             
@@ -393,6 +442,7 @@ class AnalysisProcessor(processor.ProcessorABC):
 
             event_selection_mask = selections.all(*(cuts_list))
             eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
+
 
             for dense_axis_name, dense_axis_vals in dense_axis_variables.items():
                 # if the category requires zero jets, don't fill jet histograms
@@ -408,27 +458,30 @@ class AnalysisProcessor(processor.ProcessorABC):
                 axes_fill_info_dict = {
                     dense_axis_name : dense_axis_vals[event_selection_mask],
                     "process"       : histAxisName,
+                    "systematic"    : "nominal",
                     "weight"        : weight[event_selection_mask],
                     "eft_coeff"     : eft_coeffs_cut,
                 }
 
                 hout[dense_axis_name].fill(**axes_fill_info_dict)
 
-                # in the future add this as an option
-                if eft_coeffs is not None:
-                    event_weights_SM = calc_eft_weights(eft_coeffs,np.zeros(len(self._wc_names_lst)))
-                    sumw2 = np.square(weight*event_weights_SM)
-                else: 
-                    sumw2 = np.square(weight)
 
-                sumw2axes_fill_info_dict = {
-                    dense_axis_name+"_sumw2"    : dense_axis_vals[event_selection_mask],
-                    "process"                   : histAxisName,
-                    "weight"                    : sumw2[event_selection_mask],
-                    "eft_coeff"                 : None,
-                }
+                if self._do_errors: 
+                    if eft_coeffs is not None:
+                        event_weights_SM = calc_eft_weights(eft_coeffs,np.zeros(len(self._wc_names_lst)))
+                        sumw2 = np.square(weight*event_weights_SM)
+                    else: 
+                        sumw2 = np.square(weight)
 
-                hout[dense_axis_name+"_sumw2"].fill(**sumw2axes_fill_info_dict)
+                    sumw2axes_fill_info_dict = {
+                        dense_axis_name+"_sumw2"    : dense_axis_vals[event_selection_mask],
+                        "process"                   : histAxisName,
+                        "systematic"                : "nominal",
+                        "weight"                    : sumw2[event_selection_mask],
+                        "eft_coeff"                 : None,
+                    }
+
+                    hout[dense_axis_name+"_sumw2"].fill(**sumw2axes_fill_info_dict)
 
         return hout
 

@@ -91,49 +91,51 @@ if __name__ == "__main__":
     hists_all = pickle.load(gzip.open(hist_file))['btag']
 
     # for var, hists in hists_all.items():
-    hists = hists_all['jetpteta']
-    procs = list(hists.axes['process'])
-    jetflavors = list(hists.axes['flav'])
+    hists = hists_all['jetptetaflav']
 
-    for p in procs: 
-        for flav in jetflavors:
-            h_num = hists[{'process':p, 'flav':flav, 'WP':'medium'}]
-            h_den = hists[{'process':p, 'flav':flav, 'WP':'all'}]
+    print(hists)
+    jetflavors = list(hists.axes['flavour'])
 
-            h_eff = h_num / h_den
-            # h_eff.values()[:] = np.nan_to_num(h_eff.values(), nan=0.0)
+    print(f"jetflavors: {jetflavors}")
 
-            hmin = 0.5
-            hmax = 0.88
+    for flav in jetflavors:
+        h_num = hists[{'flavour':flav, 'WP':'medium'}]
+        h_den = hists[{'flavour':flav, 'WP':'all'}]
 
-            fig, ax = make_2d_plot(h_eff, title=f"{p}_Eff_{flav}", hmin=hmin, hmax=hmax, ncolors=19)
-            plt_tools.save_figure(fig, f"{p}_Eff_{flav}", outdir)
+        h_eff = h_num / h_den
+        # h_eff.values()[:] = np.nan_to_num(h_eff.values(), nan=0.0)
 
-            fig, ax = make_2d_plot(h_num, title=f"{p}_Nbtag_{flav}", ncolors=19)
-            plt_tools.save_figure(fig, f"{p}_Nbtag_{flav}", outdir)
+        # hmin = 0.5
+        # hmax = 0.88
 
-            fig, ax = make_2d_plot(h_den, title=f"{p}_Ntotal_{flav}", ncolors=19)
-            plt_tools.save_figure(fig, f"{p}_Ntotal_{flav}", outdir)
+        fig, ax = make_2d_plot(h_eff, title=f"Eff_{flav}", ncolors=19)
+        plt_tools.save_figure(fig, f"Eff_{flav}", outdir)
 
-            pt_bins = [20, 30, 50, 70, 100, 140, 200, 300, 600, 1000]
-            eta_bins = [0, 0.6, 1.2, 2.4]
+        fig, ax = make_2d_plot(h_num, title=f"Nbtag_{flav}", ncolors=19)
+        plt_tools.save_figure(fig, f"Nbtag_{flav}", outdir)
 
-            fig, ax = make_err_plot(get_binomial_error(h_eff.values(), h_den.values()), xbins=pt_bins, ybins=eta_bins, title=f"{p}_uncert_{flav}", hmin=0, hmax=0.25)
-            plt_tools.save_figure(fig, f"{p}_uncert_{flav}", outdir)
+        fig, ax = make_2d_plot(h_den, title=f"Ntotal_{flav}", ncolors=19)
+        plt_tools.save_figure(fig, f"Ntotal_{flav}", outdir)
 
-            # print(f"h_ref: {h_ref.values()}")
-            # print(f"h_denom: {hists[{'process': 'TTTo2L2Nu_centralUL17', 'flav': 'b', 'WP':'all'}].values()}")
+        pt_bins = [20, 30, 50, 70, 100, 140, 200, 300, 600, 1000]
+        eta_bins = [0, 0.6, 1.2, 2.4]
 
-            # h_eff_vals = h_ref.values()
-            # h_denom_vals = hists[{'process': 'TTTo2L2Nu_centralUL17', 'flav': 'b', 'WP':'all'}].values()
+        fig, ax = make_err_plot(get_binomial_error(h_eff.values(), h_den.values()), xbins=pt_bins, ybins=eta_bins, title=f"uncert_{flav}", hmin=0, hmax=0.25)
+        plt_tools.save_figure(fig, f"uncert_{flav}", outdir)
 
-    # make diff plots
-    h_ref = hists[{'process': 'TTTo2L2Nu_centralUL17', 'flav': 'b', 'WP':'medium'}]/hists[{'process': 'TTTo2L2Nu_centralUL17', 'flav': 'b', 'WP':'all'}]
-    h_sub1 = hists[{'process': 'DYJetsToLL_centralUL17', 'flav':'b', 'WP':'medium'}]/hists[{'process': 'DYJetsToLL_centralUL17', 'flav': 'b', 'WP':'all'}]
-    h_sub2 = hists[{'process': 'tW', 'flav':'b', 'WP':'medium'}]/hists[{'process': 'tW', 'flav': 'b', 'WP':'all'}]
+        # print(f"h_ref: {h_ref.values()}")
+        # print(f"h_denom: {hists[{'process': 'TTTo2L2Nu_centralUL17', 'flav': 'b', 'WP':'all'}].values()}")
 
-    fig, ax = make_2d_plot(h_ref-h_sub1, title=f"Powheg bEff - DYJets bEff", hmin=-0.1, hmax=0.12, ncolors=6)
-    plt_tools.save_figure(fig, f"Diff_bEff_DYJets", outdir)
-    fig, ax = make_2d_plot(h_ref-h_sub2, title=f"Powheg bEff - tW bEff", hmin=-0.1, hmax=0.12, ncolors=6)
-    plt_tools.save_figure(fig, f"Diff_bEff_tW", outdir)
+        # h_eff_vals = h_ref.values()
+        # h_denom_vals = hists[{'process': 'TTTo2L2Nu_centralUL17', 'flav': 'b', 'WP':'all'}].values()
+
+    # # make diff plots
+    # h_ref = hists[{'process': 'TTTo2L2Nu_centralUL17', 'flav': 'b', 'WP':'medium'}]/hists[{'process': 'TTTo2L2Nu_centralUL17', 'flav': 'b', 'WP':'all'}]
+    # h_sub1 = hists[{'process': 'DYJetsToLL_centralUL17', 'flav':'b', 'WP':'medium'}]/hists[{'process': 'DYJetsToLL_centralUL17', 'flav': 'b', 'WP':'all'}]
+    # h_sub2 = hists[{'process': 'tW', 'flav':'b', 'WP':'medium'}]/hists[{'process': 'tW', 'flav': 'b', 'WP':'all'}]
+
+    # fig, ax = make_2d_plot(h_ref-h_sub1, title=f"Powheg bEff - DYJets bEff", hmin=-0.1, hmax=0.12, ncolors=6)
+    # plt_tools.save_figure(fig, f"Diff_bEff_DYJets", outdir)
+    # fig, ax = make_2d_plot(h_ref-h_sub2, title=f"Powheg bEff - tW bEff", hmin=-0.1, hmax=0.12, ncolors=6)
+    # plt_tools.save_figure(fig, f"Diff_bEff_tW", outdir)
 

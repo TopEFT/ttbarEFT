@@ -13,15 +13,19 @@
 	    	"label": "nbjets"
 	    },
 	    "mll": {
-	    	"regular": [35, 0, 700],
+	    	"regular": [50, 0, 1000],
 	    	"label": "mll [GeV]"
 	    },
+		"mllZ": {
+			"regular": [40, 70, 110], 
+			"label": "mll (Z window) [GeV]"
+		},
 	    "ptll": {
 	    	"regular": [25, 0, 500],
 	    	"label": "$p_T(ll)$ [GeV]"
 	    },
 	    "l0pt": {
-        	"regular": [20, 0, 400],
+        	"regular": [25, 0, 500],
         	"label": "$p_T$ (leading lepton) [GeV]"
     	},
     	"l0eta": {
@@ -33,7 +37,7 @@
     		"label": "$\\phi$ (leading lepton)"
     	},
    	    "l1pt": {
-        	"regular": [20, 0, 400],
+        	"regular": [24, 0, 500],
         	"label": "$p_T$ (subleading lepton) [GeV]"
     	},
     	"l1eta": {

@@ -109,40 +109,41 @@ if __name__ == '__main__':
     known_executors = ['iterative', 'ddr']
 
     parser = argparse.ArgumentParser(description='You can customize your run')
-    parser.add_argument('inputFile'        , nargs='?', help = 'Json file(s) containing files and metadata')
-    parser.add_argument('--executor','-x'  , default='work_queue', help = 'Which executor to use')
-    parser.add_argument('--prefix', '-r'   , nargs='?', default='', help = 'Prefix or redirector to look for the files')
-    # parser.add_argument('--pretend'        , action='store_true', help = 'Read json files but, not execute the analysis')
-    # parser.add_argument('--nworkers','-n' , default=8  , help = 'Number of workers')
-    parser.add_argument('--chunksize','-s', default=100000  , help = 'Number of events per chunk')
-    parser.add_argument('--nchunks','-c'  , default=None  , help = 'You can choose to run only a number of chunks')
-    parser.add_argument('--outname','-o'  , default='histos', help = 'Name of the output file with histograms')
-    parser.add_argument('--treename'      , default='Events', help = 'Name of the tree inside the files')
-    parser.add_argument('--wc-list', action='extend', nargs='+', help = 'Specify a list of Wilson coefficients to use in filling histograms.')
-    parser.add_argument('--hist-list', action='extend', nargs='+', help = 'Specify a list of histograms to fill.')
-    parser.add_argument('--port', default='9123-9130', help = 'Specify the Work Queue port. An integer PORT or an integer range PORT_MIN-PORT_MAX.')
-    parser.add_argument('--processor', '-p', default='analysis_processor.py', help='Specify processor file name')
-    parser.add_argument('--aggregate', default=True, help='Specify if output historgrams from different datasets should be combined')
-
+    parser.add_argument('inputFile',            nargs='?', help = 'Json file(s) containing files and metadata')
+    parser.add_argument('--executor','-x',      default='work_queue', help = 'Which executor to use')
+    parser.add_argument('--processor', '-p',    default='analysis_processor.py', help='Specify processor file name')
+    parser.add_argument('--outname','-o',       default='histos', help = 'Name of the output file with histograms')
+    parser.add_argument('--aggregate',          default=True, help='Specify if output historgrams from different datasets should be combined')
+    
+    parser.add_argument('--prefix', '-r',       nargs='?', default='', help = 'Prefix or redirector to look for the files')
+    parser.add_argument('--treename',           default='Events', help = 'Name of the tree inside the files')
+    parser.add_argument('--wc-list',            action='extend', nargs='+', help = 'Specify a list of Wilson coefficients to use in filling histograms.')
+    parser.add_argument('--hist-list',          action='extend', nargs='+', help = 'Specify a list of histograms to fill.')
+    parser.add_argument('--chunksize','-s',     default=100000  , help = 'Number of events per chunk')
+    parser.add_argument('--nchunks','-c',       default=5  , help = 'Max number of chunks for IterativeExecutor')
+    parser.add_argument('--port',               default='9123-9130', help = 'Specify the Work Queue port. An integer PORT or an integer range PORT_MIN-PORT_MAX.')
+    
     args        = parser.parse_args()
     inputFile   = args.inputFile
     executor    = args.executor
-    prefix      = args.prefix
-    # pretend     = args.pretend
-    # nworkers    = int(args.nworkers)
-    chunksize   = int(args.chunksize)
-    nchunks     = int(args.nchunks) if not args.nchunks is None else args.nchunks
+    proc_file   = args.processor
     outname     = args.outname
+    aggregate   = args.aggregate
+    prefix      = args.prefix
     treename    = args.treename
     wc_lst      = args.wc_list if args.wc_list is not None else []
-    proc_file   = args.processor
-    proc_name   = args.processor[:-3]
     hist_lst    = args.hist_list
+    chunksize   = int(args.chunksize)
+    nchunks     = int(args.nchunks) # if not args.nchunks is None else args.nchunks
     ports       = args.port
-    aggregate   = args.aggregate
+
+    # proc_name   = args.processor[:-3]
+
+    # print("\n\nrunning with processor: ", proc_file, '\n')
+    # analysis_processor = importlib.import_module(proc_name)
 
     print("\n\nrunning with processor: ", proc_file, '\n')
-    analysis_processor = importlib.import_module(proc_name)
+    analysis_processor = importlib.import_module(proc_file[:-3])
 
     ### Check json or yaml ###
     if inputFile.endswith('.json'):
@@ -267,8 +268,8 @@ if __name__ == '__main__':
             },
             extra_files = [proc_file, "proxy.pem"], #"/users/hnelson2/ttbarEFT-coffea2025/ttbarEFT/params/channels.json", 
             schema=NanoAODSchema,
-            max_task_retries= 20, # default=10
-            step_size=800000, #equivalent to chunksize, default=100k
+            max_task_retries= 30, # default=10
+            step_size=1000000, #equivalent to chunksize, default=100k
             resources_processing={"cores": 1},
             resources_accumulating={"cores": 1},
             results_directory=results_dir,

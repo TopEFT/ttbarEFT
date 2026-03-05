@@ -21,6 +21,8 @@ import topcoffea.modules.eft_helper as efth
 from ttbarEFT.modules import plotting_tools_histEFT as plt_tools
 
 np.seterr(divide='ignore', invalid='ignore')
+import warnings
+warnings.filterwarnings("ignore", message=".*List indexing selection is experimental.*")
 
 
 plot_title = {"ee_chan": r"$ee$",
@@ -49,8 +51,11 @@ procs_other = ['TTGJets_centralUL17', 'ttW_centralUL17', 'ttZ_centralUL17', 'WJe
 def make_cr_fig(h_data, h_mc, var, procs_to_group=procs_other, plot_err=False, h_sumw2=None):
     
     all_mc_procs = list(h_mc.axes['process'])
-    sep_mc_procs = [p for p in all_mc_procs if p not in procs_to_group]
-    other_mc_procs = [p for p in all_mc_procs if p in procs_to_group] 
+    # sep_mc_procs = [p for p in all_mc_procs if p not in procs_to_group]
+    # other_mc_procs = [p for p in all_mc_procs if p in procs_to_group] 
+
+    sep_mc_procs = ['TTTo2L2Nu_centralUL17', 'tW', 'DYJetsToLL_centralUL17']
+    other_mc_procs = [p for p in all_mc_procs if p not in sep_mc_procs] 
 
     h_mc_sep = h_mc[{'process': sep_mc_procs}]  # hist with processes that will be individually plotted
 
@@ -241,11 +246,26 @@ if __name__ == "__main__":
 
     # for channel, ch_dict in hists_data.items():
     for channel, ch_dict in hists_mc.items():
+
         for var in ch_dict.keys():
             if "sumw2" in var: continue
 
             h_mc = hists_mc[channel][var].as_hist({})
-            h_data = hists_data[channel][var].as_hist({}).project(var) # equiv to [{'process':sum}]
+            h_data = hists_data[channel][var].as_hist({})
+
+            if h_mc.sum() == 0:
+                print(f"Skipping {var} in {channel}: MC is empty.")
+                continue
+            
+            if "systematic" in h_mc.axes.name:
+                h_mc = h_mc[{"systematic":"nominal"}]
+
+            if "systematic" in h_data.axes.name:
+                h_data = h_data[{"systematic":"nominal"}]
+            h_data = h_data.project(var)
+
+            # h_mc = hists_mc[channel][var].as_hist({})
+            # h_data = hists_data[channel][var].as_hist({}).project(var) # equiv to [{'process':sum}]
 
             if (h_mc.sum() == 0) or (h_data.sum() == 0):
                 print(f"Skipping {var} - No entries found.")
