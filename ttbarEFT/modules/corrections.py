@@ -12,6 +12,10 @@ from coffea.lookup_tools import txt_converters, rochester_lookup
 
 from topcoffea.modules.paths import topcoffea_path
 from ttbarEFT.modules.paths import ttbarEFT_path
+from ttbarEFT.modules.CorrectedJetsFactory import CorrectedJetsFactory #, get_jec_uncertainty_label
+from ttbarEFT.modules.CorrectedMETFactory import CorrectedMETFactory
+from ttbarEFT.modules.JECStack import JECStack
+
 
 clib_year_map = {
     "2016APV": "2016preVFP_UL",
@@ -176,6 +180,81 @@ def AttachScaleWeights(events):
         events[key] = scale_weights[:, scale_indices[key]]
 
 
+
+############################
+######### btag SF  #########
+############################
+
+def GetBtagEff(year, jets, wp='medium'):
+    # similar to GetMCeffFunc in topeft.modules.corrections
+    if year not in clib_year_map.keys():
+        raise Exception(f"Error: Unknown year \"{year}\".")
+
+    pathToBtagMCeff = ttbarEFT_path('data/btagSF/UL/btagMCeff_%s.pkl.gz'%year)
+    hists = {}
+    with gzip.open(pathToBtagMCeff) as fin:
+        hists = pickle.load(fin)['btag']
+
+    h = hists['jetptetaflav']
+    hnum = h[{'WP': wp}]
+    hden = h[{'WP': 'all'}]
+
+    eff = hnum/hden
+    eff_lookup = lookup_tools.dense_lookup.dense_lookup(
+        eff.values(), 
+        [ax.edges for ax in eff.axes]
+    )
+
+    print(f"\n\n eff_lookup: {eff_lookup}")
+
+    # this order must match the order of ax in eff, which is based on btagMCeff_processor order when the hist is initialized
+    return eff_lookup(jets.hadronFlavour, jets.pt, np.abs(jets.eta))
+
+
+def GetBtagSF(jet_collection,wp,year,method,syst):
+    """
+    Get btag SF from central correctionlib json
+    - similar to topcoffea.modules.corrections.btag_sf_eval()
+    - usage: btag_sfL_up   = tc_cor.btag_sf_eval(jets_flav, "L",sys_year,f"deepJet_{dJ_tag}",f"up_{corrtype}")
+    - usage: weights_obj_base_for_kinematic_syst.add(f"btagSF{b_syst}", events.nom, btag_w_up, btag_w_down)
+    """
+
+    clib_year = clib_year_map[year]
+    fname = ttbarEFT_path(f"data/POG/BTV/{clib_year}/btagging.json.gz")
+
+    # Flatten the input (until correctionlib handles jagged data natively)
+    abseta_flat = ak.flatten(abs(jet_collection.eta))
+    pt_flat = ak.flatten(jet_collection.pt)
+    flav_flat = ak.flatten(jet_collection.hadronFlavour)
+
+    # For now, cap all pt at 1000 https://cms-talk.web.cern.ch/t/question-about-evaluating-sfs-with-correctionlib/31763
+    pt_flat = ak.where(pt_flat>1000.0,1000.0,pt_flat)
+
+    # Evaluate the SF
+    ceval = correctionlib.CorrectionSet.from_file(fname)
+    sf_flat = ceval[method].evaluate(syst,wp,flav_flat,abseta_flat,pt_flat)
+    sf = ak.unflatten(sf_flat,ak.num(jet_collection.pt))
+
+    return sf
+
+
+def GetBtag_method1a_wgt_singlewp(eff,sf,passes_tag):
+    """
+    Evaluate btag method 1a weight for a single WP (https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagSFMethods)
+    - Takes as input a given array of eff and sf and a mask for whether or not the events pass a tag
+    - Returns P(DATA)/P(MC)
+    - Where P(MC) = Product over tagged (eff) * Product over not tagged (1-eff)
+    - Where P(DATA) = Product over tagged (eff*sf) * Product over not tagged (1-eff*sf)
+    """
+
+    p_mc = ak.prod(eff[passes_tag],axis=-1) * ak.prod(1-eff[~passes_tag],axis=-1)
+    p_data = ak.prod(eff[passes_tag]*sf[passes_tag],axis=-1) * ak.prod(1-eff[~passes_tag]*sf[~passes_tag],axis=-1)
+    wgt = p_data/p_mc
+
+    return wgt
+
+
+
 ###################################
 ######### Jet Corrections #########
 ###################################
@@ -220,73 +299,245 @@ def ApplyJetVetoMaps(jets, year):
     return veto_map_event
 
 
-def GetBtagEff(year, jets, wp='medium'):
-    # similar to GetMCeffFunc in topeft.modules.corrections
+def get_jerc_keys(year, isdata, era=None):
+
+    #JERC dictionary for various keys
+    with open(ttbarEFT_path("modules/jerc_dict.yaml"), "r") as f:
+        jerc_dict = yaml.safe_load(f)
+
+    # Jet Algorithm
+    if year.startswith("202"):
+        jet_algo = 'AK4PFPuppi'
+    else:
+        jet_algo = 'AK4PFchs'
+
+    #jec levels
+    jec_levels = jerc_dict[year]['jec_levels']
+
+    # jerc keys and junc types
+    if not isdata:
+        jec_key    = jerc_dict[year]['jec_mc']
+        jer_key    = jerc_dict[year]['jer']
+        junc_types = jerc_dict[year]['junc']
+    else:
+        if year in ['2016']: #,'2022','2023BPix'
+            jec_key = jerc_dict[year]['jec_data']
+        else:
+            jec_key = jerc_dict[year]['jec_data'][era]
+        jer_key     = None
+        junc_types  = None
+
+    return jet_algo, jec_key, jec_levels, jer_key, junc_types
+
+
+def get_supported_jet_systematics(year, isData=False, era=None):
+    if isData:
+        return []
+
+    systs = [f"JER_{year}Up", f"JER_{year}Down"]
+    for base in get_supported_jes_bases(year, isData=isData, era=era):
+        systs.append(f"JES_{base}Up")
+        systs.append(f"JES_{base}Down")
+    return systs
+
+
+
+def get_supported_jes_bases(year, isData=False, era=None):
+    if isData:
+        return []
+
+    jet_algo, jec_tag, _, _, junc_types = get_jerc_keys(year, isData, era)
+
+    bases = []
+    for junc_type in junc_types:
+        full_unc_name = f"{jec_tag}_{junc_type}_{jet_algo}"
+        bases.append(get_jec_uncertainty_label(full_unc_name, jec_tag, jet_algo))
+
+    if len(set(bases)) != len(bases):
+        duplicates = sorted({x for x in bases if bases.count(x) > 1})
+        raise RuntimeError(
+            f"Collision in JES base labels for year {year}: {duplicates}"
+        )
+
+    return bases
+
+
+def get_jec_uncertainty_label(junc_name, jec_tag, jet_algo):
+    """
+    Extract the uncertainty label from a full correction name:
+      {jec_tag}_{junc_type}_{jet_algo}
+    """
+    prefix = f"{jec_tag}_"
+    suffix = f"_{jet_algo}"
+    if not junc_name.startswith(prefix):
+        raise ValueError(
+            f'Uncertainty name "{junc_name}" does not start with expected prefix "{prefix}".'
+        )
+    if not junc_name.endswith(suffix):
+        raise ValueError(
+            f'Uncertainty name "{junc_name}" does not end with expected suffix "{suffix}".'
+        )
+    junc_type = junc_name[len(prefix) : -len(suffix)]
+    if not junc_type:
+        raise ValueError(f'Failed to extract junc_type from uncertainty name "{junc_name}".')
+    return _canonicalize_junc_type_label(junc_type, jec_tag)
+
+
+def _is_run2_jec_tag(jec_tag):
+    return "UL" in jec_tag
+
+
+def _canonicalize_junc_type_label(junc_type, jec_tag):
+    # Preserve existing Run2 naming: regrouped UL sources drop the "Regrouped_" prefix.
+    if _is_run2_jec_tag(jec_tag) and junc_type.startswith("Regrouped_"):
+        return junc_type.replace("Regrouped_", "", 1)
+    return junc_type
+
+
+####### JEC
+##############################################
+# JER: https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetResolution
+# JES: https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC
+
+def ApplyJetCorrections(year, corr_type, isData, era, useclib=True, savelevels=False):
+
+    usejecstack = not useclib
+
     if year not in clib_year_map.keys():
         raise Exception(f"Error: Unknown year \"{year}\".")
 
-    pathToBtagMCeff = ttbarEFT_path('data/btagSF/UL/btagMCeff_%s.pkl.gz'%year)
-    hists = {}
-    with gzip.open(pathToBtagMCeff) as fin:
-        hists = pickle.load(fin)['btag']
+    jec_year = clib_year_map[year]
+    # if usejecstack:
+    #     jec_tag = jerc_tag_map[year][0]
+    #     jer_tag = jerc_tag_map[year][1]
+    #     jet_algo = "AK4PFchs"
+    #     extJEC = lookup_tools.extractor()
+    #     weight_sets = []
+    #     if not isData:
+    #         weight_sets += [
+    #             "* * " + topcoffea_path(f'data/JER/{jer_tag}_MC_SF_{jet_algo}.jersf.txt'),
+    #             "* * " + topcoffea_path(f'data/JER/{jer_tag}_MC_PtResolution_{jet_algo}.jr.txt'),
+    #         ]
+    #     weight_sets += [
+    #         "* * " + topcoffea_path(f'data/JEC/Summer19UL{jec_tag}_MC_L1FastJet_{jet_algo}.txt'),
+    #         "* * " + topcoffea_path(f'data/JEC/Summer19UL{jec_tag}_MC_L2Relative_{jet_algo}.txt'),
+    #     ]
+    #     if not isData:
+    #         weight_sets += [
+    #             "* * " + topcoffea_path(f'data/JEC/Quad_Summer19UL{jec_tag}_MC_UncertaintySources_{jet_algo}.junc.txt')
+    #         ]
+    #     extJEC.add_weight_sets(weight_sets)
+    #     jec_types = [
+    #         'FlavorQCD', 'FlavorPureBottom', 'FlavorPureQuark', 'FlavorPureGluon', 'FlavorPureCharm',
+    #         'BBEC1', 'Absolute', 'RelativeBal', 'RelativeSample'
+    #     ]
+    #     jec_regroup = [f"Quad_Summer19UL%s_MC_UncertaintySources_{jet_algo}_%s" % (jec_tag,jec_type) for jec_type in jec_types]
+    #     jec_names = []
+    #     if not isData:
+    #         jec_names += [
+    #             f"{jer_tag}_MC_SF_{jet_algo}",
+    #             f"{jer_tag}_MC_PtResolution_{jet_algo}",
+    #         ]
+    #     jec_names += [
+    #         f"Summer19UL{jec_tag}_MC_L1FastJet_{jet_algo}",
+    #         f"Summer19UL{jec_tag}_MC_L2Relative_{jet_algo}",
+    #     ]
+    #     if not isData:
+    #         jec_names.extend(jec_regroup)
 
-    h = hists['jetptetaflav']
-    hnum = h[{'WP': wp}]
-    hden = h[{'WP': 'all'}]
+    #     extJEC.finalize()
+    #     JECevaluator = extJEC.make_evaluator()
+    #     jec_inputs = {name: JECevaluator[name.replace("Regrouped_", "")] for name in jec_names}
+    #     jec_stack = JECStack(jec_inputs)
 
-    eff = hnum/hden
-    eff_lookup = lookup_tools.dense_lookup.dense_lookup(
-        eff.values(), 
-        [ax.edges for ax in eff.axes]
+    # elif useclib:
+        # Handle clib case
+    jet_algo, jec_tag, jec_levels, jer_tag, junc_types = get_jerc_keys(year, isData, era)
+    json_path = ttbarEFT_path(f"data/POG/JME/{jec_year}/jet_jerc.json.gz")
+
+    # Create JECStack for clib scenario
+    jec_stack = JECStack(
+        jec_tag=jec_tag,
+        jec_levels=jec_levels,
+        jer_tag=jer_tag,
+        jet_algo=jet_algo,
+        junc_types=junc_types,
+        json_path=json_path,
+        use_clib=useclib,
+        savecorr=savelevels
     )
 
-    print(f"\n\n eff_lookup: {eff_lookup}")
+    # Name map for jet or MET corrections
+    name_map = {
+        'JetPt':    'pt',
+        'JetMass':  'mass',
+        'JetEta':   'eta',
+        'JetPhi':   'phi',
+        'JetA':     'area',
+        'ptGenJet': 'pt_gen',
+        'ptRaw':    'pt_raw',
+        'massRaw':  'mass_raw',
+        'Rho':      'rho',
+        'METpt':    'pt',
+        'METphi':   'phi',
+        'UnClusteredEnergyDeltaX': 'MetUnclustEnUpDeltaX',
+        'UnClusteredEnergyDeltaY': 'MetUnclustEnUpDeltaY'
+    }
 
-    # this order must match the order of ax in eff, which is based on btagMCeff_processor order when the hist is initialized
-    return eff_lookup(jets.hadronFlavour, jets.pt, np.abs(jets.eta))
+    # Return appropriate factory based on correction type
+    if corr_type == 'met':
+        return CorrectedMETFactory(name_map)
+
+    # return CorrectedJetsFactory(name_map, jec_stack, run)
+    return CorrectedJetsFactory(name_map, jec_stack, allowed_variations=None)
 
 
-def GetBtag_method1a_wgt_singlewp(eff,sf,passes_tag):
-    """
-    Evaluate btag method 1a weight for a single WP (https://twiki.cern.ch/twiki/bin/viewauth/CMS/BTagSFMethods)
-    - Takes as input a given array of eff and sf and a mask for whether or not the events pass a tag
-    - Returns P(DATA)/P(MC)
-    - Where P(MC) = Product over tagged (eff) * Product over not tagged (1-eff)
-    - Where P(DATA) = Product over tagged (eff*sf) * Product over not tagged (1-eff*sf)
-    """
-
-    p_mc = ak.prod(eff[passes_tag],axis=-1) * ak.prod(1-eff[~passes_tag],axis=-1)
-    p_data = ak.prod(eff[passes_tag]*sf[passes_tag],axis=-1) * ak.prod(1-eff[~passes_tag]*sf[~passes_tag],axis=-1)
-    wgt = p_data/p_mc
-
-    return wgt
-
-
-def GetBtagSF(jet_collection,wp,year,method,syst):
-    """
-    Get btag SF from central correctionlib json
-    - similar to topcoffea.modules.corrections.btag_sf_eval()
-    - usage: btag_sfL_up   = tc_cor.btag_sf_eval(jets_flav, "L",sys_year,f"deepJet_{dJ_tag}",f"up_{corrtype}")
-    - usage: weights_obj_base_for_kinematic_syst.add(f"btagSF{b_syst}", events.nom, btag_w_up, btag_w_down)
-    """
-
-    clib_year = clib_year_map[year]
-    fname = ttbarEFT_path(f"data/POG/BTV/{clib_year}/btagging.json.gz")
-
-    # Flatten the input (until correctionlib handles jagged data natively)
-    abseta_flat = ak.flatten(abs(jet_collection.eta))
-    pt_flat = ak.flatten(jet_collection.pt)
-    flav_flat = ak.flatten(jet_collection.hadronFlavour)
-
-    # For now, cap all pt at 1000 https://cms-talk.web.cern.ch/t/question-about-evaluating-sfs-with-correctionlib/31763
-    pt_flat = ak.where(pt_flat>1000.0,1000.0,pt_flat)
-
-    # Evaluate the SF
-    ceval = correctionlib.CorrectionSet.from_file(fname)
-    sf_flat = ceval[method].evaluate(syst,wp,flav_flat,abseta_flat,pt_flat)
-    sf = ak.unflatten(sf_flat,ak.num(jet_collection.pt))
-
-    return sf
+def ApplyJetSystematics(year,cleanedJets,syst_var):
+    if (syst_var == f'JER_{year}Up'):
+        return cleanedJets.JER.up
+    elif (syst_var == f'JER_{year}Down'):
+        return cleanedJets.JER.down
+    elif (syst_var == 'JESUp'):
+        return cleanedJets.JES_jes.up
+    elif (syst_var == 'JESDown'):
+        return cleanedJets.JES_jes.down
+    elif (syst_var == 'nominal'):
+        return cleanedJets
+    # elif (syst_var in ['nominal','MuonESUp','MuonESDown', 'TESUp', 'TESDown', 'FESUp', 'FESDown']):
+    #     return cleanedJets
+    elif ('JES_FlavorQCD' in syst_var):
+        # Overwrite FlavorQCD with the proper jet flavor uncertainty
+        bmask = np.array(ak.flatten(abs(cleanedJets.partonFlavour)==5))
+        cmask = abs(cleanedJets.partonFlavour)==4
+        cmask = np.array(ak.flatten(cmask))
+        qmask = abs(cleanedJets.partonFlavour)<=3
+        qmask = np.array(ak.flatten(qmask))
+        gmask = abs(cleanedJets.partonFlavour)==21
+        gmask = np.array(ak.flatten(gmask))
+        corrections = np.array(np.zeros_like(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt)))
+        if 'Up' in syst_var:
+            corrections[bmask] = corrections[bmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt))[bmask]
+            corrections[cmask] = corrections[cmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt))[cmask]
+            corrections[qmask] = corrections[qmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt))[qmask]
+            corrections[gmask] = corrections[gmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt))[gmask]
+            corrections = ak.unflatten(corrections, ak.num(cleanedJets.JES_FlavorQCD.up.pt))
+            cleanedJets['JES_FlavorQCD']['up']['pt'] = corrections
+            return cleanedJets.JES_FlavorQCD.up
+        if 'Down' in syst_var:
+            corrections[bmask] = corrections[bmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.down.pt))[bmask]
+            corrections[cmask] = corrections[cmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.down.pt))[cmask]
+            corrections[qmask] = corrections[qmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.down.pt))[qmask]
+            corrections[gmask] = corrections[gmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.down.pt))[gmask]
+            corrections = ak.unflatten(corrections, ak.num(cleanedJets.JES_FlavorQCD.down.pt))
+            cleanedJets['JES_FlavorQCD']['down']['pt'] = corrections
+            return cleanedJets.JES_FlavorQCD.down
+    # Save `2016APV` as `2016APV` but look up `2016` corrections (no separate APV corrections available)
+    elif ('Up' in syst_var and syst_var[:-2].replace('APV', '') in cleanedJets.fields):
+        return cleanedJets[syst_var.replace('Up', '').replace("Pile", "PileUp").replace('APV', '')].up
+    elif ('Down' in syst_var and syst_var[:-4].replace('APV', '') in cleanedJets.fields):
+        return cleanedJets[syst_var.replace('Down', '').replace('APV', '')].down
+    else:
+        raise Exception(f"Error: Unknown variation \"{syst_var}\".")
 
 
 ########################################

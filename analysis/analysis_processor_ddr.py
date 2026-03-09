@@ -147,10 +147,12 @@ class AnalysisProcessor(processor.ProcessorABC):
             sow_renormfactUp   = self._samples[dataset]["nSumOfWeights_renormfactUp"   ]
             sow_renormfactDown = self._samples[dataset]["nSumOfWeights_renormfactDown" ]
 
-        print(f"\n\n histAxisName: {histAxisName}")
+        print(f"\n\n")
+        print(f"histAxisName: {histAxisName}")
         print(f"dataset: {dataset}")
         print(f"year: {year}")
-        print(f"xsec: {xsec} \n\n")
+        print(f"xsec: {xsec}")
+        print(f"\n\n")
 
         isEFT = hasattr(events, 'EFTfitCoefficients')    
         assert not (isEFT and isData), f"isEFT and isData cannot both be True. Check input samples."
@@ -161,6 +163,11 @@ class AnalysisProcessor(processor.ProcessorABC):
         for d in datasets:
             if dataset.startswith(d):
                 dataset = dataset.split('_')[0]
+
+        run_era = None
+        if isData:
+            run_era = self._samples[dataset]["path"].split("/")[2].split("-")[0][-1]
+        print(f"\n\n run_era: {run_era} \n\n")
 
 
         ######### EFT coefficients ##########
@@ -191,6 +198,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         mu   = events.Muon
         tau  = events.Tau
         jets = events.Jet 
+        run  = events.run
 
         leptonSelection = tt_os.Run2LeptonSelection()
 
@@ -237,10 +245,6 @@ class AnalysisProcessor(processor.ProcessorABC):
         nbtagsm = ak.num(goodJets[isBtagJetsMedium])
         njets = ak.num(goodJets[isNotBtagJetsMedium])
 
-        # JetVetoMaps applied
-        veto_map_array = tt_cor.ApplyJetVetoMaps(goodJets, year)   
-        veto_map_mask = (veto_map_array == 0)
-
 
         ######### Add variables to EVENTS #########
         events['njets'] = ak.num(jets)
@@ -249,8 +253,15 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         ######### Systematics #########
 
-        data_syst_lst = []              #TODO
-        obj_correction_syst_lst = []    #TODO
+        # data_syst_lst = []              #TODO, don't think we have any of these
+        obj_correction_syst_lst = tt_cor.get_supported_jet_systematics( 
+            year, isData=isData, era=run_era
+        )
+
+        print(f"\n\n")
+        print(f"obj_correction_syst_lst: {obj_correction_syst_lst}")
+        print(f"\n\n")
+
         wgt_correction_syst_lst = [
             'lepSFUp', 'lepSFDown',                                                                                         # lepton systs
             'trigSFUp', 'trigSFDown', 'L1prefireUp', 'L1prefireDown', "PUUp", "PUDown",                                     # Exp systs
@@ -278,21 +289,28 @@ class AnalysisProcessor(processor.ProcessorABC):
             weights_obj_base.add('L1prefire', events.L1PreFiringWeight.Nom, events.L1PreFiringWeight.Up, events.L1PreFiringWeight.Dn)
             weights_obj_base.add('PU', tt_cor.GetPUSF(events.Pileup.nTrueInt, year), tt_cor.GetPUSF(events.Pileup.nTrueInt, year, 'up'), tt_cor.GetPUSF(events.Pileup.nTrueInt, year, 'down'))
 
-            tt_cor.AttachScaleWeights(events) 
+            tt_cor.AttachScaleWeights(events) # Matrix Element uncertainties
             weights_obj_base.add('renorm', events.nom, events.renormUp*(sow/sow_renormUp), events.renormDown*(sow/sow_renormDown))
             weights_obj_base.add('fact', events.nom, events.factUp*(sow/sow_factUp), events.factDown*(sow/sow_factDown))
             
-            tc_cor.AttachPSWeights(events)
+            tc_cor.AttachPSWeights(events) #QScale uncertainties
             weights_obj_base.add('ISR', events.nom, events.ISRUp*(sow/sow_ISRUp), events.ISRDown*(sow/sow_ISRDown))
             weights_obj_base.add('FSR', events.nom, events.FSRUp*(sow/sow_FSRUp), events.FSRDown*(sow/sow_FSRDown))
 
 
-            # # Workaround to use UL16APV SFs for UL16 for light jets #from topEFT
-            #     if year == "2016":
-            #         year_light = "2016APV"
-            #     else:
-            #         year_light = year
+            # JetVetoMaps applied #TODO: AFTER JEC and can be before btag, update "goodJets" in this to be the corrected jets
 
+            goodJets["pt_gen"] = ak.values_astype(ak.fill_none(goodJets.matched_gen.pt, 0), np.float32)
+            goodJets["pt_raw"] = (1 - goodJets.rawFactor)*goodJets.pt
+            goodJets["mass_raw"] = (1 - goodJets.rawFactor)*goodJets.mass
+            goodJets["rho"] = ak.broadcast_arrays(events.fixedGridRhoFastjetAll, goodJets.pt)[0]
+
+            cleanedJets = tt_cor.ApplyJetCorrections(year, corr_type='jets', isData=isData, era=run_era).build(goodJets)
+            cleanedJets = tt_cor.ApplyJetSystematics(year=year, cleanedJets=cleanedJets, syst_var='JER_2017Up')
+            met = tt_cor.ApplyJetCorrections(year, corr_type='met', isData=isData, era=run_era).build(MET=raw_met, corrected_jets=cleanedJets)
+            jet_veto_map = tt_cor.ApplyJetVetoMaps(goodJets, year)    
+
+            # nominal btag SF 
             light_jets = goodJets[goodJets.hadronFlavour == 0]
             light_eff = tt_cor.GetBtagEff(year=year, jets=light_jets, wp='medium')
             light_bSF = tt_cor.GetBtagSF(jet_collection=light_jets, wp='M', year=year, method='deepJet_incl', syst='central')
@@ -314,6 +332,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         # for syst_var in syst_var_list:
 
             # must be inside `if not isData:` 
+            # TODO: test this block
             if self._do_systematics: # and syst_var=='nominal': 
 
                 for b_syst in ['bc_correlated', 'light_correlated', f"bc_{year}", f"light_{year}"]:
@@ -361,6 +380,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         selections = PackedSelection(dtype='uint64')
 
         pass_trg = tt_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict, lep_cat)
+        veto_map_mask = (jet_veto_map == 0)
 
         ######### Store boolean masks with PackedSelection ##########
         if isData:
@@ -436,9 +456,11 @@ class AnalysisProcessor(processor.ProcessorABC):
             cuts_list.append(lep_cat)
             cuts_list.append(jet_cat)
 
-            print(f"\n\n lep_cat: {lep_cat}")
+            print(f"\n\n")
+            print(f"lep_cat: {lep_cat}")
             print(f"jet_cat: {jet_cat}")
-            print(f"cuts list: {cuts_list}\n\n")
+            print(f"    cuts list: {cuts_list}")
+            print(f"\n\n")
 
             event_selection_mask = selections.all(*(cuts_list))
             eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
