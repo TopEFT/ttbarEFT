@@ -205,8 +205,6 @@ def GetBtagEff(year, jets, wp='medium'):
         [ax.edges for ax in eff.axes]
     )
 
-    print(f"\n\n eff_lookup: {eff_lookup}")
-
     # this order must match the order of ax in eff, which is based on btagMCeff_processor order when the hist is initialized
     return eff_lookup(jets.hadronFlavour, jets.pt, np.abs(jets.eta))
 
@@ -311,7 +309,6 @@ def get_jerc_keys(year, isdata, era=None):
     else:
         jet_algo = 'AK4PFchs'
 
-    #jec levels
     jec_levels = jerc_dict[year]['jec_levels']
 
     # jerc keys and junc types

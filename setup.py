@@ -16,7 +16,8 @@ setuptools.setup(
             "data/POG/LUM/*/*.json.gz",
             "data/POG/BTV/*/*.json.gz",
             "data/btagSF/UL/*",
-            "data/leptonSF/elec/*.root"
+            "data/leptonSF/elec/*.root",
+            "modules/*.yaml",
         ]
     }
 )

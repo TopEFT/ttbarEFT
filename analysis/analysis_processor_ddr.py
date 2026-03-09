@@ -183,7 +183,19 @@ class AnalysisProcessor(processor.ProcessorABC):
         hout = self.accumulator
 
 
-        ######### Create Lepton Categories ##########
+        ######### Data Selections #########
+        if isData:
+            # Lumi Mask for Data    
+            golden_json_path = {
+                "2016"      : topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
+                "2016APV"   : topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
+                "2017"      : topcoffea_path("data/goldenJsons/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"),
+                "2018"      : topcoffea_path("data/goldenJsons/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"),
+            }
+            lumi_mask = LumiMask(golden_json_path[year])(events.run,events.luminosityBlock) 
+
+
+        ######### Load Event Categories ##########
         cat_dict = None
         with open(ttbarEFT_path("params/channels.yaml"), "r") as f:
             cat_dict=yaml.safe_load(f)
@@ -225,31 +237,42 @@ class AnalysisProcessor(processor.ProcessorABC):
         leps = ak.concatenate([ele_good, mu_good], axis=1)
         leps_sorted = leps[ak.argsort(leps.pt, axis=-1,ascending=False)] 
 
-        events['leps_pt_sorted'] = leps_sorted
 
         ######### Jet Selections #########
-        jets['isPres'] = tt_os.is_pres_jet(jets) 
+        # jets['isPres'] = tt_os.is_pres_jet(jets) 
         jets['isClean'] = tt_os.isClean(jets, ele_good, drmin=0.4)& tt_os.isClean(jets, mu_good, drmin=0.4)
-        goodJets = jets[jets.isPres & jets.isClean]
+        cleanedJets = jets[jets.isClean]
+        # goodJets = jets[jets.isPres & jets.isClean]
 
-        # njets = ak.num(goodJets)
-        # ht = ak.sum(goodJets.pt,axis=-1)
-        j0 = goodJets[ak.argmax(goodJets.pt,axis=-1,keepdims=True)]
+        # # njets = ak.num(goodJets)
+        # # ht = ak.sum(goodJets.pt,axis=-1)
+        # j0 = goodJets[ak.argmax(goodJets.pt,axis=-1,keepdims=True)]
 
-        # Medium DeepJet WP
-        medium_tag = "btag_wp_medium_" + year.replace("201", "UL1")
-        btagwpm = get_tc_param(medium_tag)
-        isBtagJetsMedium = (goodJets.btagDeepFlavB > btagwpm)
-        isNotBtagJetsMedium = np.invert(isBtagJetsMedium)
+        # # Medium DeepJet WP
+        # medium_tag = "btag_wp_medium_" + year.replace("201", "UL1")
+        # btagwpm = get_tc_param(medium_tag)
+        # isBtagJetsMedium = (goodJets.btagDeepFlavB > btagwpm)
+        # isNotBtagJetsMedium = np.invert(isBtagJetsMedium)
         
-        nbtagsm = ak.num(goodJets[isBtagJetsMedium])
-        njets = ak.num(goodJets[isNotBtagJetsMedium])
+        # nbtagsm = ak.num(goodJets[isBtagJetsMedium])
+        # njets = ak.num(goodJets[isNotBtagJetsMedium])
 
 
         ######### Add variables to EVENTS #########
-        events['njets'] = ak.num(jets)
+        events['leps_pt_sorted'] = leps_sorted
         tt_es.addLepCatMasks(events) 
         tt_es.add2losMask(events, year, isData)
+
+        ######## Create objects for dense axes ##########
+        leps_sorted = ak.pad_none(leps_sorted, 2)
+        l0 = leps_sorted[:,0]
+        l1 = leps_sorted[:,1]
+
+        ptll = (l0+l1).pt
+        mll = (l0+l1).mass
+
+        pass_trg = tt_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict, lep_cat)
+
 
         ######### Systematics #########
 
@@ -258,9 +281,9 @@ class AnalysisProcessor(processor.ProcessorABC):
             year, isData=isData, era=run_era
         )
 
-        print(f"\n\n")
-        print(f"obj_correction_syst_lst: {obj_correction_syst_lst}")
-        print(f"\n\n")
+        # print(f"\n\n")
+        # print(f"obj_correction_syst_lst: {obj_correction_syst_lst}")
+        # print(f"\n\n")
 
         wgt_correction_syst_lst = [
             'lepSFUp', 'lepSFDown',                                                                                         # lepton systs
@@ -271,6 +294,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         ]
 
         weights_obj_base = coffea.analysis_tools.Weights(len(events),storeIndividual=True)
+        # print(weights_obj_base.weightStatistics)        # print out the stored weights objects
 
         if not isData: 
             # If this is not an eft sample, get the genWeight
@@ -298,214 +322,237 @@ class AnalysisProcessor(processor.ProcessorABC):
             weights_obj_base.add('FSR', events.nom, events.FSRUp*(sow/sow_FSRUp), events.FSRDown*(sow/sow_FSRDown))
 
 
-            # JetVetoMaps applied #TODO: AFTER JEC and can be before btag, update "goodJets" in this to be the corrected jets
+        ######### The rest of the processor is inside this loop over systs that affect object kinematics  ###########
+        if self._do_systematics and not isData:                     # if doing systematics, loop over corrections for only MC
+            syst_var_list = ['nominal'] + obj_correction_syst_lst
+        else:                                                       # otherwise just loop once for nominal case 
+            syst_var_list = ['nominal']
 
-            goodJets["pt_gen"] = ak.values_astype(ak.fill_none(goodJets.matched_gen.pt, 0), np.float32)
-            goodJets["pt_raw"] = (1 - goodJets.rawFactor)*goodJets.pt
-            goodJets["mass_raw"] = (1 - goodJets.rawFactor)*goodJets.mass
-            goodJets["rho"] = ak.broadcast_arrays(events.fixedGridRhoFastjetAll, goodJets.pt)[0]
+        raw_met = met
+        for syst_var in syst_var_list:
+            weights_obj_base_for_kinematic_syst = copy.deepcopy(weights_obj_base)
 
-            cleanedJets = tt_cor.ApplyJetCorrections(year, corr_type='jets', isData=isData, era=run_era).build(goodJets)
-            cleanedJets = tt_cor.ApplyJetSystematics(year=year, cleanedJets=cleanedJets, syst_var='JER_2017Up')
-            met = tt_cor.ApplyJetCorrections(year, corr_type='met', isData=isData, era=run_era).build(MET=raw_met, corrected_jets=cleanedJets)
+            # # jetptname = "pt_nom" if hasattr(cleanedJets, "pt_nom") else "pt" # TODO: from TopEFT, do I need this? 
+
+            # TODO: I think I don't need this jet cleaning since I'm doing it with the isClean function but need to check for sure
+            # vetos_tocleanjets = ak.with_name(leptons, "PtEtaPhiMCandidate")
+            # tmp = ak.cartesian([ak.local_index(jets.pt), vetos_tocleanjets.jetIdx], nested=True)
+            # cleanedJets = jets[~ak.any(tmp.slot0 == tmp.slot1, axis=-1)] # this line should go before *any selection*, otherwise lep.jetIdx is not aligned with the jet index
+
+            cleanedJets["pt_raw"] = (1 - cleanedJets.rawFactor)*cleanedJets.pt
+            cleanedJets["mass_raw"] = (1 - cleanedJets.rawFactor)*cleanedJets.mass
+            cleanedJets["rho"] = ak.broadcast_arrays(events.fixedGridRhoFastjetAll, cleanedJets.pt)[0]
+
+            if not isData: 
+                cleanedJets["pt_gen"] = ak.values_astype(ak.fill_none(cleanedJets.matched_gen.pt, 0), np.float32)
+
+            correctedJets = tt_cor.ApplyJetCorrections(year, corr_type='jets', isData=isData, era=run_era).build(cleanedJets)
+            correctedJets = tt_cor.ApplyJetSystematics(year=year, cleanedJets=cleanedJets, syst_var=syst_var)
+            met = tt_cor.ApplyJetCorrections(year, corr_type='met', isData=isData, era=run_era).build(MET=raw_met, corrected_jets=correctedJets)
+
+            correctedJets['isGood'] = tt_os.is_pres_jet(correctedJets)
+            goodJets =  correctedJets[correctedJets.isGood]
+
             jet_veto_map = tt_cor.ApplyJetVetoMaps(goodJets, year)    
 
-            # nominal btag SF 
-            light_jets = goodJets[goodJets.hadronFlavour == 0]
-            light_eff = tt_cor.GetBtagEff(year=year, jets=light_jets, wp='medium')
-            light_bSF = tt_cor.GetBtagSF(jet_collection=light_jets, wp='M', year=year, method='deepJet_incl', syst='central')
-            light_btagweight = tt_cor.GetBtag_method1a_wgt_singlewp(light_eff, light_bSF, passes_tag=light_jets.btagDeepFlavB > btagwpm)
-
-            bc_jets = goodJets[goodJets.hadronFlavour > 0]
-            bc_eff = tt_cor.GetBtagEff(year=year, jets=bc_jets, wp='medium')
-            bc_bSF = tt_cor.GetBtagSF(jet_collection=bc_jets, wp='M', year=year, method='deepJet_comb', syst='central')
-            bc_btagweight = tt_cor.GetBtag_method1a_wgt_singlewp(bc_eff, bc_bSF, passes_tag=bc_jets.btagDeepFlavB > btagwpm)
-
-            btag_eventweight = light_btagweight*bc_btagweight
-
-            weights_obj_base.add('btagSF', btag_eventweight)
-
-
-        # if self._do_systematics and not isData: syst_var_list = ["nominal"] + obj_correction_syst_lst
-        # else: syst_var_list = ['nominal']
-
-        # for syst_var in syst_var_list:
-
-            # must be inside `if not isData:` 
-            # TODO: test this block
-            if self._do_systematics: # and syst_var=='nominal': 
-
-                for b_syst in ['bc_correlated', 'light_correlated', f"bc_{year}", f"light_{year}"]:
-                    if b_syst.endswith("correlated"): 
-                        corrtype = "correlated"
-                    else: 
-                        corrtype = "uncorrelated"
-
-                    if b_syst.startswith("light_"):
-                        syst_jets = light_jets
-                        syst_method= "deepJet_incl"
-                        syst_year = year
-                        btag_effM = light_eff
-                        fixed_btag_w = bc_btagweight
-                    elif b_syst.startswith("bc_"):
-                        syst_jets = bc_jets
-                        syst_method= "deepJet_comb"
-                        syst_year = year
-                        btag_effM = bc_eff
-                        fixed_btag_w = light_btagweight
-
-
-                    btag_SF_up = tt_cor.GetBtagSF(jet_collection=syst_jets, wp='M', year=year, method=syst_method, syst=f'up_{corrtype}')
-                    btag_SF_down = tt_cor.GetBtagSF(jet_collection=syst_jets, wp='M', year=year, method=syst_method, syst=f'down_{corrtype}')
-
-                    btagweight_up = tt_cor.GetBtag_method1a_wgt_singlewp(btag_effM, btag_SF_up, passes_tag=bc_jets.btagDeepFlavB > btagwpm)
-                    btagweight_down = tt_cor.GetBtag_method1a_wgt_singlewp(btag_effM, btag_SF_down, passes_tag=bc_jets.btagDeepFlavB > btagwpm)
-
-                    eventweight_up = fixed_btag_w * btagweight_up
-                    event_weight_down = fixed_btag_w * btagweight_down
-
-                    # TODO: maybe change events.nom to btag_eventweight? depends on how this will be used in combine
-                    weights_obj_base.add(f'btagSF{b_syst}', events.nom, eventweight_up/btag_eventweight, event_weight_down/btag_eventweight)
-
-
-        ######### Create objects for dense axes ##########
-        leps_sorted = ak.pad_none(leps_sorted, 2)
-        l0 = leps_sorted[:,0]
-        l1 = leps_sorted[:,1]
-
-        ptll = (l0+l1).pt
-        mll = (l0+l1).mass
-
-        ######### Selection Masks #########
-        selections = PackedSelection(dtype='uint64')
-
-        pass_trg = tt_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict, lep_cat)
-        veto_map_mask = (jet_veto_map == 0)
-
-        ######### Store boolean masks with PackedSelection ##########
-        if isData:
-            # Lumi Mask for Data    
-            golden_json_path = {
-                "2016"      : topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
-                "2016APV"   : topcoffea_path("data/goldenJsons/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"),
-                "2017"      : topcoffea_path("data/goldenJsons/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"),
-                "2018"      : topcoffea_path("data/goldenJsons/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"),
-            }
-            lumi_mask = LumiMask(golden_json_path[year])(events.run,events.luminosityBlock) 
-            selections.add('is_good_lumi', lumi_mask)
-
-        selections.add('pass_trg', pass_trg)
-        selections.add('jetvetomap', veto_map_mask)
-
-        selections.add('2los', events.is2los)
-
-        selections.add('bmask_exactly0med', (nbtagsm==0))
-        selections.add('bmask_exactly1med', (nbtagsm==1))
-        selections.add('bmask_exactly2med', (nbtagsm==2))
-        selections.add('bmask_atleast2med', (nbtagsm>=2))
-
-        selections.add("exactly_0j", (njets==0))
-        selections.add("exactly_1j", (njets==1))
-        selections.add("exactly_2j", (njets==2))
-
-        selections.add("atleast_1j", (njets>=1))
-
-        if isData: 
-            selections.add("ee",  (events.is_ee & events.is2los & pass_trg))    # data always has trig pass requirement
-        else: 
-            selections.add("ee",  (events.is_ee & events.is2los))               # MC for ee has efficiencies, so no pass_trg requirement
-        
-        selections.add("em",  (events.is_em & events.is2los & pass_trg))        # MC for emu has SF, so use pass_trg requirement 
-        selections.add("mm",  (events.is_mm & events.is2los & pass_trg))        # MC for mumu has SF, so use pass_trg requirement
-
-        ######### Fill dense axes variables ##########
-
-        dense_axis_variables = {}
-        dense_axis_variables['njets'] = njets
-        dense_axis_variables['nbjets'] = nbtagsm
-        dense_axis_variables['mll'] = mll
-        dense_axis_variables['mllZ'] = mll
-        dense_axis_variables['ptll'] = ptll
-        dense_axis_variables['l0pt'] = l0.pt
-        dense_axis_variables['l0eta'] = l0.eta 
-        dense_axis_variables['l0phi'] = l0.phi 
-        dense_axis_variables['l1pt'] = l1.pt
-        dense_axis_variables['l1eta'] = l1.eta 
-        dense_axis_variables['l1phi'] = l1.phi
-        dense_axis_variables['j0pt'] = ak.flatten(j0.pt) 
-        dense_axis_variables['j0eta'] = ak.flatten(j0.eta)
-        dense_axis_variables['j0phi'] = ak.flatten(j0.phi)
-        dense_axis_variables['MET'] = met.pt
-
-        jet_variables = ['j0pt', 'j0eta', 'j0phi']
-
-
-        ########## Fill the histograms ##########
-        # Loop through systematics and fill histograms
-        weights_object = copy.deepcopy(weights_obj_base)
-        weight = weights_object.weight(None) 
-
-        for jet_cat in CR_cat_dict[lep_cat]['jet_list']: 
-            # masks that are applied to all categories
-            cuts_list = ['jetvetomap', 'bmask_exactly0med']
-            # cuts_list = ['jetvetomap']
-
-            if isData:
-                cuts_list.append('is_good_lumi')
+            njets = ak.num(goodJets)
+            j0 = goodJets[ak.argmax(goodJets.pt,axis=-1,keepdims=True)]
+            # ht = ak.sum(goodJets.pt,axis=-1)
             
-            cuts_list.append(lep_cat)
-            cuts_list.append(jet_cat)
+            # Medium DeepJet WP
+            medium_tag = "btag_wp_medium_" + year.replace("201", "UL1")
+            btagwpm = get_tc_param(medium_tag)
+            isBtagJetsMedium = (goodJets.btagDeepFlavB > btagwpm)
+            isNotBtagJetsMedium = np.invert(isBtagJetsMedium)
+        
+            nbtagsm = ak.num(goodJets[isBtagJetsMedium])
+            # njets = ak.num(goodJets[isNotBtagJetsMedium])
+
+            if not isData:
+                # nominal btag SF 
+                light_jets = goodJets[goodJets.hadronFlavour == 0]
+                light_eff = tt_cor.GetBtagEff(year=year, jets=light_jets, wp='medium')
+                light_bSF = tt_cor.GetBtagSF(jet_collection=light_jets, wp='M', year=year, method='deepJet_incl', syst='central')
+                light_btagweight = tt_cor.GetBtag_method1a_wgt_singlewp(light_eff, light_bSF, passes_tag=light_jets.btagDeepFlavB > btagwpm)
+
+                bc_jets = goodJets[goodJets.hadronFlavour > 0]
+                bc_eff = tt_cor.GetBtagEff(year=year, jets=bc_jets, wp='medium')
+                bc_bSF = tt_cor.GetBtagSF(jet_collection=bc_jets, wp='M', year=year, method='deepJet_comb', syst='central')
+                bc_btagweight = tt_cor.GetBtag_method1a_wgt_singlewp(bc_eff, bc_bSF, passes_tag=bc_jets.btagDeepFlavB > btagwpm)
+
+                btag_eventweight = light_btagweight*bc_btagweight
+
+                weights_obj_base_for_kinematic_syst.add('btagSF', btag_eventweight)
+
+
+                if self._do_systematics and syst_var=='nominal': 
+                # look at coffea.analysis_tools.Weights.add_multivariation()
+
+                    for b_syst in ['bc_correlated', 'light_correlated', f"bc_{year}", f"light_{year}"]:
+                        if b_syst.endswith("correlated"): 
+                            corrtype = "correlated"
+                        else: 
+                            corrtype = "uncorrelated"
+
+                        if b_syst.startswith("light_"):
+                            syst_jets = light_jets
+                            syst_method= "deepJet_incl"
+                            syst_year = year
+                            btag_effM = light_eff
+                            fixed_btag_w = bc_btagweight
+                        elif b_syst.startswith("bc_"):
+                            syst_jets = bc_jets
+                            syst_method= "deepJet_comb"
+                            syst_year = year
+                            btag_effM = bc_eff
+                            fixed_btag_w = light_btagweight
+
+
+                        btag_SF_up = tt_cor.GetBtagSF(jet_collection=syst_jets, wp='M', year=year, method=syst_method, syst=f'up_{corrtype}')
+                        btag_SF_down = tt_cor.GetBtagSF(jet_collection=syst_jets, wp='M', year=year, method=syst_method, syst=f'down_{corrtype}')
+
+                        btagweight_up = tt_cor.GetBtag_method1a_wgt_singlewp(btag_effM, btag_SF_up, passes_tag=syst_jets.btagDeepFlavB > btagwpm)
+                        btagweight_down = tt_cor.GetBtag_method1a_wgt_singlewp(btag_effM, btag_SF_down, passes_tag=syst_jets.btagDeepFlavB > btagwpm)
+
+                        eventweight_up = fixed_btag_w * btagweight_up
+                        event_weight_down = fixed_btag_w * btagweight_down
+
+                        # TODO: maybe change events.nom to btag_eventweight? depends on how this will be used in combine
+                        weights_obj_base_for_kinematic_syst.add(f'btagSF{b_syst}', events.nom, eventweight_up/btag_eventweight, event_weight_down/btag_eventweight)
+
 
             print(f"\n\n")
-            print(f"lep_cat: {lep_cat}")
-            print(f"jet_cat: {jet_cat}")
-            print(f"    cuts list: {cuts_list}")
+            print(f"weights object entries: {weights_obj_base_for_kinematic_syst.weightStatistics.keys()}")
             print(f"\n\n")
 
-            event_selection_mask = selections.all(*(cuts_list))
-            eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
+            ######### Selection Masks #########
+            selections = PackedSelection(dtype='uint64')
+
+            veto_map_mask = (jet_veto_map == 0)
+
+            ######### Store boolean masks with PackedSelection ##########
+            if isData: 
+                selections.add('is_good_lumi', lumi_mask)
+
+            selections.add('pass_trg', pass_trg)
+            selections.add('jetvetomap', veto_map_mask)
+
+            selections.add('2los', events.is2los)
+
+            selections.add('bmask_exactly0med', (nbtagsm==0))
+            selections.add('bmask_exactly1med', (nbtagsm==1))
+            selections.add('bmask_exactly2med', (nbtagsm==2))
+            selections.add('bmask_atleast2med', (nbtagsm>=2))
+
+            selections.add("exactly_0j", (njets==0))
+            selections.add("exactly_1j", (njets==1))
+            selections.add("exactly_2j", (njets==2))
+
+            selections.add("atleast_1j", (njets>=1))
+
+            if isData: 
+                selections.add("ee",  (events.is_ee & events.is2los & pass_trg))    # data always has trig pass requirement
+            else: 
+                selections.add("ee",  (events.is_ee & events.is2los))               # MC for ee has efficiencies, so no pass_trg requirement
+            
+            selections.add("em",  (events.is_em & events.is2los & pass_trg))        # MC for emu has SF, so use pass_trg requirement 
+            selections.add("mm",  (events.is_mm & events.is2los & pass_trg))        # MC for mumu has SF, so use pass_trg requirement
+
+            ######### Fill dense axes variables ##########
+
+            dense_axis_variables = {}
+            dense_axis_variables['njets'] = njets
+            dense_axis_variables['nbjets'] = nbtagsm
+            dense_axis_variables['mll'] = mll
+            dense_axis_variables['mllZ'] = mll
+            dense_axis_variables['ptll'] = ptll
+            dense_axis_variables['l0pt'] = l0.pt
+            dense_axis_variables['l0eta'] = l0.eta 
+            dense_axis_variables['l0phi'] = l0.phi 
+            dense_axis_variables['l1pt'] = l1.pt
+            dense_axis_variables['l1eta'] = l1.eta 
+            dense_axis_variables['l1phi'] = l1.phi
+            dense_axis_variables['j0pt'] = ak.flatten(j0.pt) 
+            dense_axis_variables['j0eta'] = ak.flatten(j0.eta)
+            dense_axis_variables['j0phi'] = ak.flatten(j0.phi)
+            dense_axis_variables['MET'] = met.pt
+
+            jet_variables = ['j0pt', 'j0eta', 'j0phi']
 
 
-            for dense_axis_name, dense_axis_vals in dense_axis_variables.items():
-                # if the category requires zero jets, don't fill jet histograms
-                if (jet_cat == 'exactly_0j') and (dense_axis_name in jet_variables):
-                    print(f"Skipping '{dense_axis_name}' in category '{lep_cat}_{jet_cat}'. Jet histograms are not filled for categories that don't require a jet")
-                    continue
+            ########## Fill the histograms ##########
+            # Loop through systematics and fill histograms
+            # weights_object = copy.deepcopy(weights_obj_base)
 
-                # if dense_axis_name not in self._hist_lst:
-                #     print(f"Skipping \"{dense_axis_name}\", it is not in the list of hists to include")
-                #     continue                         
+            weights_object = copy.deepcopy(weights_obj_base_for_kinematic_syst)
+            weight = weights_object.weight(None) 
 
-                # Fill the histos
-                axes_fill_info_dict = {
-                    dense_axis_name : dense_axis_vals[event_selection_mask],
-                    "process"       : histAxisName,
-                    "systematic"    : "nominal",
-                    "weight"        : weight[event_selection_mask],
-                    "eft_coeff"     : eft_coeffs_cut,
-                }
+            for jet_cat in CR_cat_dict[lep_cat]['jet_list']: 
+                # masks that are applied to all categories
+                cuts_list = ['jetvetomap', 'bmask_exactly0med']
+                # cuts_list = ['jetvetomap']
 
-                hout[dense_axis_name].fill(**axes_fill_info_dict)
+                if isData:
+                    cuts_list.append('is_good_lumi')
+                
+                cuts_list.append(lep_cat)
+                cuts_list.append(jet_cat)
+
+                print(f"\n\n")
+                print(f"lep_cat: {lep_cat}")
+                print(f"jet_cat: {jet_cat}")
+                print(f"    cuts list: {cuts_list}")
+                print(f"\n\n")
+
+                event_selection_mask = selections.all(*(cuts_list))
+                eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
+
+                ### PDF Weights
+                # pdfWeights = events.LHEPdfWeight
+                #     for i in range(100): #maybe 101 instead of 100? 
+                #     # weight = orig_weight[event_selection_mask] * pdfWeights[event_selection_mask]
 
 
-                if self._do_errors: 
-                    if eft_coeffs is not None:
-                        event_weights_SM = calc_eft_weights(eft_coeffs,np.zeros(len(self._wc_names_lst)))
-                        sumw2 = np.square(weight*event_weights_SM)
-                    else: 
-                        sumw2 = np.square(weight)
+                for dense_axis_name, dense_axis_vals in dense_axis_variables.items():
+                    # if the category requires zero jets, don't fill jet histograms
+                    if (jet_cat == 'exactly_0j') and (dense_axis_name in jet_variables):
+                        print(f"Skipping '{dense_axis_name}' in category '{lep_cat}_{jet_cat}'. Jet histograms are not filled for categories that don't require a jet")
+                        continue
 
-                    sumw2axes_fill_info_dict = {
-                        dense_axis_name+"_sumw2"    : dense_axis_vals[event_selection_mask],
-                        "process"                   : histAxisName,
-                        "systematic"                : "nominal",
-                        "weight"                    : sumw2[event_selection_mask],
-                        "eft_coeff"                 : None,
+                    # if dense_axis_name not in self._hist_lst:
+                    #     print(f"Skipping \"{dense_axis_name}\", it is not in the list of hists to include")
+                    #     continue                         
+
+                    # Fill the histos
+                    axes_fill_info_dict = {
+                        dense_axis_name : dense_axis_vals[event_selection_mask],
+                        "process"       : histAxisName,
+                        "systematic"    : "nominal",
+                        "weight"        : weight[event_selection_mask],
+                        "eft_coeff"     : eft_coeffs_cut,
                     }
 
-                    hout[dense_axis_name+"_sumw2"].fill(**sumw2axes_fill_info_dict)
+                    hout[dense_axis_name].fill(**axes_fill_info_dict)
 
-        return hout
+
+                    if self._do_errors: 
+                        if eft_coeffs is not None:
+                            event_weights_SM = calc_eft_weights(eft_coeffs,np.zeros(len(self._wc_names_lst)))
+                            sumw2 = np.square(weight*event_weights_SM)
+                        else: 
+                            sumw2 = np.square(weight)
+
+                        sumw2axes_fill_info_dict = {
+                            dense_axis_name+"_sumw2"    : dense_axis_vals[event_selection_mask],
+                            "process"                   : histAxisName,
+                            "systematic"                : "nominal",
+                            "weight"                    : sumw2[event_selection_mask],
+                            "eft_coeff"                 : None,
+                        }
+
+                        hout[dense_axis_name+"_sumw2"].fill(**sumw2axes_fill_info_dict)
+
+            return hout
 
 
     def postprocess(self, accumulator):
