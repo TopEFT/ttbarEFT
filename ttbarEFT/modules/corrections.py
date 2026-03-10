@@ -209,6 +209,33 @@ def GetBtagEff(year, jets, wp='medium'):
     return eff_lookup(jets.hadronFlavour, jets.pt, np.abs(jets.eta))
 
 
+def GetBtagEffLookup(year, wp='medium'):
+
+    if year not in clib_year_map.keys(): 
+        raise Exception(f"Error: Unknown year \"{year}\".")
+
+    pathToBtagMCeff = ttbarEFT_path(f'data/btagSF/UL/btagMCeff_{year}.pkl.gz')
+    
+    hists = {}
+    with gzip.open(pathToBtagMCeff) as fin:
+        hists = pickle.load(fin)['btag']
+
+    h = hists['jetptetaflav']
+    hnum = h[{'WP': wp}]
+    hden = h[{'WP': 'all'}]
+
+    eff = hnum/hden
+    eff_lookup = lookup_tools.dense_lookup.dense_lookup(
+        eff.values(), 
+        [ax.edges for ax in eff.axes]
+    )
+
+    def evaluate_eff(jets):
+        return eff_lookup(jets.hadronFlavour, jets.pt, np.abs(jets.eta))
+
+    return evaluate_eff
+
+
 def GetBtagSF(jet_collection,wp,year,method,syst):
     """
     Get btag SF from central correctionlib json
@@ -219,6 +246,7 @@ def GetBtagSF(jet_collection,wp,year,method,syst):
 
     clib_year = clib_year_map[year]
     fname = ttbarEFT_path(f"data/POG/BTV/{clib_year}/btagging.json.gz")
+    ceval = correctionlib.CorrectionSet.from_file(fname)
 
     # Flatten the input (until correctionlib handles jagged data natively)
     abseta_flat = ak.flatten(abs(jet_collection.eta))
@@ -229,11 +257,40 @@ def GetBtagSF(jet_collection,wp,year,method,syst):
     pt_flat = ak.where(pt_flat>1000.0,1000.0,pt_flat)
 
     # Evaluate the SF
-    ceval = correctionlib.CorrectionSet.from_file(fname)
     sf_flat = ceval[method].evaluate(syst,wp,flav_flat,abseta_flat,pt_flat)
     sf = ak.unflatten(sf_flat,ak.num(jet_collection.pt))
 
     return sf
+
+
+def GetBtagSFLookup(wp,year,method):
+    """
+    Get btag SF from central correctionlib json
+    - similar to topcoffea.modules.corrections.btag_sf_eval()
+    - usage: btag_sfL_up   = tc_cor.btag_sf_eval(jets_flav, "L",sys_year,f"deepJet_{dJ_tag}",f"up_{corrtype}")
+    - usage: weights_obj_base_for_kinematic_syst.add(f"btagSF{b_syst}", events.nom, btag_w_up, btag_w_down)
+    """
+
+    clib_year = clib_year_map[year]
+    fname = ttbarEFT_path(f"data/POG/BTV/{clib_year}/btagging.json.gz")
+    ceval = correctionlib.CorrectionSet.from_file(fname)[method]
+
+    def evaluate_sf(jet_collection, syst):
+        # Flatten the input (until correctionlib handles jagged data natively)
+        abseta_flat = ak.flatten(abs(jet_collection.eta))
+        pt_flat = ak.flatten(jet_collection.pt)
+        flav_flat = ak.flatten(jet_collection.hadronFlavour)
+
+        # For now, cap all pt at 1000 https://cms-talk.web.cern.ch/t/question-about-evaluating-sfs-with-correctionlib/31763
+        pt_flat = ak.where(pt_flat>1000.0,1000.0,pt_flat)
+
+        # Evaluate the SF
+        sf_flat = ceval.evaluate(syst,wp,flav_flat,abseta_flat,pt_flat)
+        sf = ak.unflatten(sf_flat,ak.num(jet_collection.pt))
+
+        return sf
+
+    return evaluate_sf
 
 
 def GetBtag_method1a_wgt_singlewp(eff,sf,passes_tag):
