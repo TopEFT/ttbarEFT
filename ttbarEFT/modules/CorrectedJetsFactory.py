@@ -444,14 +444,33 @@ class CorrectedJetsFactory(object):
                     template_mass,
                 )
 
-        jets_record = ak.zip(jagged_out, depth_limit=1, parameters=parameters, behavior=behavior)
+        # jets_record = ak.zip(jagged_out, depth_limit=1, parameters=parameters, behavior=behavior)
+        # Start with an empty record that has the correct length and structure
+        # before making this change, the area field was throwing errors and/or the structure of jets_record did not match events.Jet
+        jets_record = ak.zip(
+            {"pt": jagged_out[self.name_map["JetPt"]]}, 
+            depth_limit=None, 
+            behavior=behavior
+        )
 
+        # Add every field one-by-one
+        # This uses 'ak.with_field', which is more permissive than 'ak.zip' because it doesn't force a global re-broadcast of the whole dictionary.
+        for k, v in jagged_out.items():
+            if not (k == "JER" or k.startswith("JES_") or k == self.name_map["JetPt"]):
+                try:
+                    jets_record = ak.with_field(jets_record, v, k)
+                except Exception as e:
+                    logger.warning(f"Field {k} failed to add: {e}")
+
+        # Add systemics (which are nested records)
         if jer_systematic is not None:
             jets_record = ak.with_field(jets_record, jer_systematic, "JER")
+        for name, variation in jes_systematics.items():
+            jets_record = ak.with_field(jets_record, variation, f"JES_{name}")
 
-        if len(jes_systematics) > 0:
-            for name, variation in jes_systematics.items():
-                jets_record = ak.with_field(jets_record, variation, f"JES_{name}")
+        # Restore behavior and parameters
+        jets_record = ak.with_parameter(jets_record, "corrected", True)
+        jets_record = ak.with_parameter(jets_record, "typename", "Jet")
 
         if logger.isEnabledFor(logging.INFO):
             jet_fields = tuple(ak.fields(jets_record))

@@ -363,10 +363,11 @@ def get_jerc_keys(year, isdata, era=None):
     # Jet Algorithm
     if year.startswith("202"):
         jet_algo = 'AK4PFPuppi'
+        jec_levels = jerc_dict[year]['jec_levels']
     else:
         jet_algo = 'AK4PFchs'
-
-    jec_levels = jerc_dict[year]['jec_levels']
+        jec_levels = []            # no JEC corrections for Run2, already applied in nanoAODv9
+    
 
     # jerc keys and junc types
     if not isdata:
@@ -374,10 +375,11 @@ def get_jerc_keys(year, isdata, era=None):
         jer_key    = jerc_dict[year]['jer']
         junc_types = jerc_dict[year]['junc']
     else:
-        if year in ['2016']: #,'2022','2023BPix'
-            jec_key = jerc_dict[year]['jec_data']
-        else:
-            jec_key = jerc_dict[year]['jec_data'][era]
+        jec_key     = None
+        # if year in ['2016']: #,'2022','2023BPix'
+        #     jec_key = jerc_dict[year]['jec_data']
+        # else:
+        #     jec_key = jerc_dict[year]['jec_data'][era]
         jer_key     = None
         junc_types  = None
 
@@ -548,7 +550,23 @@ def ApplyJetCorrections(year, corr_type, isData, era, useclib=True, savelevels=F
 
 def ApplyJetSystematics(year,cleanedJets,syst_var):
     if (syst_var == f'JER_{year}Up'):
-        return cleanedJets.JER.up
+        # return cleanedJets.JER.up
+        print(f"\n\n")
+        print(f"cleanedJets.JER.up: {cleanedJets.JER.up}")
+        print(f"cleanedJets.pt[0]: {cleanedJets.pt[0]}")
+        print(f"cleanedJets.JER.up.pt[0]: {cleanedJets.JER.up.pt[0]}")
+        print(f"cleanedJets.JER.up.pt firsts: {ak.firsts(cleanedJets.JER.up.pt)[0]}")
+        # print(f"cleanedJets.JER.up.fields: {cleanedJets.JER.up.fields}")
+        print(f"\n\n")
+
+        # print(f"type of cleanedJets['pt']: {type(cleanedJets['pt'])}" )
+        # print(f"type of ak.firsts(cleanedJets.JER.up.pt): {type(ak.firsts(cleanedJets.JER.up.pt))}")
+
+        cleanedJets['pt'] = ak.firsts(cleanedJets.JER.up.pt)
+        cleanedJets['mass'] = ak.firsts(cleanedJets.JER.up.mass)
+
+        return cleanedJets
+
     elif (syst_var == f'JER_{year}Down'):
         return cleanedJets.JER.down
     elif (syst_var == 'JESUp'):
@@ -585,11 +603,12 @@ def ApplyJetSystematics(year,cleanedJets,syst_var):
             corrections = ak.unflatten(corrections, ak.num(cleanedJets.JES_FlavorQCD.down.pt))
             cleanedJets['JES_FlavorQCD']['down']['pt'] = corrections
             return cleanedJets.JES_FlavorQCD.down
-    # Save `2016APV` as `2016APV` but look up `2016` corrections (no separate APV corrections available)
-    elif ('Up' in syst_var and syst_var[:-2].replace('APV', '') in cleanedJets.fields):
-        return cleanedJets[syst_var.replace('Up', '').replace("Pile", "PileUp").replace('APV', '')].up
-    elif ('Down' in syst_var and syst_var[:-4].replace('APV', '') in cleanedJets.fields):
-        return cleanedJets[syst_var.replace('Down', '').replace('APV', '')].down
+
+    # # Save `2016APV` as `2016APV` but look up `2016` corrections (no separate APV corrections available)
+    # elif ('Up' in syst_var and syst_var[:-2].replace('APV', '') in cleanedJets.fields):
+    #     return cleanedJets[syst_var.replace('Up', '').replace("Pile", "PileUp").replace('APV', '')].up
+    # elif ('Down' in syst_var and syst_var[:-4].replace('APV', '') in cleanedJets.fields):
+    #     return cleanedJets[syst_var.replace('Down', '').replace('APV', '')].down
     else:
         raise Exception(f"Error: Unknown variation \"{syst_var}\".")
 
