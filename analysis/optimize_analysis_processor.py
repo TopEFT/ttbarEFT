@@ -244,6 +244,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         # jets['isPres'] = tt_os.is_pres_jet(jets) 
         jets['isClean'] = tt_os.isClean(jets, ele_good, drmin=0.4)& tt_os.isClean(jets, mu_good, drmin=0.4)
         cleanedJets = jets[jets.isClean]
+        cleanedJets = ak.fill_none(cleanedJets, [])
 
         # Medium DeepJet WP
         medium_tag = "btag_wp_medium_" + year.replace("201", "UL1")
@@ -348,7 +349,10 @@ class AnalysisProcessor(processor.ProcessorABC):
                 jet_veto_map = tt_cor.ApplyJetVetoMaps(goodJets, year)    
 
                 njets = ak.num(goodJets)
-                j0 = goodJets[ak.argmax(goodJets.pt,axis=-1,keepdims=True)]
+                jets_sorted = goodJets[ak.argsort(goodJets.pt, axis=-1,ascending=False)]
+                jets_sorted = ak.pad_none(jets_sorted, 1)
+                j0 = jets_sorted[:,0]
+                # j0 = goodJets[ak.argmax(goodJets.pt,axis=-1,keepdims=True)]
                 # ht = ak.sum(goodJets.pt,axis=-1)
             
                 # Medium DeepJet WP
@@ -375,7 +379,9 @@ class AnalysisProcessor(processor.ProcessorABC):
                 jet_veto_map = tt_cor.ApplyJetVetoMaps(goodJets, year)    
 
                 njets = ak.num(goodJets)
-                j0 = goodJets[ak.argmax(goodJets.pt,axis=-1,keepdims=True)]
+                jets_sorted = goodJets[ak.argsort(goodJets.pt, axis=-1,ascending=False)]
+                jets_sorted = ak.pad_none(jets_sorted, 1)
+                j0 = jets_sorted[:,0]
                 # ht = ak.sum(goodJets.pt,axis=-1)
                 
                 # Medium DeepJet WP
@@ -477,9 +483,9 @@ class AnalysisProcessor(processor.ProcessorABC):
             dense_axis_variables['l1pt'] = l1.pt
             dense_axis_variables['l1eta'] = l1.eta 
             dense_axis_variables['l1phi'] = l1.phi
-            dense_axis_variables['j0pt'] = ak.flatten(j0.pt) 
-            dense_axis_variables['j0eta'] = ak.flatten(j0.eta)
-            dense_axis_variables['j0phi'] = ak.flatten(j0.phi)
+            dense_axis_variables['j0pt'] = j0.pt
+            dense_axis_variables['j0eta'] = j0.eta
+            dense_axis_variables['j0phi'] = j0.phi
             dense_axis_variables['MET'] = met.pt
 
             jet_variables = ['j0pt', 'j0eta', 'j0phi']
@@ -550,14 +556,20 @@ class AnalysisProcessor(processor.ProcessorABC):
                         #     print(f"Skipping \"{dense_axis_name}\", it is not in the list of hists to include")
                         #     continue                       
 
-                        if dense_axis_name == 'j0pt': 
-                            print(f"\n\n")
-                            print(dense_axis_vals[event_selection_mask])
-                            print(type(dense_axis_vals[event_selection_mask]))
+                        # if dense_axis_name == 'j0pt':
+                            # print(f"\n\n")
+                            # print(dense_axis_vals[event_selection_mask])
+                            # print(type(dense_axis_vals[event_selection_mask]))
 
-                            arr = dense_axis_vals[event_selection_mask]
-                            assert len(arr[ak.is_none(arr)]) == 0, arr[ak.is_none(arr)]
-                            print(f"\n\n")  
+                            # arr = dense_axis_vals[event_selection_mask]
+
+                            # print(f"goodJets where j0 is none: {goodJets[ak.is_none(arr)]}")
+                            # print(f"correctedJets where j0 is none: {correctedJets[ak.is_none(arr)]}")
+                            # print(f"j0 where j0pt is none: {j0[ak.is_none(arr)]}")
+                            # print(f"njets where j0 is none: {njets[ak.is_none(arr)]}")
+
+                            # assert len(arr[ak.is_none(arr)]) == 0, arr[ak.is_none(arr)]
+                            # print(f"\n\n")
 
                         # Fill the histos
                         axes_fill_info_dict = {

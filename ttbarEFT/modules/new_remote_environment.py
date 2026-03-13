@@ -9,6 +9,7 @@ import glob
 import os
 import re
 import conda_pack
+import shutil
 import time
 from pathlib import Path
 
@@ -135,10 +136,11 @@ def check_quick_rebuild(env_name: str, pip_paths: Dict):
     # 4. Conda pack updated environment
         logger.info("Packaging new environment file from {}".format(env_dir))
         Path(env_name).unlink(missing_ok=True)
+        #subprocess.check_call(['poncho_package_create', env_dir, env_name])
         tmp_path = Path(env_name).with_suffix("").with_suffix("")
         subprocess.check_call(['cp', '-r', env_dir, tmp_path])
         subprocess.check_call(['poncho_package_create', '--ignore-editable-packages', str(tmp_path), env_name])
-        Path(tmp_path).unlink(missing_ok=True)
+        shutil.rmtree(tmp_path)
     return True
 
 def _find_local_pip():
