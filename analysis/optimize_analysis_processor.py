@@ -65,12 +65,14 @@ def calc_eft_weights(eft_coeffs, wc_vals):
 
 
 class AnalysisProcessor(processor.ProcessorABC):
-    def __init__(self, samples, lep_cat, wc_names_lst=[], hist_lst=None, do_errors=False, do_systematics=False, dtype=np.float32):
+    def __init__(self, samples, lep_cat, wc_names_lst=[], hist_lst=None, do_errors=False, syst_list = None, dtype=np.float32):
         self._samples = samples
         self._lep_cat = lep_cat
         self._wc_names_lst = wc_names_lst
         self._do_errors = do_errors
-        self._do_systematics = True # do_systematics
+
+        self._syst_list = syst_list
+        self._do_systematics = syst_list is not None # only do systematics if sys_list is not None
         self._dtype = dtype 
         
 
@@ -197,6 +199,54 @@ class AnalysisProcessor(processor.ProcessorABC):
             lumi_mask = LumiMask(golden_json_path[year])(events.run,events.luminosityBlock) 
 
 
+        ######### Setup List of Sysmematics to Run Over ######### 
+        wgt_correction_bases = [
+            'lepSF', 
+            'trigSF',
+            'btagSF', 
+            'FSR', 'ISR', 'renorm', 'fact',
+        ]
+
+        wgt_correction_syst_lst_all = [
+            'lepSFUp', 'lepSFDown',                                                                                         # lepton systs
+            'trigSFUp', 'trigSFDown', 'L1prefireUp', 'L1prefireDown', "PUUp", "PUDown",                                     # Exp systs
+            'btagSFbc_correlatedUp', 'btagSFbc_correlatedDown', 'btagSFlight_correlatedUp', 'btagSFlight_correlatedDown',   # btag correlated systs
+            f'btagSFbc_{year}Up',f'btagSFbc_{year}Down',f'btagSFlight_{year}Up',f'btagSFlight_{year}Down',                  # btag uncorrelated systs
+            'FSRUp', 'FSRDown', 'ISRUp', 'ISRDown', 'renormUp', 'renormDown', 'factUp', 'factDown',                         # Theory systs
+        ]
+
+        obj_correction_syst_lst = tt_cor.get_supported_jet_systematics( 
+            year, isData=isData, era=run_era
+        )
+
+        syst_var_list = ['nominal']
+        wgt_correction_syst_lst = []
+
+        if self._do_systematics and not isData:                     # if doing systematics, loop over corrections for only MC
+            if 'all' in self._syst_list: 
+                wgt_correction_syst_lst =  wgt_correction_syst_lst_all
+                syst_var_list.extend(obj_correction_syst_lst)   
+            else:
+                for var in self._syst_list: 
+                    if var in wgt_correction_bases: 
+                        if var == 'btagSF':
+                            wgt_correction_syst_lst.extend('btagSFbc_correlatedUp', 'btagSFbc_correlatedDown', 'btagSFlight_correlatedUp', 'btagSFlight_correlatedDown',   # btag correlated systs
+                                                            f'btagSFbc_{year}Up',f'btagSFbc_{year}Down',f'btagSFlight_{year}Up',f'btagSFlight_{year}Down',)
+                        else:
+                            wgt_correction_syst_lst.extend(f"{var}Up")
+                            wgt_correction_syst_lst.extend(f"{var}Down")
+
+                    if var in obj_correction_syst_lst: 
+                        syst_var_list.extend(var)                                     
+
+            if 'noJEC' in self._syst_list:                          # set syst_var_list to empty if noJEC specified
+                syst_var_list = ['nominal']
+
+        print(f"\n\n")
+        print(f"list of systematics to run over: {wgt_correction_syst_lst}, {syst_var_list}")
+        print(f"\n\n")
+
+
         ######### Load Event Categories ##########
         cat_dict = None
         with open(ttbarEFT_path("params/channels.yaml"), "r") as f:
@@ -271,17 +321,17 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         ######### Systematics #########
         # data_syst_lst = []              #TODO, don't think we have any of these
-        obj_correction_syst_lst = tt_cor.get_supported_jet_systematics( 
-            year, isData=isData, era=run_era
-        )
+        # obj_correction_syst_lst = tt_cor.get_supported_jet_systematics( 
+        #     year, isData=isData, era=run_era
+        # )
 
-        wgt_correction_syst_lst = [
-            'lepSFUp', 'lepSFDown',                                                                                         # lepton systs
-            'trigSFUp', 'trigSFDown', 'L1prefireUp', 'L1prefireDown', "PUUp", "PUDown",                                     # Exp systs
-            'btagSFbc_correlatedUp', 'btagSFbc_correlatedDown', 'btagSFlight_correlatedUp', 'btagSFlight_correlatedDown',   # btag correlated systs
-            f'btagSFbc_{year}Up',f'btagSFbc_{year}Down',f'btagSFlight_{year}Up',f'btagSFlight_{year}Down',                  # btag uncorrelated systs
-            'FSRUp', 'FSRDown', 'ISRUp', 'ISRDown', 'renormUp', 'renormDown', 'factUp', 'factDown',                         # Theory systs
-        ]
+        # wgt_correction_syst_lst = [
+        #     'lepSFUp', 'lepSFDown',                                                                                         # lepton systs
+        #     'trigSFUp', 'trigSFDown', 'L1prefireUp', 'L1prefireDown', "PUUp", "PUDown",                                     # Exp systs
+        #     'btagSFbc_correlatedUp', 'btagSFbc_correlatedDown', 'btagSFlight_correlatedUp', 'btagSFlight_correlatedDown',   # btag correlated systs
+        #     f'btagSFbc_{year}Up',f'btagSFbc_{year}Down',f'btagSFlight_{year}Up',f'btagSFlight_{year}Down',                  # btag uncorrelated systs
+        #     'FSRUp', 'FSRDown', 'ISRUp', 'ISRDown', 'renormUp', 'renormDown', 'factUp', 'factDown',                         # Theory systs
+        # ]
 
         weights_obj_base = coffea.analysis_tools.Weights(len(events),storeIndividual=True)
 
@@ -323,22 +373,25 @@ class AnalysisProcessor(processor.ProcessorABC):
             cleanedJets["mass_raw"] = (1 - cleanedJets.rawFactor)*cleanedJets.mass
             cleanedJets["rho"] = ak.broadcast_arrays(events.fixedGridRhoFastjetAll, cleanedJets.pt)[0]
             cleanedJets["pt_gen"] = ak.values_astype(ak.fill_none(cleanedJets.matched_gen.pt, 0), np.float32)
-            # cleanedJets = tt_cor.ApplyJetCorrections(year, corr_type='jets', isData=isData, era=run_era).build(cleanedJets)
             cleanedJets = tt_cor.ApplyJetCorrections(year, corr_type='jets', isData=isData, era=run_era).build(cleanedJets)
             cleanedJets['pt_nom'] = cleanedJets['pt']
             cleanedJets['mass_nom'] = cleanedJets['mass']
 
-        if self._do_systematics and not isData:                     # if doing systematics, loop over corrections for only MC
-            syst_var_list = ['nominal'] + obj_correction_syst_lst
-        else:                                                       # otherwise just loop once for nominal case 
-            syst_var_list = ['nominal']
+        # if self._do_systematics and not isData:                     # if doing systematics, loop over corrections for only MC
+        #     syst_var_list = ['nominal'] + obj_correction_syst_lst
+        # else:                                                       # otherwise just loop once for nominal case 
+        #     syst_var_list = ['nominal']
 
         ######### The rest of the processor is inside this loop over systs that affect object kinematics  ###########
         print(f"\n\n")
         print(f"syst_var_list: {syst_var_list}")
+        print(f"")
         print(f"\n\n")
 
         for syst_var in syst_var_list:
+        # for syst_var in ['nominal', 'JER_2017Up', 'JER_2017Down']: 
+        # for syst_var in ['JER_2017Up', 'JER_2017Down', 'JES_FragmentationUp', 'JES_FragmentationDown', 'JES_FlavorQCDUp', 'JES_FlavorQCDDown']:
+        # for syst_var in ['JES_FlavorQCDUp']:
 
             print(f"\n\n running over syst_var: {syst_var} \n\n")
 
@@ -364,14 +417,8 @@ class AnalysisProcessor(processor.ProcessorABC):
  
                 weights_obj_base_for_kinematic_syst = copy.deepcopy(weights_obj_base)
 
-                # print(f"\n before ApplySystematics event0= {cleanedJets[0]} \n")
-                # print(f"\n before ApplySystematics event1= {cleanedJets[1]} \n")
-
                 correctedJets = tt_cor.ApplyJetSystematics(year=year, cleanedJets=cleanedJets, syst_var=syst_var)
                 met = tt_cor.ApplyJetCorrections(year, corr_type='met', isData=isData, era=run_era).build(MET=raw_met, corrected_jets=correctedJets)
-
-                # print(f"\n after ApplySystematics event0= {correctedJets[0]} \n")
-                # print(f"\n after ApplySystematics event1= {correctedJets[1]} \n")
 
                 correctedJets['isGood'] = tt_os.is_pres_jet(correctedJets)
                 goodJets =  correctedJets[correctedJets.isGood]
@@ -518,7 +565,7 @@ class AnalysisProcessor(processor.ProcessorABC):
                     else: 
                         continue    # if there is no up/down fluctuation for this category, don't fill a hist
 
-
+                print(f"lep_cat: {lep_cat}")
                 for jet_cat in CR_cat_dict[lep_cat]['jet_list']: 
                     # masks that are applied to all categories
                     cuts_list = ['jetvetomap', 'bmask_exactly0med']
@@ -530,9 +577,7 @@ class AnalysisProcessor(processor.ProcessorABC):
                     cuts_list.append(lep_cat)
                     cuts_list.append(jet_cat)
 
-                    print(f"\n\n")
-                    print(f"lep_cat: {lep_cat}")
-                    print(f"jet_cat: {jet_cat}")
+                    print(f"    jet_cat: {jet_cat}")
                     print(f"    cuts list: {cuts_list}")
                     print(f"\n\n")
 
@@ -551,25 +596,10 @@ class AnalysisProcessor(processor.ProcessorABC):
                             # print(f"Skipping '{dense_axis_name}' in category '{lep_cat}_{jet_cat}'. Jet histograms are not filled for categories that don't require a jet")
                             continue
 
-                        print(f"filling histogram : {dense_axis_name}")
+                        print(f"        filling histogram : {dense_axis_name}")
                         # if dense_axis_name not in self._hist_lst:
                         #     print(f"Skipping \"{dense_axis_name}\", it is not in the list of hists to include")
                         #     continue                       
-
-                        # if dense_axis_name == 'j0pt':
-                            # print(f"\n\n")
-                            # print(dense_axis_vals[event_selection_mask])
-                            # print(type(dense_axis_vals[event_selection_mask]))
-
-                            # arr = dense_axis_vals[event_selection_mask]
-
-                            # print(f"goodJets where j0 is none: {goodJets[ak.is_none(arr)]}")
-                            # print(f"correctedJets where j0 is none: {correctedJets[ak.is_none(arr)]}")
-                            # print(f"j0 where j0pt is none: {j0[ak.is_none(arr)]}")
-                            # print(f"njets where j0 is none: {njets[ak.is_none(arr)]}")
-
-                            # assert len(arr[ak.is_none(arr)]) == 0, arr[ak.is_none(arr)]
-                            # print(f"\n\n")
 
                         # Fill the histos
                         axes_fill_info_dict = {

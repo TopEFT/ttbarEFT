@@ -375,11 +375,11 @@ def get_jerc_keys(year, isdata, era=None):
         jer_key    = jerc_dict[year]['jer']
         junc_types = jerc_dict[year]['junc']
     else:
-        jec_key     = None
         # if year in ['2016']: #,'2022','2023BPix'
         #     jec_key = jerc_dict[year]['jec_data']
         # else:
         #     jec_key = jerc_dict[year]['jec_data'][era]
+        jec_key     = None
         jer_key     = None
         junc_types  = None
 
@@ -499,30 +499,29 @@ def ApplyJetCorrections(year, corr_type, isData, era, useclib=True, savelevels=F
     # Return appropriate factory based on correction type
     if corr_type == 'met':
         return CorrectedMETFactory(name_map)
-
-    # return CorrectedJetsFactory(name_map, jec_stack, run)
-    return CorrectedJetsFactory(name_map, jec_stack, allowed_variations=None)
+    elif corr_type == 'jets':
+        return CorrectedJetsFactory(name_map, jec_stack, allowed_variations=None)
+    else: 
+        raise ValueError(f"Unknown correction type \"{corr_type}\".")
 
 
 def ApplyJetSystematics(year,cleanedJets,syst_var):
 
+    # getattr(cleanedJets, f"JER.up.pt")
     if (syst_var == 'nominal'):
         return cleanedJets
 
     elif (syst_var == f'JER_{year}Up'):
         new_jets = cleanedJets
-
+        # new_pt = ak.firsts(getattr(cleanedJets, f"JER").up.pt)
         new_pt = ak.firsts(cleanedJets.JER.up.pt)
         new_mass = ak.firsts(cleanedJets.JER.up.mass)
         new_jets = ak.with_field(new_jets, new_pt, "pt")
         new_jets = ak.with_field(new_jets, new_mass, "mass")
-
         return new_jets
 
     elif (syst_var == f'JER_{year}Down'):
-
         new_jets = cleanedJets
-
         new_pt = ak.firsts(cleanedJets.JER.down.pt)
         new_mass = ak.firsts(cleanedJets.JER.down.mass)
         new_jets = ak.with_field(new_jets, new_pt, "pt")
@@ -531,73 +530,81 @@ def ApplyJetSystematics(year,cleanedJets,syst_var):
         return new_jets
 
     elif (syst_var == 'JESUp'):
-
         new_jets = cleanedJets
-
         new_pt = ak.firsts(cleanedJets.JES_jes.up.pt)
         new_mass = ak.firsts(cleanedJets.JES_jes.up.mass)
         new_jets = ak.with_field(new_jets, new_pt, "pt")
         new_jets = ak.with_field(new_jets, new_mass, "mass")
-
         return new_jets
 
     elif (syst_var == 'JESDown'):
-
         new_jets = cleanedJets
-
         new_pt = ak.firsts(cleanedJets.JES_jes.down.pt)
         new_mass = ak.firsts(cleanedJets.JES_jes.down.mass)
         new_jets = ak.with_field(new_jets, new_pt, "pt")
         new_jets = ak.with_field(new_jets, new_mass, "mass")
-
         return new_jets
 
-    # elif ('Up' in syst_var and syst_var[:-2].replace('APV', '') in cleanedJets.fields):
-    #     return cleanedJets[syst_var.replace('Up', '').replace("Pile", "PileUp").replace('APV', '')].up
-    # elif ('Down' in syst_var and syst_var[:-4].replace('APV', '') in cleanedJets.fields):
-    #     return cleanedJets[syst_var.replace('Down', '').replace('APV', '')].down
+    # elif ('JES_FlavorQCD' in syst_var):
+    #     new_jets = cleanedJets
+
+    #     # Overwrite FlavorQCD with the proper jet flavor uncertainty
+    #     bmask = np.array(ak.flatten(abs(cleanedJets.partonFlavour)==5))
+    #     cmask = abs(cleanedJets.partonFlavour)==4
+    #     cmask = np.array(ak.flatten(cmask))
+    #     qmask = abs(cleanedJets.partonFlavour)<=3
+    #     qmask = np.array(ak.flatten(qmask))
+    #     gmask = abs(cleanedJets.partonFlavour)==21
+    #     gmask = np.array(ak.flatten(gmask))
+    #     corrections = np.array(np.zeros_like(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt)))
+
+    #     if 'Up' in syst_var:
+    #         corrections[bmask] = corrections[bmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt))[bmask]
+    #         corrections[cmask] = corrections[cmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt))[cmask]
+    #         corrections[qmask] = corrections[qmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt))[qmask]
+    #         corrections[gmask] = corrections[gmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt))[gmask]
+    #         corrections = ak.unflatten(corrections, ak.num(cleanedJets.JES_FlavorQCD.up.pt))
+
+    #         new_jets = ak.with_field(new_jets, corrections, "pt")
+    #         new_jets = ak.with_field(new_jets, ak.firsts(cleanedJets.JES_FlavorQCD.up.mass), "mass")
+    #         return new_jets
+    #         # cleanedJets['JES_FlavorQCD']['up']['pt'] = corrections
+    #         # return cleanedJets.JES_FlavorQCD.up
+
+    #     if 'Down' in syst_var:
+    #         corrections[bmask] = corrections[bmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.down.pt))[bmask]
+    #         corrections[cmask] = corrections[cmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.down.pt))[cmask]
+    #         corrections[qmask] = corrections[qmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.down.pt))[qmask]
+    #         corrections[gmask] = corrections[gmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.down.pt))[gmask]
+    #         corrections = ak.unflatten(corrections, ak.num(cleanedJets.JES_FlavorQCD.down.pt))
+
+    #         new_jets = ak.with_field(new_jets, corrections, "pt")
+    #         new_jets = ak.with_field(new_jets, ak.firsts(cleanedJets.JES_FlavorQCD.down.mass), "mass")
+
+    #         return new_jets
+    #         # cleanedJets['JES_FlavorQCD']['down']['pt'] = corrections
+    #         # return cleanedJets.JES_FlavorQCD.down
+
+    elif ('Up' in syst_var) and (syst_var[:-2] in cleanedJets.fields):
+        new_jets = cleanedJets
+        new_pt = ak.firsts(getattr(cleanedJets, f"{syst_var[:-2]}").up.pt)
+        new_mass = ak.firsts(getattr(cleanedJets, f"{syst_var[:-2]}").up.mass)
+        new_jets = ak.with_field(new_jets, new_pt, "pt")
+        new_jets = ak.with_field(new_jets, new_mass, "mass")
+        return new_jets
+
+    elif ('Down' in syst_var) and (syst_var[:-4] in cleanedJets.fields):
+        new_jets = cleanedJets
+        new_pt = ak.firsts(getattr(cleanedJets, f"{syst_var[:-4]}").down.pt)
+        new_mass = ak.firsts(getattr(cleanedJets, f"{syst_var[:-4]}").down.mass)
+        new_jets = ak.with_field(new_jets, new_pt, "pt")
+        new_jets = ak.with_field(new_jets, new_mass, "mass")
+        return new_jets
 
     else: 
-        raise Exception(f"Error: Unknown variation \"{syst_var}\".")
-
-    # if (syst_var == f'JER_{year}Up'):
-    #     # return cleanedJets.JER.up
-    #     # print(f"\n\n")
-    #     # print(f"cleanedJets.JER.up: {cleanedJets.JER.up}")
-    #     # print(f"cleanedJets.pt[0]: {cleanedJets.pt[0]}")
-    #     # print(f"cleanedJets.JER.up.pt[0]: {cleanedJets.JER.up.pt[0]}")
-    #     # print(f"cleanedJets.JER.up.pt firsts: {ak.firsts(cleanedJets.JER.up.pt)[0]}")
-    #     # # print(f"cleanedJets.JER.up.fields: {cleanedJets.JER.up.fields}")
-    #     # print(f"\n\n")
-
-    #     # cleanedJets['pt'] = ak.firsts(cleanedJets.JER.up.pt)
-    #     # cleanedJets['mass'] = ak.firsts(cleanedJets.JER.up.mass)
-
-    #     # return cleanedJets
-
-    #     # print(f"type of cleanedJets['pt']: {type(cleanedJets['pt'])}" )
-    #     # print(f"type of ak.firsts(cleanedJets.JER.up.pt): {type(ak.firsts(cleanedJets.JER.up.pt))}")
+        raise ValueError(f"Unknown variation {syst_var}.")
 
 
-    #     new_jets = cleanedJets
-    #     new_pt = ak.firsts(cleanedJets.JER.up.pt)
-    #     new_mass = ak.firsts(cleanedJets.JER.up.mass)
-
-    #     new_jets = ak.with_field(new_jets, new_pt, "pt")
-    #     new_jets = ak.with_field(new_jets, new_mass, "mass")
-
-    #     return new_jets
-
-    # elif (syst_var == f'JER_{year}Down'):
-    #     return cleanedJets.JER.down
-    # elif (syst_var == 'JESUp'):
-    #     return cleanedJets.JES_jes.up
-    # elif (syst_var == 'JESDown'):
-    #     return cleanedJets.JES_jes.down
-    # elif (syst_var == 'nominal'):
-    #     return cleanedJets
-    # elif (syst_var in ['nominal','MuonESUp','MuonESDown', 'TESUp', 'TESDown', 'FESUp', 'FESDown']):
-    #     return cleanedJets
     # elif ('JES_FlavorQCD' in syst_var):
     #     # Overwrite FlavorQCD with the proper jet flavor uncertainty
     #     bmask = np.array(ak.flatten(abs(cleanedJets.partonFlavour)==5))
