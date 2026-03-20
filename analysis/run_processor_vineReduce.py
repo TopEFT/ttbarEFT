@@ -215,6 +215,7 @@ if __name__ == '__main__':
         )
         mgr.tune("hungry-minimum", 1)
         mgr.enable_monitoring(watchdog=False)
+        mgr.enable_disconnect_slow_workers(3)
 
         # env = remote_environment.get_environment(
         #     extra_pip_local = {"ttbarEFT": ["ttbarEFT", "setup.py"],
@@ -268,8 +269,8 @@ if __name__ == '__main__':
             },
             extra_files = [proc_file, "proxy.pem"], #"/users/hnelson2/ttbarEFT-coffea2025/ttbarEFT/params/channels.json", 
             schema=NanoAODSchema,
-            max_task_retries= 30, # default=10
-            step_size=1000000, #equivalent to chunksize, default=100k
+            max_task_retries= 10, # default=10
+            step_size = 500000, #equivalent to chunksize, default=100k
             resources_processing={"cores": 1},
             resources_accumulating={"cores": 1},
             results_directory=results_dir,

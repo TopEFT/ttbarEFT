@@ -489,7 +489,7 @@ def ApplyJetCorrections(year, corr_type, isData, era, useclib=True, savelevels=F
         'ptGenJet': 'pt_gen',
         'ptRaw':    'pt_raw',
         'massRaw':  'mass_raw',
-        'Rho':      'rho',
+        'Rho':      'Rho',
         'METpt':    'pt',
         'METphi':   'phi',
         'UnClusteredEnergyDeltaX': 'MetUnclustEnUpDeltaX',
