@@ -221,7 +221,7 @@ if __name__ == '__main__':
         )
         mgr.tune("hungry-minimum", 1)
         mgr.enable_monitoring(watchdog=False)
-        mgr.enable_disconnect_slow_workers(4)
+        mgr.enable_disconnect_slow_workers(5)
 
         # get X509 proxy file
         x509_proxy = f"/tmp/x509up_u{os.getuid()}"
@@ -278,7 +278,7 @@ if __name__ == '__main__':
             extra_files = [proc_file, "proxy.pem"], #"/users/hnelson2/ttbarEFT-coffea2025/ttbarEFT/params/channels.json", 
             schema=NanoAODSchema,
             max_task_retries= 10, # default=10
-            step_size = 80000,
+            step_size = 100000,
             # step_size=1000000, #equivalent to chunksize, default=100k
             resources_processing={"cores": 1},
             resources_accumulating={"cores": 1},
@@ -310,11 +310,10 @@ if __name__ == '__main__':
     ### RUN PROCESSOR USING ITERATIVE EXECUTOR ###
     elif executor == 'iterative': 
 
-        leptoncat = 'em'
+        leptoncat = 'ee'
 
         flist = preprocessing_for_taskvine(samplesdict)
-        proc_instance = processor_versions['em_chan']
-        # proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat=leptoncat, wc_names_lst=wc_lst, hist_lst=hist_lst)
+        proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=do_syst)
         exec_instance = processor.IterativeExecutor()
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
         hists = runner(fileset=flist, processor_instance=proc_instance, treename=treename)

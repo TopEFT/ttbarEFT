@@ -371,7 +371,8 @@ def get_jerc_keys(year, isdata, era=None):
 
     # jerc keys and junc types
     if not isdata:
-        jec_key    = jerc_dict[year]['jec_mc']
+        jec_key    = []
+        # jec_key    = jerc_dict[year]['jec_mc']
         jer_key    = jerc_dict[year]['jer']
         junc_types = jerc_dict[year]['junc']
     else:
@@ -487,8 +488,8 @@ def ApplyJetCorrections(year, corr_type, isData, era, useclib=True, savelevels=F
         'JetPhi':   'phi',
         'JetA':     'area',
         'ptGenJet': 'pt_gen',
-        'ptRaw':    'pt_raw',
-        'massRaw':  'mass_raw',
+        # 'ptRaw':    'pt_raw',
+        # 'massRaw':  'mass_raw',
         'Rho':      'Rho',
         'METpt':    'pt',
         'METphi':   'phi',
