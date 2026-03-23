@@ -1,0 +1,16 @@
+{
+    "xsec": 5.284311882352942,
+    "year": "2018",
+    "treeName": "Events",
+    "histAxisName": "WZTo3LNu_centralUL18",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_WZTo3LNu/output_2096.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_WZTo3LNu/output_2097.root"
+    ],
+    "nEvents": 1998000,
+    "nSumOfWeights": 9317324.73408,
+    "isData": false,
+    "path": "/store/mc/RunIISummer20UL18NanoAODv9/WZTo3LNu_mllmin4p0_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2"
+}

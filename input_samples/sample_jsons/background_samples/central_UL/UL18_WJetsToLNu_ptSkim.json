@@ -1,0 +1,19 @@
+{
+    "xsec": 61526.7,
+    "year": "2018",
+    "treeName": "Events",
+    "histAxisName": "WJetsToLNu_centralUL18",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_WJetsToLNu/output_1809.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_WJetsToLNu/output_1703.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_WJetsToLNu/output_1855.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_WJetsToLNu/output_1772.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_WJetsToLNu/output_1597.root"
+    ],
+    "nEvents": 81051269,
+    "nSumOfWeights": 1188874708.6423702,
+    "isData": false,
+    "path": "/store/mc/RunIISummer20UL18NanoAODv9/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/280000"
+}

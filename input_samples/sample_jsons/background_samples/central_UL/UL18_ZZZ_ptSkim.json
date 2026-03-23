@@ -1,0 +1,25 @@
+{
+    "xsec": 0.01398,
+    "year": "2018",
+    "treeName": "Events",
+    "histAxisName": "ZZZ_centralUL18",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_ZZZ/output_1954.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_ZZZ/output_1974.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_ZZZ/output_2152.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_ZZZ/output_1681.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_ZZZ/output_1598.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_ZZZ/output_1935.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_ZZZ/output_1890.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_ZZZ/output_1697.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_ZZZ/output_1844.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_ZZZ/output_1705.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_ZZZ/output_1476.root"
+    ],
+    "nEvents": 10139000,
+    "nSumOfWeights": 149718.288925024,
+    "isData": false,
+    "path": "/store/mc/RunIISummer20UL18NanoAODv9/ZZZ_TuneCP5_13TeV-amcatnlo-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/"
+}

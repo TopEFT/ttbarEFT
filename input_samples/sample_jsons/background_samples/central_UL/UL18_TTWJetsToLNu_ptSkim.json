@@ -1,0 +1,27 @@
+{
+    "xsec": 0.2043,
+    "year": "2018",
+    "treeName": "Events",
+    "histAxisName": "ttW_centralUL18",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_TTWJetsToLNu/output_1888.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_TTWJetsToLNu/output_2023.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_TTWJetsToLNu/output_212.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_TTWJetsToLNu/output_722.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_TTWJetsToLNu/output_2241.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_TTWJetsToLNu/output_723.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_TTWJetsToLNu/output_2010.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_TTWJetsToLNu/output_1095.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_TTWJetsToLNu/output_1377.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_TTWJetsToLNu/output_2093.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_TTWJetsToLNu/output_1098.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_TTWJetsToLNu/output_416.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_TTWJetsToLNu/output_1099.root"
+    ],
+    "nEvents": 10450000,
+    "nSumOfWeights": 3502613.3919518394,
+    "isData": false,
+    "path": "/store/mc/RunIISummer20UL18NanoAODv9/TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1"
+}
