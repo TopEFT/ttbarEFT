@@ -2,6 +2,7 @@ import argparse
 import os
 import pickle
 import gzip
+import fnmatch
 
 import awkward as ak
 import numpy as np
@@ -31,59 +32,102 @@ plot_title = {"ee_chan": r"$ee$",
 
 # label and color based on process axis name, keeps coloring and naming consistent
 mc_process_styles = {
-    'TTTo2L2Nu_centralUL17':{'label': r'TTTo2L2Nu', 'color': '#bd1f01'},
-    'DYJetsToLL_centralUL17' :{'label': r'DYJetsToLL', 'color': '#3f90da'},
-    'WWTo2L2Nu_centralUL17':{'label': r'WWTo2L2Nu', 'color': '#b9ac70'},
-    'tW':{'label': r'tW', 'color': '#832db6'},
-    'TTGJets_centralUL17':{'label': r'TTGJets', 'color': '#94a4a2'},
-    'ttW_centralUL17':{'label': r'ttW', 'color': 'pink'},
-    'ttZ_centralUL17':{'label': r'ttZ', 'color': '#a96b59'},
-    'WJetsToLNu_centralUL17':{'label': r'WJetsToLNu', 'color': '#e76300'},
-    'WZTo3LNu_centralUL17':{'label': r'WZTo3LNu', 'color': '#717581'},
-    'ZZTo4L_centralUL17':{'label': r'ZZTo4L', 'color': '#92dadd'},
+    'TTTo2L2Nu*':{'label': r'TTTo2L2Nu', 'color': '#bd1f01'},
+    'DY*' :{'label': r'DYJetsToLL', 'color': '#3f90da'},
+    'WWTo2L2Nu*':{'label': r'WWTo2L2Nu', 'color': '#b9ac70'},
+    'tW*':{'label': r'tW', 'color': '#832db6'},
+    'TTGJets*':{'label': r'TTGJets', 'color': '#94a4a2'},
+    'ttW*':{'label': r'ttW', 'color': 'pink'},
+    'ttZ*':{'label': r'ttZ', 'color': '#a96b59'},
+    'WJetsToLNu*':{'label': r'WJetsToLNu', 'color': '#e76300'},
+    'WZTo3LNu*':{'label': r'WZTo3LNu', 'color': '#717581'},
+    'ZZTo4L*':{'label': r'ZZTo4L', 'color': '#92dadd'},
     'Others': {'label': 'Others', 'color': '#ffa90e'},
 }
 
-# processes to group together under "Other" label
-procs_other = ['TTGJets_centralUL17', 'ttW_centralUL17', 'ttZ_centralUL17', 'WJetsToLNu_centralUL17', 'WWW_centralUL17', 'WWZ_centralUL17', 'WZTo3LNu_centralUL17', 'WZZ_centralUL17', 'ZZTo4L_centralUL17', 'ZZZ_centralUL17']
+
+process_grouping = {
+        "TTTo2L2Nu": ["TTTo2L2Nu_centralUL17", "TTTo2L2Nu_centralUL18"],
+        "DYJetsToLL": ["DYJetsToLL_centralUL17", "DY10to50_centralUL18", "DY50_centralUL18"],
+        "tW": ["tW"]
+    }
 
 
-def make_cr_fig(h_data, h_mc, var, procs_to_group=procs_other, plot_err=False, h_sumw2=None):
+def get_plotting_style(proc_name, styles_dict=mc_process_styles):
+    """
+    Checks if proc_name matches a key or a pattern in the styles_dict.
+    """
+    # Try exact match first
+    if proc_name in styles_dict:
+        return styles_dict[proc_name]
     
-    all_mc_procs = list(h_mc.axes['process'])
-    # sep_mc_procs = [p for p in all_mc_procs if p not in procs_to_group]
-    # other_mc_procs = [p for p in all_mc_procs if p in procs_to_group] 
+    # Try pattern matching (e.g., 'TTTo2L2Nu*')
+    for pattern, style in styles_dict.items():
+        if fnmatch.fnmatch(proc_name, pattern):
+            return style
+            
+    # Fallback to making it gray if no color provided
+    return {'label': proc_name, 'color': 'gray'}
 
-    sep_mc_procs = ['TTTo2L2Nu_centralUL17', 'tW', 'DYJetsToLL_centralUL17']
-    other_mc_procs = [p for p in all_mc_procs if p not in sep_mc_procs] 
 
-    h_mc_sep = h_mc[{'process': sep_mc_procs}]  # hist with processes that will be individually plotted
 
-    if other_mc_procs: 
-        final_categories = sep_mc_procs + ['Others']
+def group_hist_processes(h, process_map, others_name="Others"):
+    """
+    Groups a histogram's 'process' axis using a mapping dictionary.
+    
+    Args:
+        h: The original histogram
+        process_map: dict of { "NewName": ["OldName1", "OldName2"], ... }
+        others_name: Name for any processes not mentioned in the map
+    """
+    all_procs = list(h.axes['process'])
+    
+    # Identify which processes from the original hist are vs are NOT in the mapping
+    mapped_procs = [p for sublist in process_map.values() for p in sublist]
+    remaining_procs = [p for p in all_procs if p not in mapped_procs]
 
-        h_mc_all = hist.Hist(
-            hist.axis.StrCategory(final_categories, name= "process", growth=True),
-            h_mc.axes[1],
-            storage=h_mc.storage_type()
-        )
+    # Build the list of new categories
+    final_categories = list(process_map.keys())
+    if remaining_procs:
+        final_categories.append(others_name)
 
-        for proc in sep_mc_procs:
-            old_idx = h_mc.axes['process'].index(proc)
-            new_idx = h_mc_all.axes['process'].index(proc)
-            h_mc_all.view(flow=True)[new_idx] = h_mc.view(flow=True)[old_idx]
+    # Initialize the new histogram with the same structure as the old one
+    h_grouped = hist.Hist(
+        hist.axis.StrCategory(final_categories, name="process", growth=True),
+        *[ax for ax in h.axes if ax.name != "process"],
+        storage=h.storage_type()
+    )
 
-        others_hist = h_mc[{'process': other_mc_procs}][{'process':sum}]
-        others_idx = h_mc_all.axes['process'].index('Others')
-        h_mc_all.view(flow=True)[others_idx] = others_hist.view(flow=True)
+    # Fill the mapped groups
+    for new_name, old_names in process_map.items():
+        # Only sum processes that actually exist in the current histogram
+        existing_olds = [p for p in old_names if p in all_procs]
+        if existing_olds:
+            # Sum the contributions from the list of old names
+            summed_view = h[{"process": existing_olds}][{"process": sum}].view(flow=True)
+            h_grouped[{"process": new_name}] = summed_view
 
+    # Group everything else into "Others" process axis
+    if remaining_procs:
+        others_view = h[{"process": remaining_procs}][{"process": sum}].view(flow=True)
+        h_grouped[{"process": others_name}] = others_view
+
+    return h_grouped
+
+
+def make_cr_fig(h_data, h_mc, var, procs_to_group=None, plot_err=False, h_sumw2=None):
+
+    if procs_to_group:
+        h_mc_all = group_hist_processes(h=h_mc, process_map=procs_to_group)
     else: 
-        h_mc_all = h_mc_sep
+        h_mc_all = h_mc
 
     # create stack for MC plot and make labels/colors based on processes
     mc_stack = h_mc_all.stack("process") #for s in mc_stack: print(s.name)
-    mc_labels = [mc_process_styles.get(s.name, {}).get('label', s.name) for s in mc_stack]
-    mc_colors = [mc_process_styles.get(s.name, {}).get('color', 'gray') for s in mc_stack]
+    mc_labels = [get_plotting_style(s.name, mc_process_styles)['label'] for s in mc_stack]
+    mc_colors = [get_plotting_style(s.name, mc_process_styles)['color'] for s in mc_stack]
+    # mc_labels = [mc_process_styles.get(s.name, {}).get('label', s.name) for s in mc_stack]
+    # mc_colors = [mc_process_styles.get(s.name, {}).get('color', 'gray') for s in mc_stack]
 
     hep.style.use("CMS")
     fig, (ax, rax) = plt.subplots(
@@ -278,7 +322,7 @@ if __name__ == "__main__":
                 plot_err = False 
                 h_sumw2 = None
 
-            fig, ax, rax = make_cr_fig(h_data=h_data, h_mc=h_mc, var=var, procs_to_group=procs_other, plot_err=plot_err, h_sumw2=h_sumw2)
+            fig, ax, rax = make_cr_fig(h_data=h_data, h_mc=h_mc, var=var, procs_to_group = process_grouping, plot_err=plot_err, h_sumw2=h_sumw2)
             title = f"{plot_title[channel]}"
             ax.set_title(f"{title}")
 
