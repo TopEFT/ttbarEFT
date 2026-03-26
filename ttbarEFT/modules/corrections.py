@@ -354,6 +354,31 @@ def ApplyJetVetoMaps(jets, year):
     return veto_map_event
 
 
+def GetJetPuIDSF(year, jets, var='nom', wp='L'):
+
+    year = str(year)
+    if year not in clib_year_map.keys():
+        raise Exception(f"Error: Unknown year \"{year}\".")
+
+    clib_year = clib_year_map[year]
+    json_path = ttbarEFT_path(f"data/POG/JME/{clib_year}/jmar.json.gz")
+    ceval = correctionlib.CorrectionSet.from_file(json_path)
+    key = "PUJetID_eff"
+
+    eta_flat = ak.flatten(jets.eta)
+    pt_flat = ak.flatten(jets.pt)
+    mask_flat = pt_flat < 50 
+
+    pt_flat_for_eval = ak.where(mask_flat, pt_flat, 49.9)
+
+    weights_raw = ceval[key].evaluate(eta_flat, pt_flat_for_eval, var, wp)
+    jetPuID_flat = ak.where(mask_flat, weights_raw, 1.0)
+    jetPuID_unflat = ak.unflatten(jetPuID_flat, ak.num(jets.pt))
+
+    return ak.prod(jetPuID_unflat, axis=1)
+
+
+
 def get_jerc_keys(year, isdata, era=None):
 
     #JERC dictionary for various keys
@@ -371,8 +396,7 @@ def get_jerc_keys(year, isdata, era=None):
 
     # jerc keys and junc types
     if not isdata:
-        jec_key    = []
-        # jec_key    = jerc_dict[year]['jec_mc']
+        jec_key    = jerc_dict[year]['jec_mc']
         jer_key    = jerc_dict[year]['jer']
         junc_types = jerc_dict[year]['junc']
     else:
@@ -673,20 +697,6 @@ def AttachElectronSF(electrons, year):
         "2022_Summer23BPix": "2023PromptD",
     }
 
-    HEEPSF_B = {
-        "2016preVFP" : 0.985,
-        "2016postVFP" : 0.985,
-        "2017" : 0.979,
-        "2018" : 0.973,
-    }
-
-    HEEPSF_E = {
-        "2016preVFP" : 0.990,
-        "2016postVFP" : 0.990,
-        "2017" : 0.987,
-        "2018" : 0.980,   
-    }
-
     # initialize electron variables
     eta = electrons.eta
     pt = electrons.pt
@@ -725,6 +735,20 @@ def AttachElectronSF(electrons, year):
 
 
     ###### evaluate HEEP sf ######
+
+    HEEPSF_B = {
+        "2016preVFP" : 0.985,
+        "2016postVFP" : 0.985,
+        "2017" : 0.979,
+        "2018" : 0.973,
+    }
+
+    HEEPSF_E = {
+        "2016preVFP" : 0.990,
+        "2016postVFP" : 0.990,
+        "2017" : 0.987,
+        "2018" : 0.980,   
+    }
 
     eta_barrel_mask = ak.flatten(abs(eta) < 1.4442)
 
@@ -818,11 +842,15 @@ def AttachElectronSF(electrons, year):
     # Attach SFs (reco*HEEP) to electrons
     electrons['SF_ele_nom'] = reco_nom * HEEPSF_nom
     electrons['SF_ele_up'] = reco_up * HEEPSF_nom * HEEPSF_up 
-    electrons['SF_ele_down'] = reco_up * HEEPSF_nom * HEEPSF_down 
+    electrons['SF_ele_down'] = reco_down * HEEPSF_nom * HEEPSF_down 
 
-    electrons['SF_muon_nom'] = ak.ones_like(reco_nom)
-    electrons['SF_muon_up'] = ak.ones_like(reco_nom)
-    electrons['SF_muon_down'] = ak.ones_like(reco_nom)
+    electrons['SF_muonID_nom'] = ak.ones_like(reco_nom)
+    electrons['SF_muonID_up'] = ak.ones_like(reco_nom)
+    electrons['SF_muonID_down'] = ak.ones_like(reco_nom)
+
+    electrons['SF_muonISO_nom'] = ak.ones_like(reco_nom)
+    electrons['SF_muonISO_up'] = ak.ones_like(reco_nom)
+    electrons['SF_muonISO_down'] = ak.ones_like(reco_nom)
 
 
 def AttachMuonSF(muons, year): 
@@ -894,13 +922,59 @@ def AttachMuonSF(muons, year):
     ISO_down = ak.unflatten(ISO_down_flat, ak.num(pt))
 
     # attach SFs to muons 
-    muons['SF_muon_nom'] = tracking_nom * reco_nom * ID_nom * ISO_nom
-    muons['SF_muon_up'] = tracking_up * reco_up * ID_up * ISO_up
-    muons['SF_muon_down'] = tracking_down * reco_down * ID_down * ISO_down
+    muons['SF_muonID_nom'] = tracking_nom * reco_nom * ID_nom * ISO_nom
+    muons['SF_muonID_up'] = tracking_up * reco_up * ID_up * ISO_up
+    muons['SF_muonID_down'] = tracking_down * reco_down * ID_down * ISO_down
+
+    muons['SF_muonISO_nom'] = ISO_nom
+    muons['SF_muonISO_up'] = ISO_up
+    muons['SF_muonISO_down'] = ISO_down
+
+    # muons['SF_muon_nom'] = tracking_nom * reco_nom * ID_nom * ISO_nom
+    # muons['SF_muon_up'] = tracking_up * reco_up * ID_up * ISO_up
+    # muons['SF_muon_down'] = tracking_down * reco_down * ID_down * ISO_down
 
     muons['SF_ele_nom'] = ak.ones_like(pt)
     muons['SF_ele_up'] = ak.ones_like(pt)
     muons['SF_ele_down'] = ak.ones_like(pt)    
+
+def Get_ElecIDSF(events):
+
+    leps = ak.pad_none(events.leps_pt_sorted, 2)
+    l0 = leps[:,0]
+    l1 = leps[:,1]
+ 
+    calc_nom = l0.SF_ele_nom * l1.SF_ele_nom
+    calc_up = l0.SF_ele_up * l1.SF_ele_up
+    calc_down = l0.SF_ele_down * l1.SF_ele_down
+
+    return ak.fill_none(calc_nom, 1.0), ak.fill_none(calc_up, 1.0), ak.fill_none(calc_down, 1.0)
+
+
+def Get_MuonIDSF(events):
+
+    leps = ak.pad_none(events.leps_pt_sorted, 2)
+    l0 = leps[:,0]
+    l1 = leps[:,1]
+
+    calc_nom = l0.SF_muonID_nom * l1.SF_muonID_nom
+    calc_up = l0.SF_muonID_up * l1.SF_muonID_up
+    calc_down = l0.SF_muonID_down * l1.SF_muonID_down
+
+    return ak.fill_none(calc_nom, 1.0), ak.fill_none(calc_up, 1.0), ak.fill_none(calc_down, 1.0)
+
+
+def Get_MuonISOSF(events):
+
+    leps = ak.pad_none(events.leps_pt_sorted, 2)
+    l0 = leps[:,0]
+    l1 = leps[:,1]
+
+    calc_nom = l0.SF_muonISO_nom * l1.SF_muonISO_nom
+    calc_up = l0.SF_muonISO_up * l1.SF_muonISO_up
+    calc_down = l0.SF_muonISO_down * l1.SF_muonISO_down
+
+    return ak.fill_none(calc_nom, 1.0), ak.fill_none(calc_up, 1.0), ak.fill_none(calc_down, 1.0)
 
 
 def GetLepSF(events, lep_cat):
@@ -1132,7 +1206,7 @@ def GetTrigSF(events, lep_cat):
     if lep_cat == 'ee': 
         calc_nom = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom
         calc_up = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom
-        calc_down = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom 
+        calc_down = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom
         
     elif lep_cat == 'mm': 
         calc_nom = calculate_trigSF_mm(l0, l1, "nom")

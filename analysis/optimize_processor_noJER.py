@@ -208,6 +208,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         wgt_correction_bases = [
             'lepSF', 
             'trigSF',
+            'jetPuID'
             'btagSF', 
             'FSR', 'ISR', 'renorm', 'fact',
         ]
@@ -215,6 +216,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         wgt_correction_syst_lst_all = [
             'lepSFUp', 'lepSFDown',                                                                                         # lepton systs
             'trigSFUp', 'trigSFDown', 'L1prefireUp', 'L1prefireDown', "PUUp", "PUDown",                                     # Exp systs
+            'jetPuIDUp', 'jetPuIDDown',
             'btagSFbc_correlatedUp', 'btagSFbc_correlatedDown', 'btagSFlight_correlatedUp', 'btagSFlight_correlatedDown',   # btag correlated systs
             f'btagSFbc_{year}Up',f'btagSFbc_{year}Down',f'btagSFlight_{year}Up',f'btagSFlight_{year}Down',                  # btag uncorrelated systs
             'FSRUp', 'FSRDown', 'ISRUp', 'ISRDown', 'renormUp', 'renormDown', 'factUp', 'factDown',                         # Theory systs
@@ -335,7 +337,11 @@ class AnalysisProcessor(processor.ProcessorABC):
             norm = genw*(xsec/sow)*lumi
             weights_obj_base.add('norm', norm)
 
-            weights_obj_base.add('lepSF', *tt_cor.GetLepSF(events, lep_cat))
+            # weights_obj_base.add('lepSF', *tt_cor.GetLepSF(events, lep_cat))
+            weights_obj_base.add('elecID', *tt_cor.Get_ElecIDSF(events))
+            weights_obj_base.add('muonID', *tt_cor.Get_MuonIDSF(events))
+            weights_obj_base.add('muonISO', *tt_cor.Get_MuonISOSF(events))
+
             weights_obj_base.add('trigSF', *tt_cor.GetTrigSF(events, lep_cat)) # a bit misleading, ee is trigger efficiencies so up/down is set to ones
 
             weights_obj_base.add('L1prefire', events.L1PreFiringWeight.Nom, events.L1PreFiringWeight.Up, events.L1PreFiringWeight.Dn)
@@ -356,13 +362,13 @@ class AnalysisProcessor(processor.ProcessorABC):
             # light_btag_SF_lookup = tt_cor.GetBtagSFLookup(wp='M',year=year, method='deepJet_incl')
             # bc_btag_SF_lookup = tt_cor.GetBtagSFLookup(wp='M',year=year, method='deepJet_comb')
 
-            raw_met = met
-            cleanedJets["pt_raw"] = (1 - cleanedJets.rawFactor)*cleanedJets.pt
-            cleanedJets["mass_raw"] = (1 - cleanedJets.rawFactor)*cleanedJets.mass
-            # cleanedJets["rho"] = ak.broadcast_arrays(events.fixedGridRhoFastjetAll, cleanedJets.pt)[0] #THIS LINE BREAKS THE JETS BUT NOT IN A WAY THAT FAILS
-            rho_jagged = ak.ones_like(cleanedJets.pt) * events.fixedGridRhoFastjetAll
-            cleanedJets = ak.with_field(cleanedJets, rho_jagged, "Rho")
-            cleanedJets["pt_gen"] = ak.values_astype(ak.fill_none(cleanedJets.matched_gen.pt, 0), np.float32)
+            # raw_met = met
+            # cleanedJets["pt_raw"] = (1 - cleanedJets.rawFactor)*cleanedJets.pt
+            # cleanedJets["mass_raw"] = (1 - cleanedJets.rawFactor)*cleanedJets.mass
+            # # cleanedJets["rho"] = ak.broadcast_arrays(events.fixedGridRhoFastjetAll, cleanedJets.pt)[0] #THIS LINE BREAKS THE JETS BUT NOT IN A WAY THAT FAILS
+            # rho_jagged = ak.ones_like(cleanedJets.pt) * events.fixedGridRhoFastjetAll
+            # cleanedJets = ak.with_field(cleanedJets, rho_jagged, "Rho")
+            # cleanedJets["pt_gen"] = ak.values_astype(ak.fill_none(cleanedJets.matched_gen.pt, 0), np.float32)
             # cleanedJets = tt_cor.ApplyJetCorrections(year, corr_type='jets', isData=isData, era=run_era).build(cleanedJets)
 
         ######### The rest of the processor is inside this loop over systs that affect object kinematics  ###########
@@ -409,6 +415,7 @@ class AnalysisProcessor(processor.ProcessorABC):
                 #     correctedJets['isGood'] = tt_os.is_pres_jet(correctedJets)
                 #     goodJets =  correctedJets[correctedJets.isGood]
 
+                weights_obj_base_for_kinematic_syst.add('jetPuID', tt_cor.GetJetPuIDSF(year, goodJets, var='nom'), tt_cor.GetJetPuIDSF(year, goodJets, var='up'), tt_cor.GetJetPuIDSF(year, goodJets, var='down'))
                 jet_veto_map = tt_cor.ApplyJetVetoMaps(goodJets, year)    
 
                 njets = ak.num(goodJets)

@@ -29,7 +29,7 @@
         	"label": "$p_T$ (leading lepton) [GeV]"
     	},
     	"l0eta": {
-    		"regular": [24, -3, 3],
+    		"regular": [20, -3, 3],
     		"label": "$\\eta$ (leading lepton)"
     	},
     	"l0phi": {
