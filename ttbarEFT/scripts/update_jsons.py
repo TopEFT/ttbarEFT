@@ -32,6 +32,20 @@ data_2017_dict = {
 	'SingleMuon_F-UL2017.json': 'SingleMuon_F_UL2017',
 }
 
+data2018_ref_dir = "/users/hnelson2/ttbarEFT-coffea2025/input_samples/sample_jsons/data_samples/2018/"
+# 'reference json': 'directory with new files'
+data2018_dict = {
+	'EGamma_A-UL2018.json': 'EGamma_A_UL2018',
+	'EGamma_B-UL2018.json': 'EGamma_B_UL2018',
+	'EGamma_C-UL2018.json': 'EGamma_C_UL2018',
+	'EGamma_D-UL2018.json': 'EGamma_D_UL2018',
+	'SingleMuon_A-UL2018.json': 'SingleMuon_A_UL2018',
+	'SingleMuon_B-UL2018.json': 'SingleMuon_B_UL2018',
+	'SingleMuon_C-UL2018.json': 'SingleMuon_C_UL2018',
+	'SingleMuon_D-UL2018.json': 'SingleMuon_D_UL2018',
+}
+
+
 bkgd_ref_dir = "/users/hnelson2/ttbarEFT-coffea2025/input_samples/sample_jsons/background_samples/central_UL/"
 
 DY_path_dir = "/cms/cephfs/data/store/user/hnelson2/skims/mc/ptSkim/DY/"
@@ -61,6 +75,20 @@ bkgd_2017_dict = {
 	'UL17_ZZZ.json'				: 'UL17_ZZZ',
 }
 
+bkgd_2018_dict = {
+	'UL18_TTGJets.json'			: 'UL18_TTGJets',
+	'UL18_TTWJetsToLNu.json'	: 'UL18_TTWJetsToLNu',
+	'UL18_TTZToLLNuNu_M_10.json': 'UL18_TTZToLLNuNu_M_10',
+	'UL18_WJetsToLNu.json'		: 'UL18_WJetsToLNu',
+	'UL18_WWTo2L2Nu.json'		: 'UL18_WWTo2L2Nu',
+	'UL18_WWW_4F.json'			: 'UL18_WWW_4F',
+	'UL18_WWZ_4F.json'			: 'UL18_WWZ_4F',
+	'UL18_WZTo3LNu.json'		: 'UL18_WZTo3LNu',
+	'UL18_WZZ.json'				: 'UL18_WZZ',
+	'UL18_ZZTo4L.json'			: 'UL18_ZZTo4L',
+	'UL18_ZZZ.json'				: 'UL18_ZZZ',
+}
+
 tW_path_dir = "/cms/cephfs/data/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/"
 tW_dict = {
 	'UL16APV_TW_antitop_5f_NoFullyHadronicDecays.json'	: 'UL16APV_TW_antitop_5f_NoFullyHadronicDecays',
@@ -74,7 +102,11 @@ tW_dict = {
 }
 
 # update_multiple_jsons(data_ref_dir, data_path_dir, data_2017_dict)
+update_multiple_jsons(data2018_ref_dir, data_path_dir, data2018_dict)
+
+
 # update_multiple_jsons(bkgd_ref_dir, DY_path_dir, DY_dict)
 # update_multiple_jsons(bkgd_ref_dir, bkgd_path_dir, bkgd_2017_dict)
-update_multiple_jsons(bkgd_ref_dir, tW_path_dir, tW_dict)
+# update_multiple_jsons(bkgd_ref_dir, tW_path_dir, tW_dict)
+# update_multiple_jsons(bkgd_ref_dir, bkgd_path_dir, bkgd_2018_dict)
 

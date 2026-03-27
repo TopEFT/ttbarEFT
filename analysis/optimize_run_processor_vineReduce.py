@@ -203,6 +203,12 @@ if __name__ == '__main__':
     # Run the processor and get the output
     tstart = time.time()
 
+    processor_versions = {
+        "ee_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=['all', 'noJEC']),
+        "mm_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='mm', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=['all', 'noJEC']),
+        "em_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=['all', 'noJEC']),
+    }
+
     ### RUN PROCESSOR USING VINE REDUCE ###
     if executor == 'ddr': 
         # construct port range
@@ -257,24 +263,12 @@ if __name__ == '__main__':
                 save_to_file = preprocessed_data_path,
             )
 
-
-        processor_versions = {
-                "ee_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=do_syst),
-                "mm_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='mm', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=do_syst),
-                "em_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=do_syst),
-            },
-
         ### Dynamic Data Reduction ### 
         print(f"\n\nProcessing data with VineReduce...")
         ddr = CoffeaDynamicDataReduction(
             mgr, #taskvine manager,
             data = preprocessed_data,
-            # processors = processor_versions,
-            processors = {
-                "ee_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=do_syst),
-                "mm_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='mm', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=do_syst),
-                "em_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=do_syst),
-            },
+            processors = processor_versions,
             extra_files = [proc_file, "proxy.pem"], #"/users/hnelson2/ttbarEFT-coffea2025/ttbarEFT/params/channels.json", 
             schema=NanoAODSchema,
             max_task_retries= 10, # default=10
@@ -310,10 +304,9 @@ if __name__ == '__main__':
     ### RUN PROCESSOR USING ITERATIVE EXECUTOR ###
     elif executor == 'iterative': 
 
-        leptoncat = 'ee'
-
         flist = preprocessing_for_taskvine(samplesdict)
-        proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=do_syst)
+        proc_instance = processor_versions['ee_chan']
+        # proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=['elecID', 'muonID', 'muonISO','trigSF'])
         exec_instance = processor.IterativeExecutor()
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
         hists = runner(fileset=flist, processor_instance=proc_instance, treename=treename)

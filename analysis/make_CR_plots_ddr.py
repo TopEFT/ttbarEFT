@@ -45,15 +45,19 @@ mc_process_styles = {
     'Others': {'label': 'Others', 'color': '#ffa90e'},
 }
 
-
 process_grouping = {
         "TTTo2L2Nu": ["TTTo2L2Nu_centralUL17", "TTTo2L2Nu_centralUL18"],
         "DYJetsToLL": ["DYJetsToLL_centralUL17", "DY10to50_centralUL18", "DY50_centralUL18"],
         "tW": ["tW"]
     }
 
+rax_styles = {
+    'eta': {'xlim':[-3, 3], 'ylim':[0.6, 1.4], 'yticks':[0.6, 0.8, 1.0, 1.2, 1.4]},
+    'phi':  {'xlim':[-4, 4], 'ylim':[0.6, 1.4], 'yticks':[0.6, 0.8, 1.0, 1.2, 1.4]},
+    'mll': {'ylim':[0.5, 2]}
+}
 
-def get_plotting_style(proc_name, styles_dict=mc_process_styles):
+def get_proc_plotting_style(proc_name, styles_dict=mc_process_styles):
     """
     Checks if proc_name matches a key or a pattern in the styles_dict.
     """
@@ -123,18 +127,27 @@ def make_cr_fig(h_data, h_mc, var, procs_to_group=None, plot_err=False, h_sumw2=
         h_mc_all = h_mc
 
     # create stack for MC plot and make labels/colors based on processes
-    mc_stack = h_mc_all.stack("process") #for s in mc_stack: print(s.name)
-    mc_labels = [get_plotting_style(s.name, mc_process_styles)['label'] for s in mc_stack]
-    mc_colors = [get_plotting_style(s.name, mc_process_styles)['color'] for s in mc_stack]
+    mc_stack = h_mc_all.stack("process")                                                            #for s in mc_stack: print(s.name)
+    mc_labels = [get_proc_plotting_style(s.name, mc_process_styles)['label'] for s in mc_stack]
+    mc_colors = [get_proc_plotting_style(s.name, mc_process_styles)['color'] for s in mc_stack]
     # mc_labels = [mc_process_styles.get(s.name, {}).get('label', s.name) for s in mc_stack]
     # mc_colors = [mc_process_styles.get(s.name, {}).get('color', 'gray') for s in mc_stack]
 
     hep.style.use("CMS")
+    # fig, (ax, rax) = plt.subplots(
+    #     nrows=2,
+    #     ncols=1,
+    #     figsize=(10,12),
+    #     gridspec_kw={'height_ratios': (3, 1), 'hspace':0.05},
+    #     sharex=True
+    # )
+
     fig, (ax, rax) = plt.subplots(
         nrows=2,
         ncols=1,
-        figsize=(10,12),
-        gridspec_kw={'height_ratios': (3, 1), 'hspace':0.05},
+        figsize = (10, 10),
+        # figsize=(11.5,10),
+        gridspec_kw={'height_ratios': (4, 1), 'hspace':0.15},
         sharex=True
     )
 
@@ -153,6 +166,7 @@ def make_cr_fig(h_data, h_mc, var, procs_to_group=None, plot_err=False, h_sumw2=
     hep.histplot(
         h_data, 
         histtype='errorbar',
+        markersize=14,
         yerr=True,
         color='black',
         label='Data',
@@ -182,6 +196,7 @@ def make_cr_fig(h_data, h_mc, var, procs_to_group=None, plot_err=False, h_sumw2=
         ratio_hist,
         yerr=False,
         histtype='errorbar',
+        markersize=14,
         color='black',
         ax=rax,
     )  
@@ -248,15 +263,16 @@ def make_cr_fig(h_data, h_mc, var, procs_to_group=None, plot_err=False, h_sumw2=
     # Ratio plot formatting
     rax.set_xlabel(h_total_mc.axes[0].label if h_total_mc.axes[0].label else h_total_mc.axes[0].name)
     rax.set_ylabel("Data/MC")
-    rax.set_ylim([0.8, 1.5])                    # rax.set_ylim([0.5, 1.5])
-    rax.set_yticks([0.8, 1.0, 1.2, 1.4])        # rax.set_yticks([0.5, 1.0, 1.5]) 
-    rax.axhline(y=1.0, color='black', linestyle='--', alpha=0.5)
     rax.set_xmargin(0)                          # makes 0 on x-axis start at left edge
-    if "eta" in var: 
-        rax.set_xlim([-3, 3])
-    elif "phi" in var: 
-        rax.set_xlim([-4, 4])
+    rax.axhline(y=1.0, color='black', linestyle='--', alpha=0.5)
 
+    rax.set_ylim([0.5, 1.5])                    # rax.set_ylim([0.5, 1.5])
+    rax.set_yticks([0.5, 1.0, 1.5])             # rax.set_yticks([0.8, 1.0, 1.2, 1.4]) 
+
+    for rax_style_key, rax_style in rax_styles.items():
+        if rax_style_key in var:
+            rax.set(**rax_style)
+            break
 
     return fig, ax, rax    
 
@@ -270,6 +286,7 @@ if __name__ == "__main__":
     parser.add_argument("--outtitle", default='', help="extra title to add to png file names")
     parser.add_argument("--doerror", action='store_true', help="plot uncertainties")
     parser.add_argument("--ylog", action='store_true', help="make plots with log scale on yaxis")
+    parser.add_argument("--var", )
 
     args = parser.parse_args()
     data_pkl = args.data
@@ -308,9 +325,6 @@ if __name__ == "__main__":
                 h_data = h_data[{"systematic":"nominal"}]
             h_data = h_data.project(var)
 
-            # h_mc = hists_mc[channel][var].as_hist({})
-            # h_data = hists_data[channel][var].as_hist({}).project(var) # equiv to [{'process':sum}]
-
             if (h_mc.sum() == 0) or (h_data.sum() == 0):
                 print(f"Skipping {var} - No entries found.")
                 continue
@@ -326,9 +340,8 @@ if __name__ == "__main__":
             title = f"{plot_title[channel]}"
             ax.set_title(f"{title}")
 
-            # if var in var_to_restrict:
-                # ax.set_xlim([0, 200])
-                # rax.set_xlim([0, 200])
+            # if 'eta' in var: 
+                # ax.set_ylim([0, 0.7e6])
 
             figname = f"{channel}_{var}_CR{outtitle}"
             plt_tools.save_figure(fig, figname, outdir)

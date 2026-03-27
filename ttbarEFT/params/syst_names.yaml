@@ -1,0 +1,38 @@
+wgt_correction_bases: 
+  - elecID
+  - muonID
+  - muonISO
+  - trigSF
+  - L1prefire
+  - PU
+  - jetPuID
+  - btagSF
+  - FSR
+  - ISR
+  - renorm
+  - fact
+
+btag_var_2016APV:
+  - btagSFbc_correlated
+  - btagSFlight_correlated
+  - btagSFbc_2016APV
+  - btagSFlight_2016APV
+
+btag_var_2016:
+  - btagSFbc_correlated
+  - btagSFlight_correlated
+  - btagSFbc_2016
+  - btagSFlight_2016
+
+btag_var_2017:
+  - btagSFbc_correlated
+  - btagSFlight_correlated
+  - btagSFbc_2017
+  - btagSFlight_2017
+
+btag_var_2018:
+  - btagSFbc_correlated
+  - btagSFlight_correlated
+  - btagSFbc_2018
+  - btagSFlight_2018
+

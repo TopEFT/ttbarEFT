@@ -4,6 +4,7 @@ import gzip
 import awkward as ak
 import re
 import yaml
+import uproot
 
 import correctionlib
 
@@ -1088,7 +1089,7 @@ def ApplyRochesterCorrections(mu, year, isData):
 ######## Trigger Efficienies ########
 #####################################
 
-def AttachElecTrigEff(electrons, year):
+def AttachElecTrigEff_nouncert(electrons, year):
 
     extLepSF = lookup_tools.extractor()
 
@@ -1128,6 +1129,74 @@ def AttachElecTrigEff(electrons, year):
     electrons['trig_DATAeff_mu_down'] = ak.ones_like(electrons.pt)
 
 
+# new function that includes uncertainties
+def AttachElecTrigEff(electrons, year):
+    eff_path = ttbarEFT_path('data/leptonSF/elec/DiEleCaloIdLMWPMS2_HEEPeff.root')
+    
+    # Map input year to ROOT internal tags
+    year_map = {
+        "2016APV": "UL2016preVFP",
+        "2016":    "UL2016postVFP",
+        "2017":    "UL2017",
+        "2018":    "UL2018",
+    }
+    tag = year_map[year]
+
+    # Extract values and variances manually
+    with uproot.open(eff_path) as f:
+        # Barrel
+        h_b = f[f"{tag}_Barrel_Et"]
+        edges_b = h_b.axes[0].edges()
+        val_b = h_b.values()
+        err_b = np.sqrt(h_b.variances()) #Convert variance to sigma
+        
+        # Endcap
+        h_e = f[f"{tag}_Endcaps_Et"]
+        edges_e = h_e.axes[0].edges()
+        val_e = h_e.values()
+        err_e = np.sqrt(h_e.variances())
+
+    # Create the dense_lookup objects for nominal and errors
+    lookup_sf_b = lookup_tools.dense_lookup.dense_lookup(val_b, edges_b)
+    lookup_sf_e = lookup_tools.dense_lookup.dense_lookup(val_e, edges_e)
+    lookup_err_b = lookup_tools.dense_lookup.dense_lookup(err_b, edges_b)
+    lookup_err_e = lookup_tools.dense_lookup.dense_lookup(err_e, edges_e)
+
+    # Calculate Et and the Barrel mask
+    eta = electrons.eta
+    eta_flat = ak.flatten(eta)
+    Et_flat = ak.flatten(electrons.pt * (electrons.scEtOverPt + 1))
+    eta_barrel_mask = abs(eta_flat) < 1.4442
+
+    # Nominal
+    sf_nom_flat = ak.where(
+        eta_barrel_mask, 
+        lookup_sf_b(Et_flat), 
+        lookup_sf_e(Et_flat)
+    )
+    # Error (Sigma)
+    sf_err_flat = ak.where(
+        eta_barrel_mask, 
+        lookup_err_b(Et_flat), 
+        lookup_err_e(Et_flat)
+    )
+
+    # Unflatten and attach to electrons
+    electrons['trig_eff_ele_nom']  = ak.unflatten(sf_nom_flat, ak.num(eta))
+    electrons['trig_eff_ele_up']   = ak.unflatten(sf_nom_flat + sf_err_flat, ak.num(eta))
+    electrons['trig_eff_ele_down'] = ak.unflatten(sf_nom_flat - sf_err_flat, ak.num(eta))
+
+    # Fill placeholder muon efficiencies
+    electrons['trig_MCeff_mu_nom'] = ak.ones_like(electrons.pt)
+    electrons['trig_DATAeff_mu_nom'] = ak.ones_like(electrons.pt)
+    electrons['trig_MCeff_mu_up'] = ak.ones_like(electrons.pt)
+    electrons['trig_DATAeff_mu_up'] = ak.ones_like(electrons.pt)
+    electrons['trig_MCeff_mu_down'] = ak.ones_like(electrons.pt)
+    electrons['trig_DATAeff_mu_down'] = ak.ones_like(electrons.pt)
+    
+    return electrons
+
+
 def AttachMuonTrigEff(muons, year):
     if year not in clib_year_map.keys():
         raise Exception(f"Error: Unknown year \"{year}\".")
@@ -1163,6 +1232,8 @@ def AttachMuonTrigEff(muons, year):
 
     # fill ele trig eff with ones 
     muons['trig_eff_ele_nom'] = ak.ones_like(pt)
+    muons['trig_eff_ele_up'] = ak.ones_like(pt)
+    muons['trig_eff_ele_down'] = ak.ones_like(pt)
 
 
 def GetTrigSF(events, lep_cat):
@@ -1205,8 +1276,8 @@ def GetTrigSF(events, lep_cat):
     # calculate trigger SFs from already saved efficiencies
     if lep_cat == 'ee': 
         calc_nom = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom
-        calc_up = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom
-        calc_down = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom
+        calc_up = l0.trig_eff_ele_up * l1.trig_eff_ele_up
+        calc_down = l0.trig_eff_ele_down * l1.trig_eff_ele_down
         
     elif lep_cat == 'mm': 
         calc_nom = calculate_trigSF_mm(l0, l1, "nom")
