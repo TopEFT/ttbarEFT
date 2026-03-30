@@ -86,8 +86,6 @@ if __name__ == "__main__":
     if not os.path.exists(outdir):
         os.makedirs(outdir, exist_ok=True)
 
-    flav_list = ['b', 'c', 'l']
-
     hists_all = pickle.load(gzip.open(hist_file))['btag']
 
     # for var, hists in hists_all.items():
@@ -99,8 +97,9 @@ if __name__ == "__main__":
     print(f"jetflavors: {jetflavors}")
 
     for flav in jetflavors:
-        h_num = hists[{'flavour':flav, 'WP':'medium'}]
-        h_den = hists[{'flavour':flav, 'WP':'all'}]
+        print(f"running over flavor: {flav}")
+        h_num = hists[{'flavour':complex(0, flav), 'WP':'medium'}]  # use complex() to pick the flavour axis with the value 0,4,5 instead of default index 0,4,5
+        h_den = hists[{'flavour':complex(0, flav), 'WP':'all'}]
 
         h_eff = h_num / h_den
         # h_eff.values()[:] = np.nan_to_num(h_eff.values(), nan=0.0)
