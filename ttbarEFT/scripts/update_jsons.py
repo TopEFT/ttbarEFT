@@ -15,11 +15,32 @@ def update_multiple_jsons(ref_dir, path_dir, json_dict):
 			update_json(path=path, refpath=ref, outname=outname)
 
 # user inputs
-data_ref_dir = "/users/hnelson2/ttbarEFT-coffea2025/input_samples/sample_jsons/data_samples/2017/"
 data_path_dir = "/cms/cephfs/data/store/user/hnelson2/skims/data/FullRun2/ptSkim/"
 
-# 'reference json': 'directory with new files'
-data_2017_dict = {
+data2016_ref_dir = "/users/hnelson2/ttbarEFT-coffea2025/input_samples/sample_jsons/data_samples/2016/"
+data2016_dict = {
+	'DoubleEG_B-ver1_HIPM_UL2016.json': 'DoubleEG_B_ver1_HIPM_UL2016',
+	'DoubleEG_B-ver2_HIPM_UL2016.json': 'DoubleEG_B_ver2_HIPM_UL2016',
+	'DoubleEG_C-HIPM_UL2016.json': 'DoubleEG_C_HIPM_UL2016',
+	'DoubleEG_D-HIPM_UL2016.json': 'DoubleEG_D_HIPM_UL2016',
+	'DoubleEG_E-HIPM_UL2016.json': 'DoubleEG_E_HIPM_UL2016',
+	'DoubleEG_F-HIPM_UL2016.json': 'DoubleEG_F_HIPM_UL2016',
+	'DoubleEG_F-UL2016.json': 'DoubleEG_F_UL2016',
+	'DoubleEG_G-UL2016.json': 'DoubleEG_G_UL2016',
+	'DoubleEG_H-UL2016.json': 'DoubleEG_H_UL2016',
+	'SingleMuon_B-ver1_HIPM_UL2016.json': 'SingleMuon_B_ver1_HIPM_UL2016',
+	'SingleMuon_B-ver2_HIPM_UL2016.json': 'SingleMuon_B_ver2_HIPM_UL2016',
+	'SingleMuon_C-HIPM_UL2016.json': 'SingleMuon_C_HIPM_UL2016',
+	'SingleMuon_D-HIPM_UL2016.json': 'SingleMuon_D_HIPM_UL2016',
+	'SingleMuon_E-HIPM_UL2016.json': 'SingleMuon_E_HIPM_UL2016',
+	'SingleMuon_F-HIPM_UL2016.json': 'SingleMuon_F_HIPM_UL2016',
+	'SingleMuon_F-UL2016.json': 'SingleMuon_F_UL2016',
+	'SingleMuon_G-UL2016.json': 'SingleMuon_G_UL2016',
+	'SingleMuon_H-UL2016.json': 'SingleMuon_H_UL2016',
+}
+
+data2017_ref_dir = "/users/hnelson2/ttbarEFT-coffea2025/input_samples/sample_jsons/data_samples/2017/"
+data2017_dict = {
 	'DoubleEG_B-UL2017.json': 'DoubleEG_B_UL2017',
 	'DoubleEG_C-UL2017.json': 'DoubleEG_C_UL2017',
 	'DoubleEG_D-UL2017.json': 'DoubleEG_D_UL2017',
@@ -61,6 +82,32 @@ DY_dict = {
 }
 
 bkgd_path_dir = "/cms/cephfs/data/store/user/hnelson2/skims/mc/ptSkim/background/"
+
+bkgd_2016_dict = {
+	'UL16APV_TTGJets.json' 			: 'UL16APV_TTGJets',
+	'UL16APV_TTWJetsToLNu.json' 	: 'UL16APV_TTWJetsToLNu',
+	'UL16APV_TTZToLLNuNu_M_10.json' : 'UL16APV_TTZToLLNuNu_M_10',
+	'UL16APV_WJetsToLNu.json' 		: 'UL16APV_WJetsToLNu',
+	'UL16APV_WWTo2L2Nu.json' 		: 'UL16APV_WWTo2L2Nu',
+	'UL16APV_WWW_4F.json' 			: 'UL16APV_WWW_4F',
+	'UL16APV_WWZ_4F.json' 			: 'UL16APV_WWZ_4F',
+	'UL16APV_WZTo3LNu.json' 		: 'UL16APV_WZTo3LNu',
+	'UL16APV_WZZ.json' 				: 'UL16APV_WZZ',
+	'UL16APV_ZZTo4L.json' 			: 'UL16APV_ZZTo4L',
+	'UL16APV_ZZZ.json' 				: 'UL16APV_ZZZ',
+	'UL16_TTGJets.json' 			: 'UL16_TTGJets',
+	'UL16_TTWJetsToLNu.json' 		: 'UL16_TTWJetsToLNu',
+	'UL16_TTZToLLNuNu_M_10.json' 	: 'UL16_TTZToLLNuNu_M_10',
+	'UL16_WJetsToLNu.json' 			: 'UL16_WJetsToLNu',
+	'UL16_WWTo2L2Nu.json' 			: 'UL16_WWTo2L2Nu',
+	'UL16_WWW_4F.json' 				: 'UL16_WWW_4F',
+	'UL16_WWZ_4F.json' 				: 'UL16_WWZ_4F',
+	'UL16_WZTo3LNu.json' 			: 'UL16_WZTo3LNu',
+	'UL16_WZZ.json' 				: 'UL16_WZZ',
+	'UL16_ZZTo4L.json' 				: 'UL16_ZZTo4L',
+	'UL16_ZZZ.json' 				: 'UL16_ZZZ',
+}
+
 bkgd_2017_dict = {
 	'UL17_TTGJets.json'			: 'UL17_TTGJets',
 	'UL17_TTWJetsToLNu.json'	: 'UL17_TTWJetsToLNu',
@@ -101,12 +148,13 @@ tW_dict = {
 	'UL18_TW_top_5f_NoFullyHadronicDecays.json'			: 'UL18_TW_top_5f_NoFullyHadronicDecays',
 }
 
-# update_multiple_jsons(data_ref_dir, data_path_dir, data_2017_dict)
-update_multiple_jsons(data2018_ref_dir, data_path_dir, data2018_dict)
-
+# update_multiple_jsons(data2017_ref_dir, data_path_dir, data2017_dict)
+# update_multiple_jsons(data2018_ref_dir, data_path_dir, data2018_dict)
 
 # update_multiple_jsons(bkgd_ref_dir, DY_path_dir, DY_dict)
 # update_multiple_jsons(bkgd_ref_dir, bkgd_path_dir, bkgd_2017_dict)
 # update_multiple_jsons(bkgd_ref_dir, tW_path_dir, tW_dict)
 # update_multiple_jsons(bkgd_ref_dir, bkgd_path_dir, bkgd_2018_dict)
 
+update_multiple_jsons(data2016_ref_dir, data_path_dir, data2016_dict)
+update_multiple_jsons(bkgd_ref_dir, bkgd_path_dir, bkgd_2016_dict)
