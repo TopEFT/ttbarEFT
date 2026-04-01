@@ -137,28 +137,28 @@ class AnalysisProcessor(processor.ProcessorABC):
         sow             = self._samples[dataset]['nSumOfWeights']
 
         if not isData: 
-            if 'sow_ISRUp' in self._samples[dataset].keys(): 
-                sow_ISRUp          = self._samples[dataset]["nSumOfWeights_ISRUp"          ]
-                sow_ISRDown        = self._samples[dataset]["nSumOfWeights_ISRDown"        ]
-                sow_FSRUp          = self._samples[dataset]["nSumOfWeights_FSRUp"          ]
-                sow_FSRDown        = self._samples[dataset]["nSumOfWeights_FSRDown"        ]
-                sow_renormUp       = self._samples[dataset]["nSumOfWeights_renormUp"       ]
-                sow_renormDown     = self._samples[dataset]["nSumOfWeights_renormDown"     ]
-                sow_factUp         = self._samples[dataset]["nSumOfWeights_factUp"         ]
-                sow_factDown       = self._samples[dataset]["nSumOfWeights_factDown"       ]
-                sow_renormfactUp   = self._samples[dataset]["nSumOfWeights_renormfactUp"   ]
-                sow_renormfactDown = self._samples[dataset]["nSumOfWeights_renormfactDown" ]
-            else: 
-                sow_ISRUp          = self._samples[dataset]['nSumOfWeights']
-                sow_ISRDown        = self._samples[dataset]['nSumOfWeights']
-                sow_FSRUp          = self._samples[dataset]['nSumOfWeights']
-                sow_FSRDown        = self._samples[dataset]['nSumOfWeights']
-                sow_renormUp       = self._samples[dataset]['nSumOfWeights']
-                sow_renormDown     = self._samples[dataset]['nSumOfWeights']
-                sow_factUp         = self._samples[dataset]['nSumOfWeights']
-                sow_factDown       = self._samples[dataset]['nSumOfWeights']
-                sow_renormfactUp   = self._samples[dataset]['nSumOfWeights']
-                sow_renormfactDown = self._samples[dataset]['nSumOfWeights']
+            # if 'sow_ISRUp' in self._samples[dataset].keys(): 
+            sow_ISRUp          = self._samples[dataset]["nSumOfWeights_ISRUp"          ]
+            sow_ISRDown        = self._samples[dataset]["nSumOfWeights_ISRDown"        ]
+            sow_FSRUp          = self._samples[dataset]["nSumOfWeights_FSRUp"          ]
+            sow_FSRDown        = self._samples[dataset]["nSumOfWeights_FSRDown"        ]
+            sow_renormUp       = self._samples[dataset]["nSumOfWeights_renormUp"       ]
+            sow_renormDown     = self._samples[dataset]["nSumOfWeights_renormDown"     ]
+            sow_factUp         = self._samples[dataset]["nSumOfWeights_factUp"         ]
+            sow_factDown       = self._samples[dataset]["nSumOfWeights_factDown"       ]
+            sow_renormfactUp   = self._samples[dataset]["nSumOfWeights_renormfactUp"   ]
+            sow_renormfactDown = self._samples[dataset]["nSumOfWeights_renormfactDown" ]
+            # else: 
+            #     sow_ISRUp          = self._samples[dataset]['nSumOfWeights']
+            #     sow_ISRDown        = self._samples[dataset]['nSumOfWeights']
+            #     sow_FSRUp          = self._samples[dataset]['nSumOfWeights']
+            #     sow_FSRDown        = self._samples[dataset]['nSumOfWeights']
+            #     sow_renormUp       = self._samples[dataset]['nSumOfWeights']
+            #     sow_renormDown     = self._samples[dataset]['nSumOfWeights']
+            #     sow_factUp         = self._samples[dataset]['nSumOfWeights']
+            #     sow_factDown       = self._samples[dataset]['nSumOfWeights']
+            #     sow_renormfactUp   = self._samples[dataset]['nSumOfWeights']
+            #     sow_renormfactDown = self._samples[dataset]['nSumOfWeights']
 
         print(f"\n\n")
         print(f"histAxisName: {histAxisName}")
@@ -218,7 +218,7 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         if self._do_systematics and not isData:                             # if doing systematics, loop over corrections for only MC
             if 'all' in self._syst_list: 
-                kinematic_variations.extend(obj_correction_syst_lst)               # if all systematics, include all object corrections 
+                kinematic_variations.extend(obj_correction_syst_lst)        # if all systematics, include all object corrections 
 
                 for w in wgt_correction_bases:                              # if all systematics, loop through all bases from yaml 
                     if w == 'btagSF': 
@@ -319,6 +319,9 @@ class AnalysisProcessor(processor.ProcessorABC):
         ######### Selection Masks that aren't dependent on object corrections #########
         pass_trg = tt_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict, lep_cat)
 
+        print(f"triggers dict keys: {tt_es.triggers_dict.keys()}")
+        exit()
+
         weights_obj_base = coffea.analysis_tools.Weights(len(events),storeIndividual=True)
 
         if not isData: 
@@ -334,6 +337,7 @@ class AnalysisProcessor(processor.ProcessorABC):
 
             # weights_obj_base.add('lepSF', *tt_cor.GetLepSF(events, lep_cat))
             weights_obj_base.add('elecID', *tt_cor.Get_ElecIDSF(events))
+            # weights_obj_base.add('elecRECO', *tt_cor.Get_ElecRECOSF(events))
             weights_obj_base.add('muonID', *tt_cor.Get_MuonIDSF(events))
             weights_obj_base.add('muonISO', *tt_cor.Get_MuonISOSF(events))
 

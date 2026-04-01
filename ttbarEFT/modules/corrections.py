@@ -191,7 +191,7 @@ def GetBtagEff(year, jets, wp='medium'):
     if year not in clib_year_map.keys():
         raise Exception(f"Error: Unknown year \"{year}\".")
 
-    pathToBtagMCeff = ttbarEFT_path('data/btagSF/UL/btagMCeff_%s.pkl.gz'%year)
+    pathToBtagMCeff = ttbarEFT_path(f"data/btagSF/UL/btagMCeff_{year}.pkl.gz")
     hists = {}
     with gzip.open(pathToBtagMCeff) as fin:
         hists = pickle.load(fin)['btag']
@@ -845,6 +845,14 @@ def AttachElectronSF(electrons, year):
     electrons['SF_ele_up'] = reco_up * HEEPSF_nom * HEEPSF_up 
     electrons['SF_ele_down'] = reco_down * HEEPSF_nom * HEEPSF_down 
 
+    # electrons['SF_eleRECO_nom'] = reco_nom 
+    # electrons['SF_eleRECO_up'] = reco_up 
+    # electrons['SF_eleRECO_down'] = reco_down 
+
+    # electrons['SF_eleHEEP_nom'] = HEEPSF_nom
+    # electrons['SF_eleHEEP_up'] = HEEPSF_nom * HEEPSF_up 
+    # electrons['SF_eleHEEP_down'] = HEEPSF_nom * HEEPSF_down 
+
     electrons['SF_muonID_nom'] = ak.ones_like(reco_nom)
     electrons['SF_muonID_up'] = ak.ones_like(reco_nom)
     electrons['SF_muonID_down'] = ak.ones_like(reco_nom)
@@ -923,21 +931,26 @@ def AttachMuonSF(muons, year):
     ISO_down = ak.unflatten(ISO_down_flat, ak.num(pt))
 
     # attach SFs to muons 
-    muons['SF_muonID_nom'] = tracking_nom * reco_nom * ID_nom * ISO_nom
-    muons['SF_muonID_up'] = tracking_up * reco_up * ID_up * ISO_up
-    muons['SF_muonID_down'] = tracking_down * reco_down * ID_down * ISO_down
+    muons['SF_muonID_nom'] = tracking_nom * ID_nom # * reco_nom
+    muons['SF_muonID_up'] = tracking_up * ID_up # * reco_up
+    muons['SF_muonID_down'] = tracking_down * ID_down # * reco_down
 
     muons['SF_muonISO_nom'] = ISO_nom
     muons['SF_muonISO_up'] = ISO_up
     muons['SF_muonISO_down'] = ISO_down
 
-    # muons['SF_muon_nom'] = tracking_nom * reco_nom * ID_nom * ISO_nom
-    # muons['SF_muon_up'] = tracking_up * reco_up * ID_up * ISO_up
-    # muons['SF_muon_down'] = tracking_down * reco_down * ID_down * ISO_down
-
     muons['SF_ele_nom'] = ak.ones_like(pt)
     muons['SF_ele_up'] = ak.ones_like(pt)
-    muons['SF_ele_down'] = ak.ones_like(pt)    
+    muons['SF_ele_down'] = ak.ones_like(pt)   
+
+    # muons['SF_eleRECO_nom'] = ak.ones_like(pt)
+    # muons['SF_eleRECO_up'] = ak.ones_like(pt)
+    # muons['SF_eleRECO_down'] = ak.ones_like(pt)
+
+    # muons['SF_eleHEEP_nom'] = ak.ones_like(pt)
+    # muons['SF_eleHEEP_up'] = ak.ones_like(pt)
+    # muons['SF_eleHEEP_down'] = ak.ones_like(pt)
+
 
 def Get_ElecIDSF(events):
 
@@ -948,6 +961,23 @@ def Get_ElecIDSF(events):
     calc_nom = l0.SF_ele_nom * l1.SF_ele_nom
     calc_up = l0.SF_ele_up * l1.SF_ele_up
     calc_down = l0.SF_ele_down * l1.SF_ele_down
+
+    # calc_nom = l0.SF_eleHEEP_nom * l1.SF_eleHEEP_nom
+    # calc_up = l0.SF_eleHEEP_up * l1.SF_eleHEEP_up
+    # calc_down = l0.SF_eleHEEP_down * l1.SF_eleHEEP_down
+
+    return ak.fill_none(calc_nom, 1.0), ak.fill_none(calc_up, 1.0), ak.fill_none(calc_down, 1.0)
+
+
+def Get_ElecRECOSF(events):
+
+    leps = ak.pad_none(events.leps_pt_sorted, 2)
+    l0 = leps[:,0]
+    l1 = leps[:,1]
+
+    calc_nom = l0.SF_eleRECO_nom * l1.SF_eleRECO_nom
+    calc_up = l0.SF_eleRECO_up * l1.SF_eleRECO_up
+    calc_down = l0.SF_eleRECO_down * l1.SF_eleRECO_down
 
     return ak.fill_none(calc_nom, 1.0), ak.fill_none(calc_up, 1.0), ak.fill_none(calc_down, 1.0)
 

@@ -46,8 +46,8 @@ mc_process_styles = {
 }
 
 process_grouping = {
-        "TTTo2L2Nu": ["TTTo2L2Nu_centralUL17", "TTTo2L2Nu_centralUL18"],
-        "DYJetsToLL": ["DYJetsToLL_centralUL17", "DY10to50_centralUL18", "DY50_centralUL18"],
+        "TTTo2L2Nu": ["TTTo2L2Nu_centralUL16APV", "TTTo2L2Nu_centralUL16", "TTTo2L2Nu_centralUL17", "TTTo2L2Nu_centralUL18"],
+        "DYJetsToLL": ["DY10to50_centralUL16APV", "DY50_centralUL16APV", "DY10to50_centralUL16", "DY50_centralUL16", "DYJetsToLL_centralUL17", "DY10to50_centralUL18", "DY50_centralUL18"],
         "tW": ["tW"]
     }
 
@@ -311,7 +311,7 @@ def make_cr_fig(h_data, h_mc, var, procs_to_group=None, err_p=None, err_m=None, 
     return fig, ax, rax   
 
 
-def make_CR_plots_withsyst(hists_mc, hists_data, var_list=[], syst_list=[], procs_to_group=process_grouping, fig_syst_label='all_syst', ylog=False, do_mcerr=False, plottitle='', figtitle=''):
+def make_CR_plots_withsyst(hists_mc, hists_data, var_list=[], syst_list=[], procs_to_group=process_grouping, fig_syst_label='all_syst', ylog=False, do_mcerr=True, plottitle='', figtitle=''):
 
         if not var_list:                    # if no variables to plot provided, plot all 
             var_list = hists_mc.keys()
@@ -401,7 +401,7 @@ if __name__ == "__main__":
         hists_mc=hist_dict_MC[channel]
         hists_data=hist_dict_data[channel]
 
-        # plot all variables
+        # # plot all variables
         # make_CR_plots_withsyst(
         #     hists_mc=hists_mc, 
         #     hists_data=hists_data, 
@@ -415,11 +415,12 @@ if __name__ == "__main__":
         # )
 
         # make log plots for some variables
-        # var_list = ['l0pt', 'mll', 'j0pt']
-        # make_CR_plots_withsyst(hists_mc, hists_data, var_list=var_list, syst_list=[], procs_to_group=process_grouping, fig_syst_label='allsyst', ylog=True, plottitle=plot_title[channel], figtitle=channel)
+        var_list = ['l0pt', 'mll', 'j0pt']
+        make_CR_plots_withsyst(hists_mc, hists_data, var_list=var_list, syst_list=[], procs_to_group=process_grouping, fig_syst_label='allsyst', ylog=True, plottitle=plot_title[channel], figtitle=channel)
 
+        # make plots with indiviudal syst variations turned on - does not include mc stat error
         all_systs = get_shape_syst_lst(hists_mc['mll'].as_hist({}))
-        var_list = ['njets', 'l0eta', 'mllZ', 'j0pt']
+        var_list = ['njets', 'l0eta', 'mllZ']
         for syst in all_systs: 
             make_CR_plots_withsyst(
                 hists_mc=hists_mc, 
@@ -434,6 +435,7 @@ if __name__ == "__main__":
                 figtitle=channel
             )
 
+        # # make single variable plot
         # var_list = ['njets']
         # make_CR_plots_withsyst(
         #     hists_mc=hists_mc, 

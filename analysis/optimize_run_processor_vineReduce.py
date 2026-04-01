@@ -204,9 +204,9 @@ if __name__ == '__main__':
     tstart = time.time()
 
     processor_versions = {
-        "ee_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=['all', 'noJEC']),
-        "mm_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='mm', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=['all', 'noJEC']),
-        "em_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=['all', 'noJEC']),
+        "ee_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=['all', 'noJEC']),
+        "mm_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='mm', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=['all', 'noJEC']),
+        "em_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=['all', 'noJEC']),
     }
 
     ### RUN PROCESSOR USING VINE REDUCE ###
@@ -305,7 +305,7 @@ if __name__ == '__main__':
     elif executor == 'iterative': 
 
         flist = preprocessing_for_taskvine(samplesdict)
-        proc_instance = processor_versions['ee_chan']
+        proc_instance = processor_versions['mm_chan']
         # proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=['elecID', 'muonID', 'muonISO','trigSF'])
         exec_instance = processor.IterativeExecutor()
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)

@@ -42,8 +42,8 @@ def load_json_to_samplesdict(inputFile, prefix):
 
     return samplesdict
 
-def data_for_preprocessing(samplesdict):
 
+def data_for_preprocessing(samplesdict):
     data = {}
     for sname, sample in samplesdict.items():
         files_dict = {}

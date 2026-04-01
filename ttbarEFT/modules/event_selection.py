@@ -53,6 +53,14 @@ triggers_dict = {
 }
 
 exclude_triggers_dict = {
+    "2016APV_run276453": {
+        "SingleMuon": [],
+        "DoubleEG": triggers_dict["2016APV_run276453"]["SingleMuon"],
+    },  
+    "2016APV": {
+        "SingleMuon": [],
+        "DoubleEG": triggers_dict["2016APV"]["SingleMuon"],
+    },  
     "2016": {
         "SingleMuon": [],
         "DoubleEG": triggers_dict["2016"]["SingleMuon"],
@@ -109,11 +117,27 @@ def trg_pass_no_overlap(events,is_data,dataset,year,dataset_dict,exclude_dict,le
     # In case of data, check if events overlap with other datasets
     if is_data:
         # use different triggers for 2016APV for runs >= 276453
-        if (year == '2016APV') and (run_number >= 276453): 
-            dataset= "2016APV_run276453"
+        # if (year == '2016APV') and (run_number >= 276453): 
+        #     dataset= "2016APV_run276453"
+        # trg_passes = passes_trg_inlst(events,dataset_dict[year][dataset])
+        # trg_overlaps = passes_trg_inlst(events, exclude_dict[year][dataset])
 
-        trg_passes = passes_trg_inlst(events,dataset_dict[year][dataset])
-        trg_overlaps = passes_trg_inlst(events, exclude_dict[year][dataset])
+        if (year == '2016APV'): 
+            run_mask = (run_number >= 276453)
+
+            # Process Early
+            if ak.any(run_mask):
+                trg_passes = ak.where(run_mask, passes_trg_inlst(events, dataset_dict["2016APV_run276453"][dataset]), trg_passes)
+                trg_overlaps = ak.where(run_mask, passes_trg_inlst(events, exclude_dict["2016APV_run276453"][dataset]), trg_overlaps)
+
+            # Process Late
+            if ak.any(~run_mask):
+                trg_passes = ak.where(~run_mask, passes_trg_inlst(events, dataset_dict["2016APV"][dataset]), trg_passes)
+                trg_overlaps = ak.where(~run_mask, passes_trg_inlst(events, exclude_dict["2016APV"][dataset]), trg_overlaps)
+
+        else: 
+            trg_passes = passes_trg_inlst(events,dataset_dict[year][dataset])
+            trg_overlaps = passes_trg_inlst(events, exclude_dict[year][dataset])
 
     # In case of MC, pick the trigger dictionary dataset based on lepton channel
     # ee channel is filled from electron triggers, em and mm channels from only muon triggers
