@@ -1,0 +1,15 @@
+{
+    "xsec": 0.05565,
+    "year": "2016",
+    "treeName": "Events",
+    "histAxisName": "WZZ_centralUL16",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_WZZ/output_2226.root"
+    ],
+    "nEvents": 4691000,
+    "nSumOfWeights": 268159.95737512805,
+    "isData": false,
+    "path": "/WZZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM"
+}

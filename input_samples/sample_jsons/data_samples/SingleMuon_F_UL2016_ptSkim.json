@@ -1,0 +1,17 @@
+{
+    "xsec": 1.0,
+    "year": "2016",
+    "treeName": "Events",
+    "histAxisName": "dataUL16",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/SingleMuon_F_UL2016/output_3198.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/SingleMuon_F_UL2016/output_253.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/SingleMuon_F_UL2016/output_1409.root"
+    ],
+    "nEvents": 8024195.0,
+    "nSumOfWeights": 8024195.0,
+    "isData": true,
+    "path": "/SingleMuon/Run2016F-UL2016_MiniAODv2_NanoAODv9-v1/NANOAOD"
+}

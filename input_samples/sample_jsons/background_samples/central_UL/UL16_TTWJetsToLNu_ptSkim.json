@@ -1,0 +1,30 @@
+{
+  "xsec": 0.2043,
+  "year": "2016",
+  "treeName": "Events",
+  "histAxisName": "ttW_centralUL16",
+  "options": "",
+  "WCnames": [],
+  "files": [
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_TTWJetsToLNu/output_294.root",
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_TTWJetsToLNu/output_2182.root",
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_TTWJetsToLNu/output_536.root",
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_TTWJetsToLNu/output_537.root",
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_TTWJetsToLNu/output_2260.root",
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_TTWJetsToLNu/output_866.root"
+  ],
+  "nEvents": 3322643,
+  "nSumOfWeights": 1113150.3928158283,
+  "isData": false,
+  "path": "/store/mc/RunIISummer20UL16NanoAODv9/TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1",
+  "nSumOfWeights_ISRUp": 1124598.9858299994,
+  "nSumOfWeights_ISRDown": 1098606.381533673,
+  "nSumOfWeights_FSRUp": 1114473.3506282307,
+  "nSumOfWeights_FSRDown": 1112146.6812226828,
+  "nSumOfWeights_renormUp": 1002727.124626067,
+  "nSumOfWeights_renormDown": 1215766.9092205274,
+  "nSumOfWeights_factUp": 1096769.1993233624,
+  "nSumOfWeights_factDown": 1134752.9522450864,
+  "nSumOfWeights_renormfactUp": 982154.0126749801,
+  "nSumOfWeights_renormfactDown": 1227576.3305002116
+}

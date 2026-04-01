@@ -22,7 +22,8 @@ vast:
     - '../input_samples/sample_jsons/background_samples/central_UL/UL18_ZZZ_ptSkim.json'
 
 ceph: 
-  redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
+  redirector : 'file:///cms/cephfs/data/' # direct file access
+  # redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
   jsonFiles:
     - '../input_samples/sample_jsons/background_samples/central_UL/UL18_TTTo2L2Nu.json'
 

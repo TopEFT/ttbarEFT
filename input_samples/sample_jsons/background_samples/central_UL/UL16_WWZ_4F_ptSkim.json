@@ -1,0 +1,29 @@
+{
+  "xsec": 0.1651,
+  "year": "2016",
+  "treeName": "Events",
+  "histAxisName": "WWZ_4F_centralUL16",
+  "options": "",
+  "WCnames": [],
+  "files": [
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_WWZ_4F/output_911.root",
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_WWZ_4F/output_912.root",
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_WWZ_4F/output_2073.root",
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_WWZ_4F/output_2259.root",
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_WWZ_4F/output_2045.root"
+  ],
+  "nEvents": 4662000,
+  "nSumOfWeights": 10295.695877671242,
+  "isData": false,
+  "path": "/store/mc/RunIISummer20UL16NanoAODv9/WWZ_4F_TuneCP5_13TeV-amcatnlo-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v17-v1/120000",
+  "nSumOfWeights_ISRUp": 10285.525676573168,
+  "nSumOfWeights_ISRDown": 10309.60503883,
+  "nSumOfWeights_FSRUp": 10305.96656451188,
+  "nSumOfWeights_FSRDown": 10282.009789727163,
+  "nSumOfWeights_renormUp": 9938.72346345709,
+  "nSumOfWeights_renormDown": 10726.451156603867,
+  "nSumOfWeights_factUp": 10137.402760356072,
+  "nSumOfWeights_factDown": 10484.690289819011,
+  "nSumOfWeights_renormfactUp": 9787.013989597112,
+  "nSumOfWeights_renormfactDown": 10928.100634647666
+}

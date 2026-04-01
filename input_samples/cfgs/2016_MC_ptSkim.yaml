@@ -1,0 +1,29 @@
+### 2017 Non-EFT MC Samples for Control Regions ###
+
+vast:
+  # redirector : 'file:///cms/cephfs/data/' # direct file access
+  # redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
+  redirector: 'file:///project01/ndcms/hnelson2/' # access to files on vast
+  jsonFiles: 
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TW_antitop_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TW_top_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_DY10to50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_DY50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTGJets_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTWJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTZToLLNuNu_M_10_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WWTo2L2Nu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WWW_4F_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WWZ_4F_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WZTo3LNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WZZ_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_ZZTo4L_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_ZZZ_ptSkim.json'
+
+ceph: 
+  redirector : 'file:///cms/cephfs/data/' # direct file access
+  # redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
+  jsonFiles:
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTTo2L2Nu.json'
+

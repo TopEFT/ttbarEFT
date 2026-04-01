@@ -1,0 +1,32 @@
+{
+    "xsec": 1.0,
+    "year": "2016APV",
+    "treeName": "Events",
+    "histAxisName": "dataUL16APV",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_1733.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_3489.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_3270.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_162.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_868.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_3485.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_2902.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_2374.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_3488.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_1684.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_1521.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_1365.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_3220.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_1206.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_2048.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_1930.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_1801.root",
+        "/store/user/hnelson2/skims/data/FullRun2/ptSkim/DoubleEG_F_HIPM_UL2016/output_2386.root"
+    ],
+    "nEvents": 30216940.0,
+    "nSumOfWeights": 30216940.0,
+    "isData": true,
+    "path": "/DoubleEG/Run2016F-HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD"
+}

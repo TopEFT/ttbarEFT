@@ -1,0 +1,20 @@
+{
+    "xsec": 0.01398,
+    "year": "2016APV",
+    "treeName": "Events",
+    "histAxisName": "ZZZ_centralUL16APV",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL16APV_ZZZ/output_1234.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL16APV_ZZZ/output_2243.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL16APV_ZZZ/output_2044.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL16APV_ZZZ/output_1797.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL16APV_ZZZ/output_1827.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL16APV_ZZZ/output_532.root"
+    ],
+    "nEvents": 5383000,
+    "nSumOfWeights": 79507.9063035,
+    "isData": false,
+    "path": "/ZZZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM"
+}

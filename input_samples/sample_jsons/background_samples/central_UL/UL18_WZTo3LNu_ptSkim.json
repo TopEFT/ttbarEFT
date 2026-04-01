@@ -1,16 +1,26 @@
 {
-    "xsec": 5.284311882352942,
-    "year": "2018",
-    "treeName": "Events",
-    "histAxisName": "WZTo3LNu_centralUL18",
-    "options": "",
-    "WCnames": [],
-    "files": [
-        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_WZTo3LNu/output_2096.root",
-        "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_WZTo3LNu/output_2097.root"
-    ],
-    "nEvents": 1998000,
-    "nSumOfWeights": 9317324.73408,
-    "isData": false,
-    "path": "/store/mc/RunIISummer20UL18NanoAODv9/WZTo3LNu_mllmin4p0_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2"
+  "xsec": 5.284311882352942,
+  "year": "2018",
+  "treeName": "Events",
+  "histAxisName": "WZTo3LNu_centralUL18",
+  "options": "",
+  "WCnames": [],
+  "files": [
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_WZTo3LNu/output_2096.root",
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL18_WZTo3LNu/output_2097.root"
+  ],
+  "nEvents": 1998000,
+  "nSumOfWeights": 9317324.689750671,
+  "isData": false,
+  "path": "/store/mc/RunIISummer20UL18NanoAODv9/WZTo3LNu_mllmin4p0_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v16_L1v1-v2",
+  "nSumOfWeights_ISRUp": 9316843.118635409,
+  "nSumOfWeights_ISRDown": 9317694.674033843,
+  "nSumOfWeights_FSRUp": 9317249.673361003,
+  "nSumOfWeights_FSRDown": 9319280.384728871,
+  "nSumOfWeights_renormUp": 9115892.19197619,
+  "nSumOfWeights_renormDown": 9562235.501122978,
+  "nSumOfWeights_factUp": 9531794.222741347,
+  "nSumOfWeights_factDown": 8998457.666593643,
+  "nSumOfWeights_renormfactUp": 9363489.34686229,
+  "nSumOfWeights_renormfactDown": 9279660.03598252
 }

@@ -1,0 +1,27 @@
+{
+  "xsec": 3.697,
+  "year": "2016APV",
+  "treeName": "Events",
+  "histAxisName": "TTGJets_centralUL16APV",
+  "options": "",
+  "WCnames": [],
+  "files": [
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL16APV_TTGJets/output_2256.root",
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL16APV_TTGJets/output_1879.root",
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL16APV_TTGJets/output_801.root"
+  ],
+  "nEvents": 1511805,
+  "nSumOfWeights": 783211.166759491,
+  "isData": false,
+  "path": "/store/mc/RunIISummer20UL16NanoAODAPVv9/TTGJets_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v2/260000",
+  "nSumOfWeights_ISRUp": 797784.5439049196,
+  "nSumOfWeights_ISRDown": 765426.2380972393,
+  "nSumOfWeights_FSRUp": 786164.8281064034,
+  "nSumOfWeights_FSRDown": 773885.7112887204,
+  "nSumOfWeights_renormUp": 705359.8011261356,
+  "nSumOfWeights_renormDown": 839966.4172129674,
+  "nSumOfWeights_factUp": 772340.7960593313,
+  "nSumOfWeights_factDown": 797195.0306970519,
+  "nSumOfWeights_renormfactUp": 687309.8824718974,
+  "nSumOfWeights_renormfactDown": 835754.676014889
+}

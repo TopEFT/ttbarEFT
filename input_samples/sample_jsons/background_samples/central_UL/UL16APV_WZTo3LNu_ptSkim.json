@@ -1,0 +1,25 @@
+{
+  "xsec": 5.284311882352942,
+  "year": "2016APV",
+  "treeName": "Events",
+  "histAxisName": "WZTo3LNu_centralUL16APV",
+  "options": "",
+  "WCnames": [],
+  "files": [
+    "/store/user/hnelson2/skims/mc/ptSkim/background/UL16APV_WZTo3LNu/output_1841.root"
+  ],
+  "nEvents": 1080000,
+  "nSumOfWeights": 5036370.8273983,
+  "isData": false,
+  "path": "/store/mc/RunIISummer20UL16NanoAODAPVv9/WZTo3LNu_mllmin4p0_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1",
+  "nSumOfWeights_ISRUp": 5036424.981721255,
+  "nSumOfWeights_ISRDown": 5036051.010729526,
+  "nSumOfWeights_FSRUp": 5035006.9540858865,
+  "nSumOfWeights_FSRDown": 5040881.520557433,
+  "nSumOfWeights_renormUp": 4928263.75197203,
+  "nSumOfWeights_renormDown": 5168404.914525404,
+  "nSumOfWeights_factUp": 5152746.240507303,
+  "nSumOfWeights_factDown": 4863546.136028886,
+  "nSumOfWeights_renormfactUp": 5062586.993176024,
+  "nSumOfWeights_renormfactDown": 5015210.301782809
+}

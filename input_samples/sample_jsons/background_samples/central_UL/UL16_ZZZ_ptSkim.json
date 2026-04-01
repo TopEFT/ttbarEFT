@@ -1,0 +1,18 @@
+{
+    "xsec": 0.01398,
+    "year": "2016",
+    "treeName": "Events",
+    "histAxisName": "ZZZ_centralUL16",
+    "options": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_ZZZ/output_2224.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_ZZZ/output_2247.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_ZZZ/output_1606.root",
+        "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_ZZZ/output_1288.root"
+    ],
+    "nEvents": 4606000,
+    "nSumOfWeights": 68005.218650868,
+    "isData": false,
+    "path": "/ZZZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM"
+}

@@ -1,18 +1,28 @@
 {
-    "xsec": 19.47,
-    "year": "2016",
-    "treeName": "Events",
-    "histAxisName": "tW",
-    "options": "",
-    "WCnames": [],
-    "files": [
-        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL16_TW_top_5f_NoFullyHadronicDecays/output_123.root",
-        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL16_TW_top_5f_NoFullyHadronicDecays/output_120.root",
-        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL16_TW_top_5f_NoFullyHadronicDecays/output_126.root",
-        "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL16_TW_top_5f_NoFullyHadronicDecays/output_115.root"
-    ],
-    "nEvents": 3368375,
-    "nSumOfWeights": 109290196.41010003,
-    "isData": false,
-    "path": "/store/mc/RunIISummer20UL16NanoAODv9/ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8/"
+  "xsec": 19.47,
+  "year": "2016",
+  "treeName": "Events",
+  "histAxisName": "tW",
+  "options": "",
+  "WCnames": [],
+  "files": [
+    "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL16_TW_top_5f_NoFullyHadronicDecays/output_123.root",
+    "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL16_TW_top_5f_NoFullyHadronicDecays/output_120.root",
+    "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL16_TW_top_5f_NoFullyHadronicDecays/output_126.root",
+    "/store/user/hnelson2/skims/mc/ptSkim/tW_NoFullyHadronicDecays/UL16_TW_top_5f_NoFullyHadronicDecays/output_115.root"
+  ],
+  "nEvents": 3368375,
+  "nSumOfWeights": 109290196.26619339,
+  "isData": false,
+  "path": "/store/mc/RunIISummer20UL16NanoAODv9/ST_tW_top_5f_NoFullyHadronicDecays_TuneCP5_13TeV-powheg-pythia8/",
+  "nSumOfWeights_ISRUp": 109291879.78444019,
+  "nSumOfWeights_ISRDown": 109289627.0340671,
+  "nSumOfWeights_FSRUp": 109305100.28930652,
+  "nSumOfWeights_FSRDown": 109264722.69320324,
+  "nSumOfWeights_renormUp": 104094463.29003915,
+  "nSumOfWeights_renormDown": 114585577.60134746,
+  "nSumOfWeights_factUp": 112280365.02898711,
+  "nSumOfWeights_factDown": 106254759.10886812,
+  "nSumOfWeights_renormfactUp": 107277880.03259112,
+  "nSumOfWeights_renormfactDown": 112356103.27814946
 }
