@@ -11,8 +11,18 @@
         "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_ZZZ/output_1606.root",
         "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_ZZZ/output_1288.root"
     ],
-    "nEvents": 4606000,
-    "nSumOfWeights": 68005.218650868,
+    "nEvents": 5383000,
+    "nSumOfWeights": 79507.9063035,
     "isData": false,
-    "path": "/ZZZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM"
+    "path": "/store/mc/RunIISummer20UL16NanoAODAPVv9/ZZZ_TuneCP5_13TeV-amcatnlo-pythia8/NANOAODSIM/",
+    "nSumOfWeights_ISRUp": 79507.49507388337,
+    "nSumOfWeights_ISRDown": 79500.49940698405,
+    "nSumOfWeights_FSRUp": 79507.35976333887,
+    "nSumOfWeights_FSRDown": 79498.77888302947,
+    "nSumOfWeights_renormUp": 77982.26526348127,
+    "nSumOfWeights_renormDown": 81334.42065978129,
+    "nSumOfWeights_factUp": 79384.42989916072,
+    "nSumOfWeights_factDown": 79832.03393855978,
+    "nSumOfWeights_renormfactUp": 77830.35862773476,
+    "nSumOfWeights_renormfactDown": 81670.52598866995
 }

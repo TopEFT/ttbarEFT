@@ -24,11 +24,11 @@
   "nSumOfWeights_ISRUp": 365673487.89926946,
   "nSumOfWeights_ISRDown": 365682509.8761804,
   "nSumOfWeights_FSRUp": 365637897.7803253,
-  "nSumOfWeights_FSRDown": 365802246.73260677,
-  "nSumOfWeights_renormUp": 348311575.4767191,
-  "nSumOfWeights_renormDown": 383363968.9089186,
+  "nSumOfWeights_FSRDown": 365802246.7326069,
+  "nSumOfWeights_renormUp": 348311575.476719,
+  "nSumOfWeights_renormDown": 383363968.90891856,
   "nSumOfWeights_factUp": 375688633.88813996,
-  "nSumOfWeights_factDown": 355513487.5521814,
-  "nSumOfWeights_renormfactUp": 358970068.2625716,
-  "nSumOfWeights_renormfactDown": 375898215.3894622
+  "nSumOfWeights_factDown": 355513487.5521815,
+  "nSumOfWeights_renormfactUp": 358970068.26257163,
+  "nSumOfWeights_renormfactDown": 375898215.38946223
 }

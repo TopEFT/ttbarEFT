@@ -156,5 +156,6 @@ tW_dict = {
 # update_multiple_jsons(bkgd_ref_dir, tW_path_dir, tW_dict)
 # update_multiple_jsons(bkgd_ref_dir, bkgd_path_dir, bkgd_2018_dict)
 
-update_multiple_jsons(data2016_ref_dir, data_path_dir, data2016_dict)
+# update_multiple_jsons(data2016_ref_dir, data_path_dir, data2016_dict)
 update_multiple_jsons(bkgd_ref_dir, bkgd_path_dir, bkgd_2016_dict)
+

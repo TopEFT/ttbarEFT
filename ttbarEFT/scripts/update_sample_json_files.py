@@ -53,7 +53,7 @@ def update_json(path, refpath, outname):
     # newjson_dict['nSumOfWeights'] = n_sum_of_weights
 
     newjson_dict['files'] = files
-    newjson_dict['path'] = path
+    # newjson_dict['path'] = path
 
     for key in ['WCnames', 'isData']:
         assert refjson[key] == newjson_dict[key], f"{key} entry is not the same in the old and new jsons."
@@ -64,13 +64,16 @@ def update_json(path, refpath, outname):
     sampdic['nEvents']      = refjson['nEvents']
     sampdic['nSumOfWeights']= refjson['nSumOfWeights']
     sampdic['isData']       = refjson['isData']
-    # sampdic['path']         = refjson['path']
 
     try:
         sampdic['path']     = refjson['path']
     except: 
         sampdic['path']     = os.path.split(refjson['files'][0])[0]
 
+    for key in refjson.keys():
+        if key.startswith('nSumOfWeights_'):
+            sampdic[key] = refjson[key]
+            
     if not outname.endswith('.json'): 
         outname += '.json'
 

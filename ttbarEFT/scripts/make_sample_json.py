@@ -45,11 +45,11 @@ def make_sample_json(xsec, year, treeName, histAxisName, options, era, path, out
         is_data = is_data_lst[0]
 
     sampdic['WCnames'] = wc_names
-    sampdic['files'] = files
+    sampdic['files'] = [f"/store{fname.split("store")[1]}" for fname in files]
     sampdic['nEvents'] = nevents
     sampdic['nSumOfWeights'] = n_sum_of_weights
     sampdic['isData'] = is_data
-    sampdic['path'] = path
+    sampdic['path'] = f"/store{path.split("store")[1]}"
 
     if not outname.endswith('.json'): 
         outname += '.json'

@@ -8,8 +8,18 @@
     "files": [
         "/store/user/hnelson2/skims/mc/ptSkim/background/UL16_WZZ/output_2226.root"
     ],
-    "nEvents": 4691000,
-    "nSumOfWeights": 268159.95737512805,
+    "nEvents": 137000,
+    "nSumOfWeights": 7833.564293412002,
     "isData": false,
-    "path": "/WZZ_TuneCP5_13TeV-amcatnlo-pythia8/RunIISummer20UL16NanoAODv9-106X_mcRun2_asymptotic_v17-v1/NANOAODSIM"
+    "path": "/store/mc/RunIISummer20UL16NanoAODv9/WZZ_TuneCP5_13TeV-amcatnlo-pythia8/NANOAODSIM/",
+    "nSumOfWeights_ISRUp": 7836.916234269256,
+    "nSumOfWeights_ISRDown": 7828.596569559804,
+    "nSumOfWeights_FSRUp": 7831.2376526892185,
+    "nSumOfWeights_FSRDown": 7823.330769830733,
+    "nSumOfWeights_renormUp": 7551.846251465135,
+    "nSumOfWeights_renormDown": 8170.958246729528,
+    "nSumOfWeights_factUp": 7694.2456095411235,
+    "nSumOfWeights_factDown": 8000.646631046648,
+    "nSumOfWeights_renormfactUp": 7417.879839576581,
+    "nSumOfWeights_renormfactDown": 8348.283309536644
 }

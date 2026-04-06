@@ -42,23 +42,19 @@ def load_json_to_samplesdict(inputFile, prefix):
 
     return samplesdict
 
-
 def data_for_preprocessing(samplesdict):
     data = {}
     for sname, sample in samplesdict.items():
         files_dict = {}
         metadata = dict(sample)
         del metadata['files']
-
-        file_path = f"/cms/cephfs/data{sample['path']}"     #uses direct file access for get_files function
-        files = utils.get_files(file_path, recursive=True)
-        # file paths are saved with the redirector, not by default local file access
-        files_dict = {f"{sample['redirector']}/store{fname.split("store")[1]}": {'object_path': 'Events'} for fname in files}
+        for f in sample['files']:
+            fname = sample['redirector']+f
+            files_dict[fname] = {'object_path': 'Events'}
 
         data[sname] = {'files': files_dict, 'metadata': metadata}
-
+    
     return data
-
 
 def read_json_file(filename):
     with open(filename) as f:
@@ -74,6 +70,7 @@ if __name__ == '__main__':
 
     # TODO: make this an input argument with a default or make it based on --outname
     results_dir = f"/users/{os.environ['USER']}/ddr_coffea_test/"
+    timestamp = time.strftime('%Y%m%d_%H%M', time.localtime())
 
     #TODO: add IterativeExecutor Options
     known_executors = ['iterative', 'ddr', 'test']
@@ -81,9 +78,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='You can customize your run')
     parser.add_argument('inputFile'        , nargs='?', help = 'Json file(s) containing files and metadata')
     parser.add_argument('--executor','-x'  , default='work_queue', help = 'Which executor to use')
-    parser.add_argument('--prefix', '-r'   , nargs='?', default='root://cmsxrootd.crc.nd.edu/', help = 'Prefix or redirector to look for the files')
+    parser.add_argument('--prefix', '-r'   , nargs='?', default='file:///cms/cephfs/data/', help = 'Prefix or redirector to look for the files')
     # parser.add_argument('--pretend'        , action='store_true', help = 'Read json files but, not execute the analysis')
-    # parser.add_argument('--nworkers','-n' , default=8  , help = 'Number of workers')
+    # parser.add_argument('--nworkers','-n' , default=8  , help = 'Number of worvi kers')
     parser.add_argument('--chunksize','-s', default=100000  , help = 'Number of events per chunk')
     parser.add_argument('--nchunks','-c'  , default=None  , help = 'You can choose to run only a number of chunks')
     parser.add_argument('--outname','-o'  , default='histos', help = 'Name of the output file with histograms')
@@ -92,7 +89,7 @@ if __name__ == '__main__':
     parser.add_argument('--hist-list', action='extend', nargs='+', help = 'Specify a list of histograms to fill.')
     parser.add_argument('--port', default='9123-9130', help = 'Specify the Work Queue port. An integer PORT or an integer range PORT_MIN-PORT_MAX.')
     parser.add_argument('--processor', '-p', default='analysis_processor.py', help='Specify processor file name')
-    parser.add_argument('--relpath', required=True, help='relative path to jsons (equiv to relative path in yaml)')
+    parser.add_argument('--relpath', default='../input_samples/', help='relative path to jsons (equiv to relative path in yaml)')
 
     args        = parser.parse_args()
     inputFile   = args.inputFile
@@ -173,6 +170,7 @@ if __name__ == '__main__':
     ### Create Input Data dictionary for (pre)processing ###
     input_data = data_for_preprocessing(samplesdict)
 
+    print(f"samplesdict: {samplesdict}")
 
     ##################################
     ###### Run Using VineReduce ###### 
@@ -191,7 +189,7 @@ if __name__ == '__main__':
         # create TaskVine Manager
         mgr = vine.Manager(
             port=port, 
-            name=f"{os.environ['USER']}-ddr-coffea",
+            name=f"{os.environ['USER']}-vineReduce-{timestamp}",
         )
         mgr.tune("hungry-minimum", 1)
         mgr.enable_monitoring(watchdog=False)
@@ -280,7 +278,7 @@ if __name__ == '__main__':
     ###############################
 
     WEIGHTS_NAME_LST = [
-        'nom',
+        # 'nom',
         'ISRUp', 'ISRDown',
         'FSRUp', 'FSRDown',
         'renormUp', 'renormDown',
@@ -292,36 +290,12 @@ if __name__ == '__main__':
     processes = list(hists['sow']['SumOfWeights'].axes['process'])
 
     for proc in processes: 
-        path_to_json = f"{relpath}{proc}.json"
-        if os.path.exists(f"{relpath}{proc}.json"):
+        json_path = os.path.join(relpath, f"{proc}.json")
 
-            updates = {}
-            for weight in WEIGHTS_NAME_LST: 
-                if weight == 'nom': 
-                    updates[f"nSumOfWeights"] = float(hists['sow']['SumOfWeights'][proc].as_hist({}).values()[0])
-                else: 
-                    updates[f"nSumOfWeights_{weight}"] = float(hists['sow'][f"SumOfWeights_{weight}"][proc].as_hist({}).values()[0])
-
-            # had to update topcoffea.modules.utils.load_sample_json_file() to not require `nGenEvents` to be present
-            update_json(path_to_json,dry_run=False,verbose=True, **updates)
-
-        #     # open json file, load in contents, add the sum of weights entries 
-        #     with open(path_to_json, 'r') as f: 
-        #         orig = json.load(f)
-        #         for weight in WEIGHTS_NAME_LST: 
-        #             if weight == 'nom': 
-        #                 orig[f"nSumOfWeights"] = hists['sow']['SumOfWeights'][proc].as_hist({}).values()
-        #             else: 
-        #                 orig[f"nSumOfWeights_{weight}"] = hists['sow'][f"SumOfWeights_{weight}"][proc].as_hist({}).values()
-
-        #     # remove the old file 
-        #     os.remove(path_to_json)
-        #     # save the new file that includes the additions
-        #     with open(path_to_json, 'w') as f:
-        #         json.dump(orig, f, indent=4)
-
-        # else: 
-        #     raise ValueError(f"the json does not exist: {path_to_json}")
+        updates = {}
+        for weight in WEIGHTS_NAME_LST:
+            updates[f"nSumOfWeights_{weight}"] = float(hists['sow'][f"SumOfWeights_{weight}"][proc].as_hist({}).values()[0])
+        update_json(json_path,dry_run=False,verbose=True, **updates)
 
 
     ##########################

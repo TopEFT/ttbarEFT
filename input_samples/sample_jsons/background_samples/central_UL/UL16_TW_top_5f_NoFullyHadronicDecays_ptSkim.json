@@ -19,10 +19,10 @@
   "nSumOfWeights_ISRDown": 109289627.0340671,
   "nSumOfWeights_FSRUp": 109305100.28930652,
   "nSumOfWeights_FSRDown": 109264722.69320324,
-  "nSumOfWeights_renormUp": 104094463.29003915,
-  "nSumOfWeights_renormDown": 114585577.60134746,
+  "nSumOfWeights_renormUp": 104094463.29003917,
+  "nSumOfWeights_renormDown": 114585577.60134745,
   "nSumOfWeights_factUp": 112280365.02898711,
-  "nSumOfWeights_factDown": 106254759.10886812,
-  "nSumOfWeights_renormfactUp": 107277880.03259112,
+  "nSumOfWeights_factDown": 106254759.10886814,
+  "nSumOfWeights_renormfactUp": 107277880.0325911,
   "nSumOfWeights_renormfactDown": 112356103.27814946
 }
