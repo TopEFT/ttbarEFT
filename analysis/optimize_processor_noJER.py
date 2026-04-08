@@ -319,9 +319,6 @@ class AnalysisProcessor(processor.ProcessorABC):
         ######### Selection Masks that aren't dependent on object corrections #########
         pass_trg = tt_es.trg_pass_no_overlap(events, isData, dataset, str(year), tt_es.triggers_dict, tt_es.exclude_triggers_dict, lep_cat)
 
-        print(f"triggers dict keys: {tt_es.triggers_dict.keys()}")
-        exit()
-
         weights_obj_base = coffea.analysis_tools.Weights(len(events),storeIndividual=True)
 
         if not isData: 
@@ -363,6 +360,7 @@ class AnalysisProcessor(processor.ProcessorABC):
             bc_btag_SF_lookup = tt_cor.GetBtagSFLookup(wp='M',year=year, method='deepJet_comb')
 
             # raw_met = met
+            cleanedJets['pt_orig'] = cleanedJets.pt     # NECESSARY FOR MET CORRECTIONS LATER 
             # cleanedJets["pt_raw"] = (1 - cleanedJets.rawFactor)*cleanedJets.pt
             # cleanedJets["mass_raw"] = (1 - cleanedJets.rawFactor)*cleanedJets.mass
             # # cleanedJets["rho"] = ak.broadcast_arrays(events.fixedGridRhoFastjetAll, cleanedJets.pt)[0] #THIS LINE BREAKS THE JETS BUT NOT IN A WAY THAT FAILS

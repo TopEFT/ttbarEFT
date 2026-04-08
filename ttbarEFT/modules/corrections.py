@@ -483,6 +483,18 @@ def _canonicalize_junc_type_label(junc_type, jec_tag):
 
 def ApplyJetCorrections(year, corr_type, isData, era, useclib=True, savelevels=False):
 
+    clib_year_map = {
+        "2016APV": "2016preVFP_UL",
+        "2016preVFP": "2016preVFP_UL",
+        "2016": "2016postVFP_UL",
+        "2017": "2017_UL",
+        "2018": "2018_UL",
+        "2022": "2022_Summer22",
+        "2022EE": "2022_Summer22EE",
+        "2023": "2023_Summer23",
+        "2023BPix": "2023_Summer23BPix",
+    }
+    
     usejecstack = not useclib
 
     if year not in clib_year_map.keys():
@@ -496,7 +508,7 @@ def ApplyJetCorrections(year, corr_type, isData, era, useclib=True, savelevels=F
     # Create JECStack for clib scenario
     jec_stack = JECStack(
         jec_tag=jec_tag,
-        jec_levels=jec_levels,
+        jec_levels=[],      # should be jec_levels for Run3 or if JEC corrections need to be applied
         jer_tag=jer_tag,
         jet_algo=jet_algo,
         junc_types=junc_types,
@@ -513,9 +525,19 @@ def ApplyJetCorrections(year, corr_type, isData, era, useclib=True, savelevels=F
         'JetPhi':   'phi',
         'JetA':     'area',
         'ptGenJet': 'pt_gen',
-        # 'ptRaw':    'pt_raw',
-        # 'massRaw':  'mass_raw',
+        'ptRaw':    'pt',       # should be pt_raw for Run3 or if JEC corrections need to be added 
+        'massRaw':  'mass',     # should be mass_raw for Run3 or if JEC corrections need to be added 
         'Rho':      'Rho',
+        'METpt':    'pt',
+        'METphi':   'phi',
+        'UnClusteredEnergyDeltaX': 'MetUnclustEnUpDeltaX',
+        'UnClusteredEnergyDeltaY': 'MetUnclustEnUpDeltaY'
+    }
+
+    MET_name_map = {
+        'JetPt':    'pt',
+        'JetPhi':   'phi',
+        'ptRaw':    'pt_orig',       
         'METpt':    'pt',
         'METphi':   'phi',
         'UnClusteredEnergyDeltaX': 'MetUnclustEnUpDeltaX',
@@ -524,7 +546,7 @@ def ApplyJetCorrections(year, corr_type, isData, era, useclib=True, savelevels=F
 
     # Return appropriate factory based on correction type
     if corr_type == 'met':
-        return CorrectedMETFactory(name_map)
+        return CorrectedMETFactory.CorrectedMETFactory(name_map)
     elif corr_type == 'jets':
         return CorrectedJetsFactory(name_map, jec_stack, allowed_variations=None)
     else: 
@@ -537,126 +559,34 @@ def ApplyJetSystematics(year,cleanedJets,syst_var):
     if (syst_var == 'nominal'):
         return cleanedJets
 
-    elif (syst_var == f'JER_{year}Up'):
-        new_jets = cleanedJets
-        # new_pt = ak.firsts(getattr(cleanedJets, f"JER").up.pt)
-        new_pt = ak.firsts(cleanedJets.JER.up.pt)
-        new_mass = ak.firsts(cleanedJets.JER.up.mass)
-        new_jets = ak.with_field(new_jets, new_pt, "pt")
-        new_jets = ak.with_field(new_jets, new_mass, "mass")
-        return new_jets
-
-    elif (syst_var == f'JER_{year}Down'):
-        new_jets = cleanedJets
-        new_pt = ak.firsts(cleanedJets.JER.down.pt)
-        new_mass = ak.firsts(cleanedJets.JER.down.mass)
-        new_jets = ak.with_field(new_jets, new_pt, "pt")
-        new_jets = ak.with_field(new_jets, new_mass, "mass")
-
-        return new_jets
-
-    elif (syst_var == 'JESUp'):
-        new_jets = cleanedJets
-        new_pt = ak.firsts(cleanedJets.JES_jes.up.pt)
-        new_mass = ak.firsts(cleanedJets.JES_jes.up.mass)
-        new_jets = ak.with_field(new_jets, new_pt, "pt")
-        new_jets = ak.with_field(new_jets, new_mass, "mass")
-        return new_jets
-
-    elif (syst_var == 'JESDown'):
-        new_jets = cleanedJets
-        new_pt = ak.firsts(cleanedJets.JES_jes.down.pt)
-        new_mass = ak.firsts(cleanedJets.JES_jes.down.mass)
-        new_jets = ak.with_field(new_jets, new_pt, "pt")
-        new_jets = ak.with_field(new_jets, new_mass, "mass")
-        return new_jets
-
-    # elif ('JES_FlavorQCD' in syst_var):
-    #     new_jets = cleanedJets
-
-    #     # Overwrite FlavorQCD with the proper jet flavor uncertainty
-    #     bmask = np.array(ak.flatten(abs(cleanedJets.partonFlavour)==5))
-    #     cmask = abs(cleanedJets.partonFlavour)==4
-    #     cmask = np.array(ak.flatten(cmask))
-    #     qmask = abs(cleanedJets.partonFlavour)<=3
-    #     qmask = np.array(ak.flatten(qmask))
-    #     gmask = abs(cleanedJets.partonFlavour)==21
-    #     gmask = np.array(ak.flatten(gmask))
-    #     corrections = np.array(np.zeros_like(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt)))
-
-    #     if 'Up' in syst_var:
-    #         corrections[bmask] = corrections[bmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt))[bmask]
-    #         corrections[cmask] = corrections[cmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt))[cmask]
-    #         corrections[qmask] = corrections[qmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt))[qmask]
-    #         corrections[gmask] = corrections[gmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt))[gmask]
-    #         corrections = ak.unflatten(corrections, ak.num(cleanedJets.JES_FlavorQCD.up.pt))
-
-    #         new_jets = ak.with_field(new_jets, corrections, "pt")
-    #         new_jets = ak.with_field(new_jets, ak.firsts(cleanedJets.JES_FlavorQCD.up.mass), "mass")
-    #         return new_jets
-    #         # cleanedJets['JES_FlavorQCD']['up']['pt'] = corrections
-    #         # return cleanedJets.JES_FlavorQCD.up
-
-    #     if 'Down' in syst_var:
-    #         corrections[bmask] = corrections[bmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.down.pt))[bmask]
-    #         corrections[cmask] = corrections[cmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.down.pt))[cmask]
-    #         corrections[qmask] = corrections[qmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.down.pt))[qmask]
-    #         corrections[gmask] = corrections[gmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.down.pt))[gmask]
-    #         corrections = ak.unflatten(corrections, ak.num(cleanedJets.JES_FlavorQCD.down.pt))
-
-    #         new_jets = ak.with_field(new_jets, corrections, "pt")
-    #         new_jets = ak.with_field(new_jets, ak.firsts(cleanedJets.JES_FlavorQCD.down.mass), "mass")
-
-    #         return new_jets
-    #         # cleanedJets['JES_FlavorQCD']['down']['pt'] = corrections
-    #         # return cleanedJets.JES_FlavorQCD.down
-
-    elif ('Up' in syst_var) and (syst_var[:-2] in cleanedJets.fields):
-        new_jets = cleanedJets
-        new_pt = ak.firsts(getattr(cleanedJets, f"{syst_var[:-2]}").up.pt)
-        new_mass = ak.firsts(getattr(cleanedJets, f"{syst_var[:-2]}").up.mass)
-        new_jets = ak.with_field(new_jets, new_pt, "pt")
-        new_jets = ak.with_field(new_jets, new_mass, "mass")
-        return new_jets
-
-    elif ('Down' in syst_var) and (syst_var[:-4] in cleanedJets.fields):
-        new_jets = cleanedJets
-        new_pt = ak.firsts(getattr(cleanedJets, f"{syst_var[:-4]}").down.pt)
-        new_mass = ak.firsts(getattr(cleanedJets, f"{syst_var[:-4]}").down.mass)
-        new_jets = ak.with_field(new_jets, new_pt, "pt")
-        new_jets = ak.with_field(new_jets, new_mass, "mass")
-        return new_jets
-
+    if 'Up' in syst_var: 
+        suffix = 'up'
+        if syst_var.startswith(f'JER_{year}'):
+            base_field = "JER"
+        elif syst_var == "JESUp":
+            base_field = "JES_jes"
+        else: 
+            base_field = syst_var[:-2]
+            
+    elif 'Down' in syst_var:
+            suffix = 'down'
+            if syst_var.startswith(f'JER_{year}'):
+                base_field = "JER"
+            elif syst_var == "JESDown":
+                base_field = "JES_jes"
+            else:
+                base_field = syst_var[:-4]
     else: 
         raise ValueError(f"Unknown variation {syst_var}.")
-
-
-    # elif ('JES_FlavorQCD' in syst_var):
-    #     # Overwrite FlavorQCD with the proper jet flavor uncertainty
-    #     bmask = np.array(ak.flatten(abs(cleanedJets.partonFlavour)==5))
-    #     cmask = abs(cleanedJets.partonFlavour)==4
-    #     cmask = np.array(ak.flatten(cmask))
-    #     qmask = abs(cleanedJets.partonFlavour)<=3
-    #     qmask = np.array(ak.flatten(qmask))
-    #     gmask = abs(cleanedJets.partonFlavour)==21
-    #     gmask = np.array(ak.flatten(gmask))
-    #     corrections = np.array(np.zeros_like(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt)))
-    #     if 'Up' in syst_var:
-    #         corrections[bmask] = corrections[bmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt))[bmask]
-    #         corrections[cmask] = corrections[cmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt))[cmask]
-    #         corrections[qmask] = corrections[qmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt))[qmask]
-    #         corrections[gmask] = corrections[gmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.up.pt))[gmask]
-    #         corrections = ak.unflatten(corrections, ak.num(cleanedJets.JES_FlavorQCD.up.pt))
-    #         cleanedJets['JES_FlavorQCD']['up']['pt'] = corrections
-    #         return cleanedJets.JES_FlavorQCD.up
-    #     if 'Down' in syst_var:
-    #         corrections[bmask] = corrections[bmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.down.pt))[bmask]
-    #         corrections[cmask] = corrections[cmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.down.pt))[cmask]
-    #         corrections[qmask] = corrections[qmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.down.pt))[qmask]
-    #         corrections[gmask] = corrections[gmask] + np.array(ak.flatten(cleanedJets.JES_FlavorQCD.down.pt))[gmask]
-    #         corrections = ak.unflatten(corrections, ak.num(cleanedJets.JES_FlavorQCD.down.pt))
-    #         cleanedJets['JES_FlavorQCD']['down']['pt'] = corrections
-    #         return cleanedJets.JES_FlavorQCD.down
+        
+    if base_field not in cleanedJets.fields:
+        raise ValueError(f"Field {base_field} not found in jets for variation {syst_var}")
+    
+    var_record = getattr(cleanedJets[base_field], suffix)
+    new_jets = ak.with_field(cleanedJets, var_record["pt"], "pt")
+    new_jets = ak.with_field(new_jets, var_record["mass"], "mass")
+    
+    return new_jets
 
     # # Save `2016APV` as `2016APV` but look up `2016` corrections (no separate APV corrections available)
     # elif ('Up' in syst_var and syst_var[:-2].replace('APV', '') in cleanedJets.fields):
@@ -878,6 +808,14 @@ def AttachMuonSF(muons, year):
     if year not in clib_year_map.keys():
         raise Exception(f"Error: Unknown year \"{year}\".")
 
+    muonRECO_year_map = {
+        "2016APV": "2016_preVFP",
+        "2016preVFP": "2016_preVFP",
+        "2016": "2016",
+        "2017": "2017",
+        "2018": "2018",
+    }
+
     # initialize muon variables 
     abs_eta = np.abs(muons.eta) #For run3 abs(eta) should be changed to signed eta
     pt = muons.pt 
@@ -885,13 +823,15 @@ def AttachMuonSF(muons, year):
 
     abseta_flat = ak.flatten(abs_eta)
     pt_flat = ak.flatten(pt)
+    p_flat = np.multiply(pt_flat, np.cosh(abseta_flat))
     phi_flat = ak.flatten(phi)
 
     clib_year = clib_year_map[year]
+    muonRECO_year = muonRECO_year_map[year]
     # json_path_HighPt = ttbarEFT_path(f"data/POG/MUO/{clib_year}/muon_HighPt.json.gz")
     json_path_z = ttbarEFT_path(f"data/POG/MUO/{clib_year}/muon_Z.json.gz")
     ceval_z = correctionlib.CorrectionSet.from_file(json_path_z)
-    ceval_RECO = correctionlib.CorrectionSet.from_file(ttbarEFT_path(f"data/POG/MUO/{clib_year}/ScaleFactors_Muon_highPt_RECO_{clib_year}_schemaV2.json"))
+    ceval_RECO = correctionlib.CorrectionSet.from_file(ttbarEFT_path(f"data/POG/MUO/{clib_year}/ScaleFactors_Muon_highPt_RECO_{muonRECO_year}_schemaV2.json"))
     ceval_IDISO = correctionlib.CorrectionSet.from_file(ttbarEFT_path(f"data/POG/MUO/{clib_year}/ScaleFactors_Muon_highPt_IDISO_{clib_year}_schemaV2.json"))
     
     # pt_mask = ak.flatten(pt >= 50) # the lowest pT bin in muon_HighPt is 50 #
@@ -900,9 +840,10 @@ def AttachMuonSF(muons, year):
     tracking_up_flat = ceval_z["NUM_TrackerMuons_DEN_genTracks"].evaluate(abseta_flat, pt_flat, "systup")
     tracking_down_flat = ceval_z["NUM_TrackerMuons_DEN_genTracks"].evaluate(abseta_flat, pt_flat, "systdown")
 
-    reco_nom_flat = ceval_RECO["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "nominal")
-    reco_up_flat = ceval_RECO["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "systup")
-    reco_down_flat = ceval_RECO["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, pt_flat, "systdown")
+    # high pT RECO SF are binned in eta and momentum, not eta and pT
+    reco_nom_flat = ceval_RECO["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, p_flat, "nominal")
+    reco_up_flat = ceval_RECO["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, p_flat, "systup")
+    reco_down_flat = ceval_RECO["NUM_GlobalMuons_DEN_TrackerMuonProbes"].evaluate(abseta_flat, p_flat, "systdown")
 
     ID_nom_flat = ceval_IDISO["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "nominal")
     ID_up_flat = ceval_IDISO["NUM_HighPtID_DEN_GlobalMuonProbes"].evaluate(abseta_flat, pt_flat, "systup")
@@ -913,7 +854,6 @@ def AttachMuonSF(muons, year):
     ISO_down_flat = ceval_IDISO["NUM_probe_LooseRelTkIso_DEN_HighPtProbes"].evaluate(abseta_flat, pt_flat, "systdown") 
 
     # unflatten arrays
-
     tracking_nom = ak.unflatten(tracking_nom_flat, ak.num(pt))
     tracking_up = ak.unflatten(tracking_up_flat, ak.num(pt))
     tracking_down = ak.unflatten(tracking_down_flat, ak.num(pt))
@@ -931,9 +871,9 @@ def AttachMuonSF(muons, year):
     ISO_down = ak.unflatten(ISO_down_flat, ak.num(pt))
 
     # attach SFs to muons 
-    muons['SF_muonID_nom'] = tracking_nom * ID_nom # * reco_nom
-    muons['SF_muonID_up'] = tracking_up * ID_up # * reco_up
-    muons['SF_muonID_down'] = tracking_down * ID_down # * reco_down
+    muons['SF_muonID_nom'] = tracking_nom * ID_nom * reco_nom
+    muons['SF_muonID_up'] = tracking_up * ID_up * reco_up
+    muons['SF_muonID_down'] = tracking_down * ID_down * reco_down
 
     muons['SF_muonISO_nom'] = ISO_nom
     muons['SF_muonISO_up'] = ISO_up
@@ -961,10 +901,6 @@ def Get_ElecIDSF(events):
     calc_nom = l0.SF_ele_nom * l1.SF_ele_nom
     calc_up = l0.SF_ele_up * l1.SF_ele_up
     calc_down = l0.SF_ele_down * l1.SF_ele_down
-
-    # calc_nom = l0.SF_eleHEEP_nom * l1.SF_eleHEEP_nom
-    # calc_up = l0.SF_eleHEEP_up * l1.SF_eleHEEP_up
-    # calc_down = l0.SF_eleHEEP_down * l1.SF_eleHEEP_down
 
     return ak.fill_none(calc_nom, 1.0), ak.fill_none(calc_up, 1.0), ak.fill_none(calc_down, 1.0)
 

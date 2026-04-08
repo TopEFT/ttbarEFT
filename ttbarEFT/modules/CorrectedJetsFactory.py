@@ -413,22 +413,25 @@ class CorrectedJetsFactory(object):
                         )
                     )
 
-            # Use *input* jets as the base record for JES variants (legacy behavior):
-            #   - Start from the original "jets" collection
-            #   - Override pt/mass with (JER- or JEC-corrected) * JES factor
-            base_dict = {field: in_dict[field] for field in in_dict}
-
+                    
             def build_variation(unc, jetpt, jetpt_orig, jetmass, jetmass_orig, updown):
-                factor = unc[..., updown]
-                var_dict = dict(base_dict)
-                var_dict[jetpt] = factor * jetpt_orig
-                var_dict[jetmass] = factor * jetmass_orig
-                return ak.zip(var_dict, depth_limit=1, parameters=parameters, behavior=behavior)
+                factor = ak.flatten(unc[..., updown:updown+1], axis=-1)
+                shifted_pt = factor * jetpt_orig
+                shifted_mass = factor * jetmass_orig
+                
+                return shifted_pt, shifted_mass 
 
             def build_variant(unc, jetpt, jetpt_orig, jetmass, jetmass_orig):
-                up = build_variation(unc, jetpt, jetpt_orig, jetmass, jetmass_orig, 0)
-                down = build_variation(unc, jetpt, jetpt_orig, jetmass, jetmass_orig, 1)
-                return ak.zip({"up": up, "down": down}, depth_limit=1, with_name="JetSystematic")
+                up_pt, up_mass = build_variation(unc, jetpt, jetpt_orig, jetmass, jetmass_orig, 0)
+                down_pt, down_mass = build_variation(unc, jetpt, jetpt_orig, jetmass, jetmass_orig, 1)
+                
+                up_rec = ak.zip({"pt": up_pt, "mass": up_mass}, with_name="Jet", depth_limit=1)
+                dn_rec = ak.zip({"pt": down_pt, "mass": down_mass}, with_name="Jet", depth_limit=1)
+                
+                return ak.zip(
+                    {"up": up_rec, "down": dn_rec}, 
+                    depth_limit=1, 
+                    with_name="JetSystematic")
 
             template_pt = jagged_out[junc_name_map["JetPt"]]
             template_mass = jagged_out[junc_name_map["JetMass"]]
@@ -443,8 +446,8 @@ class CorrectedJetsFactory(object):
                     self.name_map["JetMass"],
                     template_mass,
                 )
+                
 
-        # jets_record = ak.zip(jagged_out, depth_limit=1, parameters=parameters, behavior=behavior)
         # Start with an empty record that has the correct length and structure
         # before making this change, the area field was throwing errors and/or the structure of jets_record did not match events.Jet
         jets_record = ak.zip(
@@ -462,24 +465,36 @@ class CorrectedJetsFactory(object):
                 except Exception as e:
                     logger.warning(f"Field {k} failed to add: {e}")
 
-        # Add systemics (which are nested records)
-        if jer_systematic is not None:
-            jets_record = ak.with_field(jets_record, jer_systematic, "JER")
-        for name, variation in jes_systematics.items():
-            jets_record = ak.with_field(jets_record, variation, f"JES_{name}")
-
         # Restore behavior and parameters
         jets_record = ak.with_parameter(jets_record, "corrected", True)
         jets_record = ak.with_parameter(jets_record, "typename", "Jet")
 
-        if logger.isEnabledFor(logging.INFO):
-            jet_fields = tuple(ak.fields(jets_record))
-            jes_fields = tuple(sorted(field for field in jet_fields if field.startswith("JES_")))
-            logger.info(
-                "CorrectedJetsFactory: JER_present=%s JES_sources=%s total_fields=%d",
-                "JER" in jet_fields,
-                jes_fields,
-                len(jet_fields),
-            )
+        jet_counts = ak.num(jets_record)
+        if jer_systematic is not None:
+
+            up_pt = ak.unflatten(ak.flatten(jer_systematic.up['pt']), jet_counts)
+            up_mass = ak.unflatten(ak.flatten(jer_systematic.up['mass']), jet_counts)
+            down_pt = ak.unflatten(ak.flatten(jer_systematic.down['pt']), jet_counts)
+            down_mass = ak.unflatten(ak.flatten(jer_systematic.down['mass']), jet_counts)
+            
+            slim_jer = ak.zip({
+                "up": ak.zip({"pt": up_pt, "mass": up_mass}, with_name="Jet"),
+                "down": ak.zip({"pt": down_pt, "mass": down_mass}, with_name="Jet")
+            }, with_name="JetSystematic")
+            
+            jets_record = ak.with_field(jets_record, slim_jer, "JER")
+
+        for name, variation in jes_systematics.items():
+            up_pt = ak.unflatten(ak.flatten(variation.up['pt']), jet_counts)
+            up_mass = ak.unflatten(ak.flatten(variation.up['mass']), jet_counts)
+            down_pt = ak.unflatten(ak.flatten(variation.down['pt']), jet_counts)
+            down_mass = ak.unflatten(ak.flatten(variation.down['mass']), jet_counts)
+            
+            slim_jes = ak.zip({
+                "up": ak.zip({"pt": up_pt, "mass": up_mass}, with_name="Jet"),
+                "down": ak.zip({"pt": down_pt, "mass": down_mass}, with_name="Jet")
+            }, with_name="JetSystematic")
+            
+            jets_record = ak.with_field(jets_record, slim_jes, f"JES_{name}")
 
         return jets_record
