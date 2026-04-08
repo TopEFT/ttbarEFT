@@ -105,6 +105,8 @@ if __name__ == '__main__':
     # TODO: make this an input argument with a default or make it based on --outname
     results_dir = f"/users/{os.environ['USER']}/ddr_coffea_test/"
 
+    timestamp = time.strftime('%Y%m%d_%H%M', time.localtime())
+
     #TODO: add IterativeExecutor Options
     known_executors = ['iterative', 'ddr']
 
@@ -204,9 +206,9 @@ if __name__ == '__main__':
     tstart = time.time()
 
     processor_versions = {
-        "ee_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=['all', 'noJEC']),
-        "mm_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='mm', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=['all', 'noJEC']),
-        "em_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=['all', 'noJEC']),
+        "ee": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=['all', 'noJEC']),
+        # "mm": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='mm', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=['all', 'noJEC']),
+        # "em": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=['all', 'noJEC']),
     }
 
     ### RUN PROCESSOR USING VINE REDUCE ###
@@ -223,7 +225,7 @@ if __name__ == '__main__':
         # create TaskVine Manager
         mgr = vine.Manager(
             port=port, 
-            name=f"{os.environ['USER']}-ddr-coffea",
+            name=f"{os.environ['USER']}-vineReduce-{timestamp}",
         )
         mgr.tune("hungry-minimum", 1)
         mgr.enable_monitoring(watchdog=False)
@@ -272,7 +274,7 @@ if __name__ == '__main__':
             extra_files = [proc_file, "proxy.pem"], #"/users/hnelson2/ttbarEFT-coffea2025/ttbarEFT/params/channels.json", 
             schema=NanoAODSchema,
             max_task_retries= 10, # default=10
-            step_size = 100000,
+            step_size = 500000, # 500000,
             # step_size=1000000, #equivalent to chunksize, default=100k
             resources_processing={"cores": 1},
             resources_accumulating={"cores": 1},
@@ -305,7 +307,7 @@ if __name__ == '__main__':
     elif executor == 'iterative': 
 
         flist = preprocessing_for_taskvine(samplesdict)
-        proc_instance = processor_versions['mm_chan']
+        proc_instance = processor_versions['em_chan']
         # proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=['elecID', 'muonID', 'muonISO','trigSF'])
         exec_instance = processor.IterativeExecutor()
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)

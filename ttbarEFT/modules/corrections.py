@@ -546,7 +546,7 @@ def ApplyJetCorrections(year, corr_type, isData, era, useclib=True, savelevels=F
 
     # Return appropriate factory based on correction type
     if corr_type == 'met':
-        return CorrectedMETFactory.CorrectedMETFactory(name_map)
+        return CorrectedMETFactory(MET_name_map)
     elif corr_type == 'jets':
         return CorrectedJetsFactory(name_map, jec_stack, allowed_variations=None)
     else: 
@@ -559,7 +559,7 @@ def ApplyJetSystematics(year,cleanedJets,syst_var):
     if (syst_var == 'nominal'):
         return cleanedJets
 
-    if 'Up' in syst_var: 
+    if syst_var.endswith('Up'): 
         suffix = 'up'
         if syst_var.startswith(f'JER_{year}'):
             base_field = "JER"
@@ -568,7 +568,7 @@ def ApplyJetSystematics(year,cleanedJets,syst_var):
         else: 
             base_field = syst_var[:-2]
             
-    elif 'Down' in syst_var:
+    elif syst_var.endswith('Down'):
             suffix = 'down'
             if syst_var.startswith(f'JER_{year}'):
                 base_field = "JER"
