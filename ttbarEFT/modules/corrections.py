@@ -552,12 +552,10 @@ def ApplyJetCorrections(year, corr_type, isData, era, useclib=True, savelevels=F
     else: 
         raise ValueError(f"Unknown correction type \"{corr_type}\".")
 
+def ApplyJetSystematics(year, corr_type, original_obj,syst_var):
 
-def ApplyJetSystematics(year,cleanedJets,syst_var):
-
-    # getattr(cleanedJets, f"JER.up.pt")
     if (syst_var == 'nominal'):
-        return cleanedJets
+        return original_obj
 
     if syst_var.endswith('Up'): 
         suffix = 'up'
@@ -579,14 +577,54 @@ def ApplyJetSystematics(year,cleanedJets,syst_var):
     else: 
         raise ValueError(f"Unknown variation {syst_var}.")
         
-    if base_field not in cleanedJets.fields:
+    if base_field not in original_obj.fields:
         raise ValueError(f"Field {base_field} not found in jets for variation {syst_var}")
+
+    if corr_type == 'jets': 
+        var_record = getattr(original_obj[base_field], suffix)
+        new_jets = ak.with_field(original_obj, var_record["pt"], "pt")
+        new_jets = ak.with_field(new_jets, var_record["mass"], "mass")
+        
+        return new_jets
+
+    elif corr_type == 'met': 
+        return getattr(original_obj[base_field], suffix)
+
+
+# def ApplyJetSystematics(year,cleanedJets,syst_var):
+
+#     # getattr(cleanedJets, f"JER.up.pt")
+#     if (syst_var == 'nominal'):
+#         return cleanedJets
+
+#     if syst_var.endswith('Up'): 
+#         suffix = 'up'
+#         if syst_var.startswith(f'JER_{year}'):
+#             base_field = "JER"
+#         elif syst_var == "JESUp":
+#             base_field = "JES_jes"
+#         else: 
+#             base_field = syst_var[:-2]
+            
+#     elif syst_var.endswith('Down'):
+#             suffix = 'down'
+#             if syst_var.startswith(f'JER_{year}'):
+#                 base_field = "JER"
+#             elif syst_var == "JESDown":
+#                 base_field = "JES_jes"
+#             else:
+#                 base_field = syst_var[:-4]
+#     else: 
+#         raise ValueError(f"Unknown variation {syst_var}.")
+        
+#     if base_field not in cleanedJets.fields:
+#         raise ValueError(f"Field {base_field} not found in jets for variation {syst_var}")
     
-    var_record = getattr(cleanedJets[base_field], suffix)
-    new_jets = ak.with_field(cleanedJets, var_record["pt"], "pt")
-    new_jets = ak.with_field(new_jets, var_record["mass"], "mass")
+#     var_record = getattr(cleanedJets[base_field], suffix)
+#     new_jets = ak.with_field(cleanedJets, var_record["pt"], "pt")
+#     new_jets = ak.with_field(new_jets, var_record["mass"], "mass")
     
-    return new_jets
+#     return new_jets
 
     # # Save `2016APV` as `2016APV` but look up `2016` corrections (no separate APV corrections available)
     # elif ('Up' in syst_var and syst_var[:-2].replace('APV', '') in cleanedJets.fields):

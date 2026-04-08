@@ -359,7 +359,7 @@ class AnalysisProcessor(processor.ProcessorABC):
             light_btag_SF_lookup = tt_cor.GetBtagSFLookup(wp='M',year=year, method='deepJet_incl')
             bc_btag_SF_lookup = tt_cor.GetBtagSFLookup(wp='M',year=year, method='deepJet_comb')
 
-            raw_met = met
+            # raw_met = met
             cleanedJets['pt_orig'] = cleanedJets.pt     # NECESSARY FOR MET CORRECTIONS LATER 
             # cleanedJets["pt_raw"] = (1 - cleanedJets.rawFactor)*cleanedJets.pt
             # cleanedJets["mass_raw"] = (1 - cleanedJets.rawFactor)*cleanedJets.mass
@@ -368,6 +368,7 @@ class AnalysisProcessor(processor.ProcessorABC):
             cleanedJets = ak.with_field(cleanedJets, rho_jagged, "Rho")
             cleanedJets["pt_gen"] = ak.values_astype(ak.fill_none(cleanedJets.matched_gen.pt, 0), np.float32)
             cleanedJets = tt_cor.ApplyJetCorrections(year, corr_type='jets', isData=isData, era=run_era).build(cleanedJets)
+            corrected_met = tt_cor.ApplyJetCorrections(year, corr_type='met', isData=isData, era=run_era).build(MET=met, corrected_jets=cleanedJets)
 
         ######### The rest of the processor is inside this loop over systs that affect object kinematics  ###########
         print(f"\n\n")
@@ -391,18 +392,23 @@ class AnalysisProcessor(processor.ProcessorABC):
                 isBtagJetsMedium = (goodJets.btagDeepFlavB > btagwpm)
                 nbtagsm = ak.num(goodJets[isBtagJetsMedium])
 
+                
+
             elif not isData:
 
                 weights_obj_base_for_kinematic_syst = copy.deepcopy(weights_obj_base)
 
                 if kinematic_var == 'nominal': 
-                    met = tt_cor.ApplyJetCorrections(year, corr_type='met', isData=isData, era=run_era).build(MET=raw_met, corrected_jets=cleanedJets)
+                    # met = tt_cor.ApplyJetCorrections(year, corr_type='met', isData=isData, era=run_era).build(MET=raw_met, corrected_jets=cleanedJets)
                     cleanedJets['isGood'] = tt_os.is_pres_jet(cleanedJets)
                     goodJets =  cleanedJets[cleanedJets.isGood]
+                    met = corrected_met
 
                 else: 
-                    correctedJets = tt_cor.ApplyJetSystematics(year=year, cleanedJets=cleanedJets, syst_var=kinematic_var)
-                    met = tt_cor.ApplyJetCorrections(year, corr_type='met', isData=isData, era=run_era).build(MET=raw_met, corrected_jets=correctedJets)
+                    # correctedJets = tt_cor.ApplyJetSystematics(year=year, cleanedJets=cleanedJets, syst_var=kinematic_var)
+                    correctedJets = tt_cor.ApplyJetSystematics(year=year, corr_type='jets', original_obj=cleanedJets, syst_var=kinematic_var)
+                    met = tt_cor.ApplyJetSystematics(year=year, corr_type='met', original_obj=corrected_met, syst_var=kinematic_var)
+                    # met = tt_cor.ApplyJetCorrections(year, corr_type='met', isData=isData, era=run_era).build(MET=raw_met, corrected_jets=correctedJets)
 
                     correctedJets['isGood'] = tt_os.is_pres_jet(correctedJets)
                     goodJets = correctedJets[correctedJets.isGood]
