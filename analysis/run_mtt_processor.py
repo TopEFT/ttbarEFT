@@ -24,6 +24,8 @@ import topcoffea.modules.remote_environment as remote_environment
 import ndcctools.taskvine as vine
 
 
+timestamp = time.strftime('%Y%m%d_%H%M', time.localtime())
+
 def check_preprocessed_data(input_data, preprocessed_data_path): 
     check = False 
 
@@ -210,7 +212,7 @@ if __name__ == '__main__':
         # create TaskVine Manager
         mgr = vine.Manager(
             port=port, 
-            name=f"{os.environ['USER']}-ddr-coffea",
+            name=f"{os.environ['USER']}-vineReduce-{timestamp}",
         )
         mgr.tune("hungry-minimum", 1)
         mgr.enable_monitoring(watchdog=False)

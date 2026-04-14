@@ -115,7 +115,7 @@ if __name__ == '__main__':
     parser.add_argument('--executor','-x',      default='work_queue', help = 'Which executor to use')
     parser.add_argument('--processor', '-p',    default='analysis_processor.py', help='Specify processor file name')
     parser.add_argument('--outname','-o',       default='histos', help = 'Name of the output file with histograms')
-    parser.add_argument('--aggregate',          default=True, help='Specify if output historgrams from different datasets should be combined')
+    parser.add_argument('--no-group',           action='store_false', default=True, dest='aggregate', help='Disable output histogram combination')
     parser.add_argument('--doerr',              default=False, help='Specify if statistical errors should be saved for nominal case')
     parser.add_argument('--dosyst',             default=None, action='extend', nargs='+', help='Specify if systematic variations should be calculated and saved')
     parser.add_argument('--prefix', '-r',       nargs='?', default='', help = 'Prefix or redirector to look for the files')
@@ -147,6 +147,10 @@ if __name__ == '__main__':
 
     # print("\n\nrunning with processor: ", proc_file, '\n')
     # analysis_processor = importlib.import_module(proc_name)
+
+    print(f"running with aggregate setting: {aggregate}")
+    if aggregate:
+        print("True for aggregate")
 
     print("\n\nrunning with processor: ", proc_file, '\n')
     analysis_processor = importlib.import_module(proc_file[:-3])
@@ -206,9 +210,9 @@ if __name__ == '__main__':
     tstart = time.time()
 
     processor_versions = {
-        "ee": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=['all', 'noJEC']),
-        # "mm": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='mm', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=['all', 'noJEC']),
-        # "em": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=['all', 'noJEC']),
+        "ee" : analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=["all"]),
+        "mm" : analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='mm', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=["all"]),
+        "em" : analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=["all"]),
     }
 
     ### RUN PROCESSOR USING VINE REDUCE ###
@@ -261,7 +265,6 @@ if __name__ == '__main__':
                 show_progress=True,
                 batch_size=5,
                 x509_proxy=x509_proxy,
-                # save_to_file = inputFile.removesuffix(".json").removesuffix(".yml").removesuffix(".yaml"), #only works python3.9 and above
                 save_to_file = preprocessed_data_path,
             )
 
@@ -289,6 +292,7 @@ if __name__ == '__main__':
         if aggregate: 
             print(f"Combining histograms from different datasets...")
             hists = {}
+            
             for ch in ddr_hists.keys():
                 hists[ch] = {}
                 variables = list(ddr_hists[ch][next(iter(ddr_hists[ch]))].keys())
@@ -307,7 +311,7 @@ if __name__ == '__main__':
     elif executor == 'iterative': 
 
         flist = preprocessing_for_taskvine(samplesdict)
-        proc_instance = processor_versions['em_chan']
+        proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=False, syst_list=[])
         # proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=['elecID', 'muonID', 'muonISO','trigSF'])
         exec_instance = processor.IterativeExecutor()
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)

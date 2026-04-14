@@ -17,6 +17,9 @@ def update_multiple_jsons(ref_dir, path_dir, json_dict):
 # user inputs
 data_path_dir = "/cms/cephfs/data/store/user/hnelson2/skims/data/FullRun2/ptSkim/"
 
+# Dictionary structure: {'reference json', 'directory with new files'}
+
+
 data2016_ref_dir = "/users/hnelson2/ttbarEFT-coffea2025/input_samples/sample_jsons/data_samples/2016/"
 data2016_dict = {
 	'DoubleEG_B-ver1_HIPM_UL2016.json': 'DoubleEG_B_ver1_HIPM_UL2016',
@@ -54,7 +57,6 @@ data2017_dict = {
 }
 
 data2018_ref_dir = "/users/hnelson2/ttbarEFT-coffea2025/input_samples/sample_jsons/data_samples/2018/"
-# 'reference json': 'directory with new files'
 data2018_dict = {
 	'EGamma_A-UL2018.json': 'EGamma_A_UL2018',
 	'EGamma_B-UL2018.json': 'EGamma_B_UL2018',
@@ -148,14 +150,13 @@ tW_dict = {
 	'UL18_TW_top_5f_NoFullyHadronicDecays.json'			: 'UL18_TW_top_5f_NoFullyHadronicDecays',
 }
 
+# update_multiple_jsons(data2016_ref_dir, data_path_dir, data2016_dict)
 # update_multiple_jsons(data2017_ref_dir, data_path_dir, data2017_dict)
 # update_multiple_jsons(data2018_ref_dir, data_path_dir, data2018_dict)
 
-# update_multiple_jsons(bkgd_ref_dir, DY_path_dir, DY_dict)
-# update_multiple_jsons(bkgd_ref_dir, bkgd_path_dir, bkgd_2017_dict)
-# update_multiple_jsons(bkgd_ref_dir, tW_path_dir, tW_dict)
-# update_multiple_jsons(bkgd_ref_dir, bkgd_path_dir, bkgd_2018_dict)
-
-# update_multiple_jsons(data2016_ref_dir, data_path_dir, data2016_dict)
+update_multiple_jsons(bkgd_ref_dir, DY_path_dir, DY_dict)
+update_multiple_jsons(bkgd_ref_dir, tW_path_dir, tW_dict)
 update_multiple_jsons(bkgd_ref_dir, bkgd_path_dir, bkgd_2016_dict)
+update_multiple_jsons(bkgd_ref_dir, bkgd_path_dir, bkgd_2017_dict)
+update_multiple_jsons(bkgd_ref_dir, bkgd_path_dir, bkgd_2018_dict)
 

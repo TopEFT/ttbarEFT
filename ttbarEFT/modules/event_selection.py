@@ -194,8 +194,40 @@ def add2losMask(events, year, isData):
     exclusive = (ak.num(leps)) < 3
 
     os = (padded_leps[:,0].charge + padded_leps[:,1].charge)==0
-
     mask = (filters & cleanup & dilep & exclusive & os)
 
     events['is2los'] = ak.fill_none(mask,False)
 
+
+def getHemMask(events, year, isData, jets): 
+    '''
+    Returns: 
+        ~is_hem_events (bool mask), used for coffea PackedSelection. True for events that should pass. False for events with HEM lep/jet
+        hem_wieght (float), event weight = 0.35 for events with HEM lep/jet. else = 1.0 (no modification)
+    '''
+
+    hem_mask = ak.zeros_like(events.event, dtype=bool)      # True if contains HEM event 
+    hem_weight = ak.ones_like(events.event, dtype=float)        # event weight multiplier
+
+    leps = ak.pad_none(events.leps_pt_sorted, 2)
+    l0 = leps[:,0]
+    l1 = leps[:,1]
+
+    if year == '2018': 
+        hem_jets = (jets.eta < -1.3) & (jets.phi < -1.57) & (jets.phi > -0.87)
+        event_has_hem_jet = ak.any(hem_jets, axis=1)
+
+
+        l0_is_hem_ele = (abs(l0.pdgId) == 11) & (l0.eta < -1.3) & (l0.phi < -0.87) & (l0.phi > -1.57)
+        l1_is_hem_ele = (abs(l1.pdgId) == 11) & (l1.eta < -1.3) & (l1.phi < -0.87) & (l1.phi > -1.57)
+        event_has_hem_lep = ak.fill_none(l0_is_hem_ele | l1_is_hem_ele, False)
+
+        is_hem_event = event_has_hem_jet | event_has_hem_lep
+
+        if isData: 
+            hem_mask = is_hem_event & (events.run >= 319077)
+        else: 
+            hem_weight = ak.where(is_hem_event, 0.35, 1.0)          # if it's a hem event, give a weight of 0.35
+            # is_hem_event = ak.fill_none(ak.zeros_like(is_hem_event, dtype=bool), False)
+
+    return ~hem_mask, hem_weight

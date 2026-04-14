@@ -17,13 +17,14 @@ vast:
     - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WWW_4F_ptSkim.json'
     - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WWZ_4F_ptSkim.json'
     - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WZTo3LNu_ptSkim.json'
-    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WZZ_ptSkim.json'
+      # - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WZZ_ptSkim.json' # these skimmed files are incomplete due to a lobster error
     - '../input_samples/sample_jsons/background_samples/central_UL/UL16_ZZTo4L_ptSkim.json'
     - '../input_samples/sample_jsons/background_samples/central_UL/UL16_ZZZ_ptSkim.json'
 
 ceph: 
-  redirector : 'file:///cms/cephfs/data/' # direct file access
-  # redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
+  # redirector : 'file:///cms/cephfs/data/' # direct file access
+  redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
   jsonFiles:
     - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTTo2L2Nu.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WZZ.json'
 

@@ -25,10 +25,20 @@ np.seterr(divide='ignore', invalid='ignore')
 import warnings
 warnings.filterwarnings("ignore", message=".*List indexing selection is experimental.*")
 
+lumi_dict = {
+    "2016APV": 19.52,
+    "2016": 16.81,
+    "2017": 41.48,
+    "2018": 59.83,
+    "Run2": 138,
+}
 
-plot_title = {"ee_chan": r"$ee$",
+plot_title = {"ee": r"$ee$",
+              "mm": r"$\mu\mu$",
+              "em": r"$e\mu$",
+              "ee_chan": r"$ee$",
               "mm_chan": r"$\mu\mu$",
-              "em_chan": r"$e\mu$"}
+              "em_chan": r"$e\mu$",}
 
 # label and color based on process axis name, keeps coloring and naming consistent
 mc_process_styles = {
@@ -47,8 +57,8 @@ mc_process_styles = {
 
 process_grouping = {
         "TTTo2L2Nu": ["TTTo2L2Nu_centralUL16APV", "TTTo2L2Nu_centralUL16", "TTTo2L2Nu_centralUL17", "TTTo2L2Nu_centralUL18"],
-        "DYJetsToLL": ["DY10to50_centralUL16APV", "DY50_centralUL16APV", "DY10to50_centralUL16", "DY50_centralUL16", "DYJetsToLL_centralUL17", "DY10to50_centralUL18", "DY50_centralUL18"],
-        "tW": ["tW"]
+        "DYJetsToLL": ["DY10to50_centralUL16APV", "DY50_centralUL16APV", "DY10to50_centralUL16", "DY50_centralUL16", 'DY10to50_centralUL17', 'DY50_centralUL17', "DY10to50_centralUL18", "DY50_centralUL18"],
+        "tW": ["tW", "TW_NoFullyHadronicDecays_centralUL16APV", "TW_NoFullyHadronicDecays_centralUL16", "TW_NoFullyHadronicDecays_centralUL17", "TW_NoFullyHadronicDecays_centralUL18"]
     }
 
 rax_styles = {
@@ -90,25 +100,25 @@ def get_shape_syst_arrs(base_histo, syst_var_lst):
         n_arr = n_arr[{"process": sum}].values()                                            # sum over the relevant processes
 
         # handle renorm and fact seperately
-        if syst_name in ["renorm", "fact"]:
-            continue    # TODO: update for the new hist
+        # if syst_name in ["renorm", "fact"]:
+        #     continue    # TODO: update for the new hist
             # p_arr_rel, m_arr_rel = get_decorrelated_uncty(syst_name, CR_GRP_MAP, relevant_samples_lst, base_histo, n_arr)
-        
+        # if "btagSF" in syst_name: continue
         # Calculate Up/Down variations
-        else:
-            u_arr_sum = base_histo[{"process": relevant_samples_lst, "systematic": syst_name + "Up"}]   # select the samples with an Up variation and the right axis
-            u_arr_sum = u_arr_sum[{"process": sum}].values()                                            # sum over all relevant samples 
-            
-            d_arr_sum = base_histo[{"process": relevant_samples_lst, "systematic": syst_name + "Down"}]
-            d_arr_sum = d_arr_sum[{"process": sum}].values()
+        # else:
+        u_arr_sum = base_histo[{"process": relevant_samples_lst, "systematic": syst_name + "Up"}]   # select the samples with an Up variation and the right axis
+        u_arr_sum = u_arr_sum[{"process": sum}].values()                                            # sum over all relevant samples 
+        
+        d_arr_sum = base_histo[{"process": relevant_samples_lst, "systematic": syst_name + "Down"}]
+        d_arr_sum = d_arr_sum[{"process": sum}].values()
 
-            # Diff with respect to nominal
-            u_arr_rel = u_arr_sum - n_arr
-            d_arr_rel = d_arr_sum - n_arr
-            
-            # Just the ones that increase the yield
-            p_arr_rel = np.where(u_arr_rel > 0, u_arr_rel, d_arr_rel)
-            m_arr_rel = np.where(u_arr_rel < 0, u_arr_rel, d_arr_rel)
+        # Diff with respect to nominal
+        u_arr_rel = u_arr_sum - n_arr
+        d_arr_rel = d_arr_sum - n_arr
+        
+        # Just the ones that increase the yield
+        p_arr_rel = np.where(u_arr_rel > 0, u_arr_rel, d_arr_rel)
+        m_arr_rel = np.where(u_arr_rel < 0, u_arr_rel, d_arr_rel)
 
         # Add in quadrature
         p_arr_rel_lst.append(p_arr_rel**2)
@@ -133,7 +143,6 @@ def get_proc_plotting_style(proc_name, styles_dict=mc_process_styles):
             
     # Fallback to making it gray if no color provided
     return {'label': proc_name, 'color': 'gray'}
-
 
 
 def group_hist_processes(h, process_map, others_name="Others"):
@@ -180,7 +189,7 @@ def group_hist_processes(h, process_map, others_name="Others"):
     return h_grouped
  
 
-def make_cr_fig(h_data, h_mc, var, procs_to_group=None, err_p=None, err_m=None, h_sumw2=None, ylog=False, syst_label="Syst. Unc."):
+def make_cr_fig(year, h_data, h_mc, var, procs_to_group=None, err_p=None, err_m=None, h_sumw2=None, ylog=False, syst_label="Syst. Unc."):
 
     plot_syst_err = False
     if (err_p is not None) and (err_m is not None):
@@ -200,7 +209,7 @@ def make_cr_fig(h_data, h_mc, var, procs_to_group=None, err_p=None, err_m=None, 
     fig, (ax, rax) = plt.subplots(
         nrows=2,
         ncols=1,
-        figsize =(10, 10),                                        # figsize=(10,12), # figsize=(11.5,10),
+        figsize=(11.5,10),                                        # figsize=(10,12), # figsize=(11.5,10), figsize =(10, 10)
         gridspec_kw={'height_ratios': (4, 1), 'hspace':0.15},     # gridspec_kw={'height_ratios': (3, 1), 'hspace':0.05},
         sharex=True
     )
@@ -275,8 +284,8 @@ def make_cr_fig(h_data, h_mc, var, procs_to_group=None, err_p=None, err_m=None, 
         )
 
     # General formatting
-    hep.cms.label("Preliminary", data=True, loc=0, ax=ax)                   #if data=False adds "Simulation" to label
-    hep.cms.lumitext(f"(13 TeV)", ax=ax)                                    #TODO add lumi to this
+    hep.cms.label("Preliminary", data=True, lumi=lumi_dict[year], com=13, loc=0, ax=ax)                   #if data=False adds "Simulation" to label
+    # hep.cms.lumitext(f"(13 TeV)", ax=ax)                                    #TODO add lumi to this
     ax.ticklabel_format(axis='y', style="sci", scilimits=(-3, 3), useMathText=True)   # Scientific notation
     ax.get_yaxis().get_offset_text().set_position((-0.085, 1.05))           # Shift multiplier position out
     # ax.set_ylim(0, ax.get_ylim()[1] * 1.05)                                 # or add this, move label inside (loc=2), and put sci ticklabel in default spot
@@ -311,17 +320,67 @@ def make_cr_fig(h_data, h_mc, var, procs_to_group=None, err_p=None, err_m=None, 
     return fig, ax, rax   
 
 
-def make_CR_plots_withsyst(hists_mc, hists_data, var_list=[], syst_list=[], procs_to_group=process_grouping, fig_syst_label='all_syst', ylog=False, do_mcerr=True, plottitle='', figtitle=''):
+def make_CR_plots_nosyst(year, hists_mc, hists_data, var_list=[], procs_to_group=process_grouping, ylog=False, plottitle='', figtitle='', outdir='.'):
 
-        if not var_list:                    # if no variables to plot provided, plot all 
-            var_list = hists_mc.keys()
+    if not var_list:                    # if no variables to plot provided, plot all 
+        var_list = hists_mc.keys()
 
-        for var in var_list:
-            if "sumw2" in var: continue
+    for var in var_list:
+        if "sumw2" in var: continue
+        
+        h_mc = hists_mc[var].as_hist({})
+        h_data = hists_data[var].as_hist({})
+        
+        if h_mc.sum() == 0:
+            print(f"Skipping {var}: MC is empty.")
+            continue
             
-            h_mc = hists_mc[var].as_hist({})
-            h_data = hists_data[var].as_hist({})
-            
+        if "systematic" in h_mc.axes.name:
+            h_mc_nom = h_mc[{"systematic":"nominal"}]
+        else:
+            h_mc_nom = h_mc
+        if "systematic" in h_data.axes.name:
+            h_data = h_data[{"systematic":"nominal"}]
+
+        h_data = h_data.project(var)
+        
+        fig, ax, rax = make_cr_fig(
+            year=year,
+            h_data=h_data, 
+            h_mc=h_mc_nom, 
+            var=var, 
+            procs_to_group=procs_to_group, 
+            err_p=None, 
+            err_m=None, 
+            ylog=ylog,
+        )
+
+        ax.set_title(plottitle)
+
+        figname = f"{figtitle}_{var}"
+        if ylog: 
+            figname += "_log"
+
+        plt_tools.save_figure(fig, figname, outdir)
+        plt.close(fig)
+
+
+def make_CR_plots_withsyst(year, hists_mc, hists_data, var_list=[], syst_list=[], procs_to_group=process_grouping, fig_syst_label='all_syst', ylog=False, do_mcerr=True, plottitle='', figtitle='', outdir='.'):
+
+    if not var_list:                    # if no variables to plot provided, plot all 
+        var_list = hists_mc.keys()
+
+    for var in var_list:
+        if "sumw2" in var: continue
+        
+        h_mc = hists_mc[var].as_hist({})
+        h_data = hists_data[var].as_hist({})
+
+        print(f"list(h_mc.axes['channel']): {list(h_mc.axes['channel'])}")
+        for ch in list(h_mc.axes['channel']):
+        # if "channel" in h_mc.axes.name:
+            h_mc = h_mc[{'channel':ch}]
+        
             if h_mc.sum() == 0:
                 print(f"Skipping {var}: MC is empty.")
                 continue
@@ -332,6 +391,9 @@ def make_CR_plots_withsyst(hists_mc, hists_data, var_list=[], syst_list=[], proc
                 h_mc_nom = h_mc
             if "systematic" in h_data.axes.name:
                 h_data = h_data[{"systematic":"nominal"}]
+
+            # if "channel" in h_mc_nom.axes.name:
+            #     h_mc_nom = h_mc_nom[{'channel':sum}]
 
             h_data = h_data.project(var)
             
@@ -351,6 +413,7 @@ def make_CR_plots_withsyst(hists_mc, hists_data, var_list=[], syst_list=[], proc
             m_err_arr = nom_arr_all - np.sqrt(shape_systs_summed_arr_m + mc_err) # the is the lower variation for the main plot
 
             fig, ax, rax = make_cr_fig(
+                year=year,
                 h_data=h_data, 
                 h_mc=h_mc_nom, 
                 var=var, 
@@ -363,7 +426,8 @@ def make_CR_plots_withsyst(hists_mc, hists_data, var_list=[], syst_list=[], proc
             plt.figtext(0.14, 0.84, fig_syst_label, fontsize=20, fontstyle='italic')  #0.72 
             ax.set_title(plottitle)
 
-            figname = f"{figtitle}_{var}_{fig_syst_label}"
+            # figname = f"{figtitle}_{ch}_{var}_{fig_syst_label}"
+            figname = f"{ch}_{var}_{fig_syst_label}"
             if ylog: 
                 figname += "_log"
 
@@ -380,7 +444,7 @@ if __name__ == "__main__":
     parser.add_argument("--outtitle", default='', help="extra title to add to png file names")
     parser.add_argument("--doerror", action='store_true', help="plot uncertainties")
     parser.add_argument("--ylog", action='store_true', help="make plots with log scale on yaxis")
-    parser.add_argument("--var", )
+    parser.add_argument("--year", default='Run2', help="specify which year - lumi will be taken from dict")
 
     args = parser.parse_args()
     data_pkl = args.data
@@ -389,10 +453,7 @@ if __name__ == "__main__":
     outtitle = args.outtitle 
     doerror = args.doerror
     ylog = args.ylog
-
-    # make output directory if it doesn't already exist (for running locally)
-    if not os.path.exists(outdir):
-        os.makedirs(outdir, exist_ok=True)
+    year = args.year
 
     hist_dict_data = pickle.load(gzip.open(data_pkl))
     hist_dict_MC = pickle.load(gzip.open(mc_pkl))
@@ -401,43 +462,107 @@ if __name__ == "__main__":
         hists_mc=hist_dict_MC[channel]
         hists_data=hist_dict_data[channel]
 
-        # # plot all variables
-        # make_CR_plots_withsyst(
+        # if not os.path.exists(outdir):
+        #     os.makedirs(outdir, exist_ok=True)
+        # make_CR_plots_nosyst(
+        #     year=year, 
         #     hists_mc=hists_mc, 
         #     hists_data=hists_data, 
-        #     var_list=[], 
+        #     var_list=['njets', 'j0pt', 'j0eta', 'l0eta', 'MET'], 
+        #     procs_to_group=process_grouping, 
+        #     ylog=False, 
+        #     plottitle=plot_title[channel], 
+        #     figtitle=channel, 
+        #     outdir=outdir,
+        # )
+
+        # plot all variables
+        # make_CR_plots_withsyst(
+        #     year=year,
+        #     hists_mc=hists_mc, 
+        #     hists_data=hists_data, 
+        #     var_list=['njets', 'j0pt', 'j0eta', 'l0eta', 'MET'],
         #     syst_list=[], 
         #     procs_to_group=process_grouping, 
         #     fig_syst_label='allsyst', 
         #     ylog=False, 
         #     plottitle=plot_title[channel], 
-        #     figtitle=channel
+        #     figtitle=channel,
+        #     outdir=outdir,
         # )
 
+        new_outdir = f"{outdir}_alluncert/"
+        if not os.path.exists(new_outdir):
+            os.makedirs(new_outdir, exist_ok=True)
+        # plot all variables
+        if channel == 'em': 
+            var_list = ['njets', 'nbjets', 'l0eta', 'l0phi', 'j0pt', 'j0eta', 'j0phi', 'MET']
+        else: 
+            var_list = []
+        make_CR_plots_withsyst(
+            year=year,
+            hists_mc=hists_mc, 
+            hists_data=hists_data, 
+            var_list=var_list, 
+            syst_list=[], 
+            procs_to_group=process_grouping, 
+            fig_syst_label='allsyst', 
+            ylog=False, 
+            plottitle=plot_title[channel], 
+            figtitle=channel,
+            outdir=new_outdir,
+        )
+
         # make log plots for some variables
-        var_list = ['l0pt', 'mll', 'j0pt']
-        make_CR_plots_withsyst(hists_mc, hists_data, var_list=var_list, syst_list=[], procs_to_group=process_grouping, fig_syst_label='allsyst', ylog=True, plottitle=plot_title[channel], figtitle=channel)
+        if channel == 'em': 
+            var_list = ['l0pt', 'j0pt']
+        else: 
+            var_list = ['l0pt', 'mll', 'j0pt']
+        make_CR_plots_withsyst(
+            year=year,
+            hists_mc=hists_mc,
+            hists_data=hists_data, 
+            var_list=var_list, 
+            syst_list=[], 
+            procs_to_group=process_grouping, 
+            fig_syst_label='allsyst', 
+            ylog=True, 
+            plottitle=plot_title[channel], 
+            figtitle=channel,
+            outdir=new_outdir,
+        )
 
         # make plots with indiviudal syst variations turned on - does not include mc stat error
-        all_systs = get_shape_syst_lst(hists_mc['mll'].as_hist({}))
-        var_list = ['njets', 'l0eta', 'mllZ']
-        for syst in all_systs: 
-            make_CR_plots_withsyst(
-                hists_mc=hists_mc, 
-                hists_data=hists_data, 
-                var_list=var_list, 
-                syst_list=[syst], 
-                procs_to_group=process_grouping, 
-                fig_syst_label=syst, 
-                ylog=False, 
-                do_mcerr=False,
-                plottitle=plot_title[channel], 
-                figtitle=channel
-            )
+        # new_outdir = f"{outdir}_variations/"
+        # if not os.path.exists(new_outdir):
+        #     os.makedirs(new_outdir, exist_ok=True)
 
+        # all_systs = get_shape_syst_lst(hists_mc['mll'].as_hist({}))
+        # if channel == 'em_chan': 
+        #     var_list = ['j0pt', 'njets', 'l0eta']
+        # else: 
+        #     var_list = ['j0pt', 'njets', 'l0eta']
+        # for syst in all_systs: 
+        #     make_CR_plots_withsyst(
+        #         year=year,
+        #         hists_mc=hists_mc, 
+        #         hists_data=hists_data, 
+        #         var_list=var_list, 
+        #         syst_list=[syst], 
+        #         procs_to_group=process_grouping, 
+        #         fig_syst_label=syst, 
+        #         ylog=False, 
+        #         do_mcerr=False,
+        #         plottitle=plot_title[channel], 
+        #         figtitle=channel,
+        #         outdir=new_outdir,
+        #     )
+
+        # if channel != 'ee_chan': continue
         # # make single variable plot
         # var_list = ['njets']
         # make_CR_plots_withsyst(
+        #     year=year,
         #     hists_mc=hists_mc, 
         #     hists_data=hists_data, 
         #     var_list=var_list, 
@@ -445,8 +570,10 @@ if __name__ == "__main__":
         #     procs_to_group=process_grouping, 
         #     fig_syst_label='allsyst', 
         #     ylog=False, 
+        #     do_mcerr=False,
         #     plottitle=plot_title[channel], 
-        #     figtitle=f"test_{channel}"
+        #     figtitle=f"test_{channel}",
+        #     outdir=outdir,
         # )
 
 

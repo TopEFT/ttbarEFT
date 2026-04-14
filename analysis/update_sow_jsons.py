@@ -297,6 +297,7 @@ if __name__ == '__main__':
             updates[f"nSumOfWeights_{weight}"] = float(hists['sow'][f"SumOfWeights_{weight}"][proc].as_hist({}).values()[0])
         update_json(json_path,dry_run=False,verbose=True, **updates)
 
+    print(f"\n\n WARNING: This script does not update the base sum of weights. If this is an EFT sample, update the sow manually using the pkl this script produces")
 
     ##########################
     ###### Save Outputs ###### 
