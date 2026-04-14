@@ -1,0 +1,29 @@
+### 2016 Non-EFT MC Samples for Control Regions ###
+
+vast:
+  redirector : 'file:///cms/cephfs/data/' # direct file access
+  # redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
+  # redirector: 'file:///project01/ndcms/hnelson2/' # access to files on vast
+  jsonFiles:
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_DY10to50.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_DY50.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTGJets.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTWJetsToLNu.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTZToLLNuNu_M_10.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TW_antitop_5f_NoFullyHadronicDecays.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TW_top_5f_NoFullyHadronicDecays.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WJetsToLNu.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WWTo2L2Nu.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WWW_4F.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WWZ_4F.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WZTo3LNu.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WZZ.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_ZZTo4L.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_ZZZ.json'
+    
+ceph: 
+  redirector : 'file:///cms/cephfs/data/' # direct file access
+  # redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
+  jsonFiles:
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTTo2L2Nu.json'
+

@@ -1,0 +1,81 @@
+### 2017 Non-EFT MC Samples for Control Regions ###
+
+vast:
+  # redirector : 'file:///cms/cephfs/data/' # direct file access
+  # redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
+  redirector: 'file:///project01/ndcms/hnelson2/' # access to files on vast
+  jsonFiles: 
+    # UL16APV
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_TW_antitop_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_TW_top_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_DY10to50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_DY50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_TTGJets_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_TTWJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_TTZToLLNuNu_M_10_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_WJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_WWTo2L2Nu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_WWW_4F_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_WWZ_4F_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_WZTo3LNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_WZZ_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_ZZTo4L_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_ZZZ_ptSkim.json'
+    # UL16
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TW_antitop_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TW_top_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_DY10to50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_DY50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTGJets_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTWJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTZToLLNuNu_M_10_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WWTo2L2Nu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WWW_4F_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WWZ_4F_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WZTo3LNu_ptSkim.json'
+      # - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WZZ_ptSkim.json' # these skimmed files are incomplete due to a lobster error. The originals should be used (added to `ceph`)
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_ZZTo4L_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_ZZZ_ptSkim.json'
+    # UL17
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_TTTo2L2Nu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_TW_antitop_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_TW_top_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_DY10to50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_DY50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_TTGJets_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_TTWJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_TTZToLLNuNu_M_10_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_WJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_WWTo2L2Nu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_WWW_4F_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_WWZ_4F_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_WZTo3LNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_WZZ_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_ZZTo4L_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_ZZZ_ptSkim.json'
+    # UL18
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_TW_antitop_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_TW_top_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_DY10to50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_DY50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_TTGJets_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_TTWJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_TTZToLLNuNu_M_10_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_WJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_WWTo2L2Nu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_WWW_4F_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_WWZ_4F_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_WZTo3LNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_WZZ_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_ZZTo4L_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_ZZZ_ptSkim.json'
+
+ceph:
+  redirector : 'file:///cms/cephfs/data/' # direct file access
+  # redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
+  jsonFiles:
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_TTTo2L2Nu.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTTo2L2Nu.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_TTTo2L2Nu.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WZZ.json'
