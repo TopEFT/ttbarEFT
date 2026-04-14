@@ -29,3 +29,62 @@ CR_CHANNELS:
     jet_list:
       - exactly_0j
       - atleast_1j
+
+UPDATED_CR_CHANNELS:
+  ee:
+    0j_0b:
+      name: ee_allj_0b
+      masks:
+      - exactly_0j
+      - bmask_exactly0med
+    1jp_0b:
+      name: ee_allj_0b
+      masks:
+      - atleast_1j
+      - bmask_exactly0med
+    # 0j_allb:
+    #   name: allj_allb
+    #   masks:
+    #   - exactly_0j
+    # 1jp_allb:
+    #   name: allj_allb
+    #   masks:
+    #   - atleast_1j
+  em:
+    0j_0b:
+      name: em_allj_0b
+      masks:
+      - exactly_0j
+      - bmask_exactly0med
+    1jp_0b:
+      name: em_allj_0b
+      masks:
+      - atleast_1j
+      - bmask_exactly0med
+    # 0j_allb:
+    #   name: allj_allb
+    #   masks:
+    #   - exactly_0j
+    # 1jp_allb:
+    #   name: allj_allb
+    #   masks:
+    #   - atleast_1j
+  mm:
+    0j_0b:
+      name: mm_allj_0b
+      masks:
+      - exactly_0j
+      - bmask_exactly0med
+    1jp_0b:
+      name: mm_allj_0b
+      masks:
+      - atleast_1j
+      - bmask_exactly0med
+    # 0j_allb:
+    #   name: allj_allb
+    #   masks:
+    #   - exactly_0j
+    # 1jp_allb:
+    #   name: allj_allb
+    #   masks:
+    #   - atleast_1j
