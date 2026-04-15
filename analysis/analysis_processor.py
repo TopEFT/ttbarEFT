@@ -191,7 +191,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         event_weight_variations, kinematic_variations = get_syst_lists(year=year, isData=isData, syst_list=self._syst_list, run_era=None)
 
         print(f"\n\n")
-        print(f"list of systematics to run over: \n\t event_weight_variations = {event_weight_variations}, \n\t kinematic_variations = {kinematic_variations}")
+        print(f"list of systematics to run over: \n\tevent_weight_variations = {event_weight_variations}, \n\tkinematic_variations = {kinematic_variations}")
         print(f"\n\n")
 
         ######### Load Event Categories ##########
@@ -199,7 +199,8 @@ class AnalysisProcessor(processor.ProcessorABC):
         with open(ttbarEFT_path("params/channels.yaml"), "r") as f:
             cat_dict=yaml.safe_load(f)
 
-        CR_cat_dict = cat_dict['CR_CHANNELS']
+        # CR_cat_dict = cat_dict['CR_CHANNELS']
+        CR_cat_dict = cat_dict['CR_CHANNELS_allb']
         SR_cat_dict = cat_dict['SR_CHANNELS']
 
 
@@ -478,10 +479,8 @@ class AnalysisProcessor(processor.ProcessorABC):
                     # in this case we want to loop over the up/down event weight variations
                     wgt_var_lst = wgt_var_lst + event_weight_variations
 
-            print(f"\n\n")
-            print(f"list of weights to loop over: {wgt_var_lst}")
-            print(f"\n\n")
 
+            lep_cat_channels = CR_cat_dict[lep_cat]
             for wgt_fluct in wgt_var_lst: 
 
                 if isData:
@@ -494,7 +493,11 @@ class AnalysisProcessor(processor.ProcessorABC):
                     else: 
                         continue        # if there is no up/down fluctuation for this category, don't fill a hist
 
-                for jet_cat in CR_cat_dict[lep_cat]['jet_list']: 
+                for chan_id, chan_settings in lep_cat_channels.items():
+                    chan_name = chan_settings['name']
+                    mask_list = chan_settings['masks']
+
+                # for jet_cat in CR_cat_dict[lep_cat]['jet_list']: 
                     # masks that are applied to all categories
                     cuts_list = ['jetvetomap', 'HEMvetomap']
 
@@ -502,7 +505,9 @@ class AnalysisProcessor(processor.ProcessorABC):
                         cuts_list.append('is_good_lumi')
                     
                     cuts_list.append(lep_cat)
-                    cuts_list.append(jet_cat)
+                    cuts_list.extend(mask_list)
+
+                    print(f"Filling bin '{chan_name}' using masks: {cuts_list}")
 
                     event_selection_mask = selections.all(*(cuts_list))
                     eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
@@ -512,11 +517,11 @@ class AnalysisProcessor(processor.ProcessorABC):
                     #     for i in range(100): #maybe 101 instead of 100? 
                     #     # weight = orig_weight[event_selection_mask] * pdfWeights[event_selection_mask]
 
-                    channel_name = lep_cat
+                    # channel_name = lep_cat
 
                     for dense_axis_name, dense_axis_vals in dense_axis_variables.items():
                         # if the category requires zero jets, don't fill jet histograms
-                        if (jet_cat == 'exactly_0j') and (dense_axis_name in jet_variables):
+                        if ('exactly_0j' in cuts_list) and (dense_axis_name in jet_variables):
                             # print(f"Skipping '{dense_axis_name}' in category '{lep_cat}_{jet_cat}'. Jet histograms are not filled for categories that don't require a jet")
                             continue
 
@@ -528,7 +533,7 @@ class AnalysisProcessor(processor.ProcessorABC):
                         axes_fill_info_dict = {
                             dense_axis_name : dense_axis_vals[event_selection_mask],
                             "process"       : histAxisName,
-                            'channel'       : channel_name,
+                            'channel'       : chan_name,
                             "systematic"    : wgt_fluct,
                             "weight"        : weight[event_selection_mask],
                             "eft_coeff"     : eft_coeffs_cut,
@@ -547,7 +552,7 @@ class AnalysisProcessor(processor.ProcessorABC):
                             sumw2axes_fill_info_dict = {
                                 dense_axis_name             : dense_axis_vals[event_selection_mask],
                                 'process'                   : histAxisName,
-                                'channel'                   : channel_name,
+                                'channel'                   : chan_name,
                                 'systematic'                : 'sumw2',
                                 'weight'                    : sumw2[event_selection_mask],
                                 'eft_coeff'                 : None,

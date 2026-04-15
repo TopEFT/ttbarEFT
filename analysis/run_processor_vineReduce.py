@@ -105,6 +105,8 @@ if __name__ == '__main__':
     # TODO: make this an input argument with a default or make it based on --outname
     results_dir = f"/users/{os.environ['USER']}/ddr_coffea_test/"
 
+    timestamp = time.strftime('%Y%m%d_%H%M', time.localtime())
+
     #TODO: add IterativeExecutor Options
     known_executors = ['iterative', 'ddr']
 
@@ -113,8 +115,9 @@ if __name__ == '__main__':
     parser.add_argument('--executor','-x',      default='work_queue', help = 'Which executor to use')
     parser.add_argument('--processor', '-p',    default='analysis_processor.py', help='Specify processor file name')
     parser.add_argument('--outname','-o',       default='histos', help = 'Name of the output file with histograms')
-    parser.add_argument('--aggregate',          default=True, help='Specify if output historgrams from different datasets should be combined')
-    
+    parser.add_argument('--no-group',           action='store_false', default=True, dest='aggregate', help='Disable output histogram combination')
+    parser.add_argument('--doerr',              default=False, help='Specify if statistical errors should be saved for nominal case')
+    parser.add_argument('--dosyst',             default=None, action='extend', nargs='+', help='Specify if systematic variations should be calculated and saved')
     parser.add_argument('--prefix', '-r',       nargs='?', default='', help = 'Prefix or redirector to look for the files')
     parser.add_argument('--treename',           default='Events', help = 'Name of the tree inside the files')
     parser.add_argument('--wc-list',            action='extend', nargs='+', help = 'Specify a list of Wilson coefficients to use in filling histograms.')
@@ -129,6 +132,9 @@ if __name__ == '__main__':
     proc_file   = args.processor
     outname     = args.outname
     aggregate   = args.aggregate
+    do_err      = args.doerr
+    do_syst     = args.dosyst
+
     prefix      = args.prefix
     treename    = args.treename
     wc_lst      = args.wc_list if args.wc_list is not None else []
@@ -142,8 +148,14 @@ if __name__ == '__main__':
     # print("\n\nrunning with processor: ", proc_file, '\n')
     # analysis_processor = importlib.import_module(proc_name)
 
+    print(f"running with aggregate setting: {aggregate}")
+    if aggregate:
+        print("True for aggregate")
+
     print("\n\nrunning with processor: ", proc_file, '\n')
     analysis_processor = importlib.import_module(proc_file[:-3])
+
+    print(f"running with syst options: {do_syst}")
 
     ### Check json or yaml ###
     if inputFile.endswith('.json'):
@@ -197,6 +209,12 @@ if __name__ == '__main__':
     # Run the processor and get the output
     tstart = time.time()
 
+    processor_versions = {
+        "ee" : analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=["all"]),
+        "mm" : analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='mm', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=["all"]),
+        "em" : analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=["all"]),
+    }
+
     ### RUN PROCESSOR USING VINE REDUCE ###
     if executor == 'ddr': 
         # construct port range
@@ -211,17 +229,11 @@ if __name__ == '__main__':
         # create TaskVine Manager
         mgr = vine.Manager(
             port=port, 
-            name=f"{os.environ['USER']}-ddr-coffea",
+            name=f"{os.environ['USER']}-vineReduce-{timestamp}",
         )
         mgr.tune("hungry-minimum", 1)
         mgr.enable_monitoring(watchdog=False)
-        mgr.enable_disconnect_slow_workers(3)
-
-        # env = remote_environment.get_environment(
-        #     extra_pip_local = {"ttbarEFT": ["ttbarEFT", "setup.py"],
-        #                         "dynamic_data_reduction": []},
-        # )
-        # sched_for_pre = partial(mgr, environment=env)
+        mgr.enable_disconnect_slow_workers(5)
 
         # get X509 proxy file
         x509_proxy = f"/tmp/x509up_u{os.getuid()}"
@@ -253,7 +265,6 @@ if __name__ == '__main__':
                 show_progress=True,
                 batch_size=5,
                 x509_proxy=x509_proxy,
-                # save_to_file = inputFile.removesuffix(".json").removesuffix(".yml").removesuffix(".yaml"), #only works python3.9 and above
                 save_to_file = preprocessed_data_path,
             )
 
@@ -262,15 +273,12 @@ if __name__ == '__main__':
         ddr = CoffeaDynamicDataReduction(
             mgr, #taskvine manager,
             data = preprocessed_data,
-            processors = {
-                "ee_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst),
-                "mm_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='mm', wc_names_lst=wc_lst, hist_lst=hist_lst),
-                "em_chan": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst),
-            },
+            processors = processor_versions,
             extra_files = [proc_file, "proxy.pem"], #"/users/hnelson2/ttbarEFT-coffea2025/ttbarEFT/params/channels.json", 
             schema=NanoAODSchema,
             max_task_retries= 10, # default=10
-            step_size = 500000, #equivalent to chunksize, default=100k
+            step_size = 500000, # 500000,
+            # step_size=1000000, #equivalent to chunksize, default=100k
             resources_processing={"cores": 1},
             resources_accumulating={"cores": 1},
             results_directory=results_dir,
@@ -284,6 +292,7 @@ if __name__ == '__main__':
         if aggregate: 
             print(f"Combining histograms from different datasets...")
             hists = {}
+            
             for ch in ddr_hists.keys():
                 hists[ch] = {}
                 variables = list(ddr_hists[ch][next(iter(ddr_hists[ch]))].keys())
@@ -301,10 +310,9 @@ if __name__ == '__main__':
     ### RUN PROCESSOR USING ITERATIVE EXECUTOR ###
     elif executor == 'iterative': 
 
-        leptoncat = 'em'
-
         flist = preprocessing_for_taskvine(samplesdict)
-        proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat=leptoncat, wc_names_lst=wc_lst, hist_lst=hist_lst)
+        proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=False, syst_list=[])
+        # proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=['elecID', 'muonID', 'muonISO','trigSF'])
         exec_instance = processor.IterativeExecutor()
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
         hists = runner(fileset=flist, processor_instance=proc_instance, treename=treename)
