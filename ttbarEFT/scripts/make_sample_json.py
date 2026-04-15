@@ -98,4 +98,4 @@ if __name__ == '__main__':
     outname      = args.outname
     options      = args.options
 
-    make_sample_json(xsec, year, treeName, histAxisName, options, era, path, outname)
+    make_sample_json(xsec, year, treeName, histAxisName, options, era, paths, outname)
