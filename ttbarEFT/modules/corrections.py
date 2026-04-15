@@ -1088,6 +1088,69 @@ def ApplyRochesterCorrections(mu, year, isData):
 
     return (mu.pt * corrections)
 
+##############################################
+######### TT LO to NNLO  Corrections #########
+##############################################
+
+def GetNLO_SF_Lookup(year, top_pt):
+
+    if year not in clib_year_map.keys(): 
+        raise Exception(f"Error: Unknown year \"{year}\".")
+
+    pathToNLOsf = ttbarEFT_path(f'data/TT_LOtoNLO/UL/TT_LOtoNLO.pkl.gz')
+    
+    hists = {}
+    with gzip.open(pathToNLOsf) as fin:
+        h = pickle.load(fin)['TT_SF']
+
+    # h = hists['jetptetaflav']
+    # hnum = h[{'WP': wp}]
+    # hden = h[{'WP': 'all'}]
+
+    SF_lookup = lookup_tools.dense_lookup.dense_lookup(
+        h.values(), 
+        [ax.edges for ax in h.axes]
+    )
+
+    # def evaluate_SF(top_pt):
+        # return eff_lookup(top_pt)
+    # return evaluate_SF
+
+    return SF_lookup(top_pt)
+    
+
+def GetNLO_Weight(events, dataset):
+
+    NLO_weight = ak.ones_like(events.event, dtype=float)
+
+    if ('TTTo2L2Nu' in dataset) or ('TT01j2l' in dataset):
+        genpart = events.GenPart
+        is_final_mask = genpart.hasFlags(["fromHardProcess","isLastCopy"])
+        gen_top = ak.pad_none(genpart[is_final_mask & (abs(genpart.pdgId) == 6)],2)
+        top1 = gen_top[:,0]
+        top2 = gen_top[:,1]
+
+        NLO_weight = np.sqrt(GetNLO_SF_Lookup(top1.pt)*GetNLO_SF_Lookup(top2.pt))
+
+
+def GetNNLO_EventWeight(events, dataset):
+
+    NNLO_weight = ak.ones_like(events.event, dtype=float)
+
+    def calculate_NNLO_SF(pt):
+        return (np.multiply(0.103, np.exp(-0.0118*pt)) - np.multiply(0.000134, pt) + 0.973)
+
+    if ('TTTo2L2Nu' in dataset) or ('TT01j2l' in dataset):
+        genpart = events.GenPart
+        is_final_mask = genpart.hasFlags(["fromHardProcess","isLastCopy"])
+        gen_top = ak.pad_none(genpart[is_final_mask & (abs(genpart.pdgId) == 6)],2)
+        top1 = gen_top[:,0]
+        top2 = gen_top[:,1]
+
+        NNLO_weight = np.sqrt(calculate_NNLO_SF(top1.pt)*calculate_NNLO_SF(top2.pt))
+
+    return NNLO_weight
+
 
 #####################################
 ######## Trigger Efficienies ########

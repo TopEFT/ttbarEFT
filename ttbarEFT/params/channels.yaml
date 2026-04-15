@@ -1,36 +1,86 @@
 SR_CHANNELS: 
   ee: 
-    jet_list:
-      - '=1'
-      - '=2' 
-      - '>2'
-    # bjet_list: []
+    1j_1b:
+      name: ee_1j_1b
+      masks:
+        - DYmask
+        - minMETpt
+        - exactly_1j
+        - bmask_exactly1med
+    2j_1b:
+      name: ee_2j_1b
+      masks:
+        - DYmask
+        - minMETpt
+        - exactly_2j
+        - bmask_exactly1med
+    2j_2b:
+      name: ee_2j_1b
+      masks:
+        - DYmask
+        - minMETpt
+        - atleast_2j
+        - bmask_exactly2med
   mm: 
-    jet_list: 
-      - '=1'
-      - '=2'
-      - '>2'
+    1j_1b:
+      name: mm_1j_1b
+      masks:
+        - DYmask
+        - minMETpt
+        - exactly_1j
+        - bmask_exactly1med
+    2j_1b:
+      name: mm_2j_1b
+      masks:
+        - DYmask
+        - minMETpt
+        - exactly_2j
+        - bmask_exactly1med
+    2j_2b:
+      name: mm_2j_1b
+      masks:
+        - DYmask
+        - minMETpt
+        - atleast_2j
+        - bmask_exactly2med
+
   em: 
-    jet_list: 
-      - '=1'
-      - '=2'
-      - '>2'
+    1j_1b:
+      name: em_1j_0b
+      masks:
+        - exactly_1j
+        - bmask_exactly0med
+    1j_1b:
+      name: em_1j_1b
+      masks:
+        - exactly_1j
+        - bmask_exactly1med
+    2j_1b:
+      name: em_2j_1b
+      masks:
+        - exactly_2j
+        - bmask_exactly1med
+    2j_2b:
+      name: em_2j_1b
+      masks:
+        - atleast_2j
+        - bmask_exactly2med
 
-CR_CHANNELS:
-  ee:
-    jet_list:
-      - exactly_0j
-      - atleast_1j
-  mm:
-    jet_list:
-      - exactly_0j
-      - atleast_1j
-  em:
-    jet_list:
-      - exactly_0j
-      - atleast_1j
+# CR_CHANNELS:
+#   ee:
+#     jet_list:
+#       - exactly_0j
+#       - atleast_1j
+#   mm:
+#     jet_list:
+#       - exactly_0j
+#       - atleast_1j
+#   em:
+#     jet_list:
+#       - exactly_0j
+#       - atleast_1j
 
-UPDATED_CR_CHANNELS:
+CR_CHANNELS_0b:
   ee:
     0j_0b:
       name: ee_allj_0b
@@ -42,14 +92,7 @@ UPDATED_CR_CHANNELS:
       masks:
       - atleast_1j
       - bmask_exactly0med
-    # 0j_allb:
-    #   name: allj_allb
-    #   masks:
-    #   - exactly_0j
-    # 1jp_allb:
-    #   name: allj_allb
-    #   masks:
-    #   - atleast_1j
+
   em:
     0j_0b:
       name: em_allj_0b
@@ -61,14 +104,6 @@ UPDATED_CR_CHANNELS:
       masks:
       - atleast_1j
       - bmask_exactly0med
-    # 0j_allb:
-    #   name: allj_allb
-    #   masks:
-    #   - exactly_0j
-    # 1jp_allb:
-    #   name: allj_allb
-    #   masks:
-    #   - atleast_1j
   mm:
     0j_0b:
       name: mm_allj_0b
@@ -80,11 +115,33 @@ UPDATED_CR_CHANNELS:
       masks:
       - atleast_1j
       - bmask_exactly0med
-    # 0j_allb:
-    #   name: allj_allb
-    #   masks:
-    #   - exactly_0j
-    # 1jp_allb:
-    #   name: allj_allb
-    #   masks:
-    #   - atleast_1j
+
+
+CR_CHANNELS_allb:
+  ee: 
+    0j_allb:
+      name: ee_allj_allb
+      masks:
+      - exactly_0j
+    1jp_allb:
+      name: ee_allj_allb
+      masks:
+      - atleast_1j
+  em: 
+    0j_allb:
+      name: em_allj_allb
+      masks:
+      - exactly_0j
+    1jp_allb:
+      name: em_allj_allb
+      masks:
+      - atleast_1j
+  mm:
+    0j_allb:
+      name: mm_allj_allb
+      masks:
+      - exactly_0j
+    1jp_allb:
+      name: mm_allj_allb
+      masks:
+      - atleast_1j

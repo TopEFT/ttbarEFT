@@ -184,11 +184,12 @@ def add2losMask(events, year, isData):
     padded_leps = ak.pad_none(leps,2)
 
     filter_flags = events.Flag
-    filters = filter_flags.goodVertices & filter_flags.globalSuperTightHalo2016Filter & filter_flags.HBHENoiseFilter & filter_flags.HBHENoiseIsoFilter & filter_flags.EcalDeadCellTriggerPrimitiveFilter & filter_flags.BadPFMuonFilter & (((year == "2016")|(year == "2016APV")) | filter_flags.ecalBadCalibFilter) & (isData | filter_flags.eeBadScFilter)
+    filters = filter_flags.goodVertices & filter_flags.globalSuperTightHalo2016Filter & filter_flags.HBHENoiseFilter & filter_flags.HBHENoiseIsoFilter & filter_flags.EcalDeadCellTriggerPrimitiveFilter & filter_flags.BadPFMuonFilter & filter_flags.BadPFMuonDzFilter & (((year == "2016")|(year == "2016APV")) | filter_flags.ecalBadCalibFilter) & filter_flags.eeBadScFilter # (isData | filter_flags.eeBadScFilter)
 
     llpairs = ak.combinations(padded_leps, 2, fields=["l0","l1"])
-    events["minMllAFAS"] = ak.min( (llpairs.l0+llpairs.l1).mass, axis=-1)
-    cleanup = events.minMllAFAS > 12
+    events["minMllAFAS"] = ak.min((llpairs.l0+llpairs.l1).mass, axis=-1)
+    # cleanup = events.minMllAFAS > 12
+    cleanup = events.minMllAFAS > 20
 
     dilep = (ak.num(leps)) >= 2
     exclusive = (ak.num(leps)) < 3
@@ -197,6 +198,20 @@ def add2losMask(events, year, isData):
     mask = (filters & cleanup & dilep & exclusive & os)
 
     events['is2los'] = ak.fill_none(mask,False)
+
+def addmllMasks(events):
+
+    leps = ak.pad_none(events.leps_pt_sorted, 2)
+    l0 = leps[:,0]
+    l1 = leps[:,1]
+
+    mll = (l0+l1).mass
+    
+    mll_mask = mll > 106
+    events['mllg106'] = ak.fill_none(mll_mask, False)
+
+    DY_mass_mask = ((mll < 75) | (mll > 105))
+    events['mllDYmask'] = ak.fill_none(DY_mass_mask, False)
 
 
 def getHemMask(events, year, isData, jets): 

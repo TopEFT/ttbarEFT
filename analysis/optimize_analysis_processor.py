@@ -251,6 +251,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         events['leps_pt_sorted'] = leps_sorted
         tt_es.addLepCatMasks(events) 
         tt_es.add2losMask(events, year, isData)
+        tt_se.addmllMasks(events)
 
         ######## Create objects for dense axes ##########
         leps_sorted = ak.pad_none(leps_sorted, 2)
@@ -293,6 +294,7 @@ class AnalysisProcessor(processor.ProcessorABC):
             weights_obj_base.add('ISR', events.nom, events.ISRUp*(sow/sow_ISRUp), events.ISRDown*(sow/sow_ISRDown))
             weights_obj_base.add('FSR', events.nom, events.FSRUp*(sow/sow_FSRUp), events.FSRDown*(sow/sow_FSRDown))
 
+            weights_obj_base.add('ttbar_NNLO', tt_cor.GetNNLO_EventWeight(events, dataset))
 
         # for Run2, Jet Corrections are applied to Data, only run this on MC
         if not isData:
@@ -432,6 +434,9 @@ class AnalysisProcessor(processor.ProcessorABC):
             selections.add("em",  (events.is_em & events.is2los & pass_trg))        # MC for emu has SF, so use pass_trg requirement 
             selections.add("mm",  (events.is_mm & events.is2los & pass_trg))        # MC for mumu has SF, so use pass_trg requirement
 
+            selections.add("DYmask", (events.mllDYmask))
+            selections.add("minMETpt", (met.pt > 60))
+
             selections.add('jetvetomap', (jet_veto_map == 0))
             selections.add('HEMvetomap', HEM_veto_mask)
 
@@ -445,6 +450,7 @@ class AnalysisProcessor(processor.ProcessorABC):
             selections.add("exactly_2j", (njets==2))
 
             selections.add("atleast_1j", (njets>=1))
+            selections.add("atleast_2j", (njets>=2))
 
 
             ######### Fill dense axes variables ##########
