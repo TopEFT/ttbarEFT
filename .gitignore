@@ -21,6 +21,8 @@ analysis/vine-run-info/
 
 input_samples/cfgs/*preprocessed.json
 
+LHEmtt/plots/
+
 # Distribution / packaging
 *.egg
 *.egg-info

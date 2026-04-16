@@ -265,7 +265,7 @@ if __name__ == '__main__':
             mgr, #taskvine manager,
             data = preprocessed_data,
             processors = {
-                "mtt": analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst),
+                "mtt": analysis_processor.AnalysisProcessor(samples=samplesdict, wc_names_lst=wc_lst, hist_lst=hist_lst),
             },
             extra_files = [proc_file, "proxy.pem"], #"/users/hnelson2/ttbarEFT-coffea2025/ttbarEFT/params/channels.json", 
             schema=NanoAODSchema,

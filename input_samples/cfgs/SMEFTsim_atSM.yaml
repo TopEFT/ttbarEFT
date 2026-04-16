@@ -1,0 +1,8 @@
+### 2017 Non-EFT MC Samples for Control Regions ###
+
+ceph: 
+  redirector : 'file:///cms/cephfs/data/' # direct file access
+    # redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
+  jsonFiles: 
+    # - '../input_samples/sample_jsons/nanogen/nanogen_TT01j2lSM_noEFT.json'
+    - '../input_samples/sample_jsons/nanogen/updated_TT01j2lSMEFTsim_SM.json'

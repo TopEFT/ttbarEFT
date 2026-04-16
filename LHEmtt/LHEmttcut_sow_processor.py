@@ -67,14 +67,29 @@ class AnalysisProcessor(processor.ProcessorABC):
                             hist.axis.Regular(bins=75, start=0, stop=1500, name='lhe_mtt', label='LHE invariant mass of tops [GeV]'),
                             wc_names=wc_names_lst,
                             label="Events"),
+            "nEvents_0_700" :HistEFT(
+                            proc_axis,
+                            hist.axis.Regular(bins=1, start=0, stop=2, name="nEvents_0_700", label="nEvents_0_700 for all events"), 
+                            wc_names=wc_names_lst, 
+                            label="Events"),
             "sow_0_700" :HistEFT(
                             proc_axis,
                             hist.axis.Regular(bins=1, start=0, stop=2, name="sow_0_700", label="sum of weights for all events"), 
                             wc_names=wc_names_lst, 
                             label="Events"),
+            "nEvents_700_900" :HistEFT(
+                            proc_axis,
+                            hist.axis.Regular(bins=1, start=0, stop=2, name="nEvents_700_900", label="sum of weights for all events"), 
+                            wc_names=wc_names_lst, 
+                            label="Events"),
             "sow_700_900" :HistEFT(
                             proc_axis,
                             hist.axis.Regular(bins=1, start=0, stop=2, name="sow_700_900", label="sum of weights for all events"), 
+                            wc_names=wc_names_lst, 
+                            label="Events"),
+            "nEvents_900_Inf" :HistEFT(
+                            proc_axis,
+                            hist.axis.Regular(bins=1, start=0, stop=2, name="nEvents_900_Inf", label="sum of weights for all events"), 
                             wc_names=wc_names_lst, 
                             label="Events"),
             "sow_900_Inf" :HistEFT(
@@ -191,7 +206,28 @@ class AnalysisProcessor(processor.ProcessorABC):
         fill_nevents = {
             "nEvents"   : counts,
             "process"   : hist_axis_name,
-            "weight"    : event_weights,
+            "weight"    : None, # counts, # event_weights,
+            "eft_coeff" : None,
+        }
+
+        fill_nevents_0_700 = {
+            "nEvents_0_700" : counts[mask_0_700],
+            "process"   : hist_axis_name,
+            "weight"    : None, # event_weights[mask_0_700],
+            "eft_coeff" : None,
+        }
+
+        fill_nevents_700_900 = {
+            "nEvents_700_900" : counts[mask_700_900],
+            "process"   : hist_axis_name,
+            "weight"    : None, # event_weights[mask_700_900],
+            "eft_coeff" : None,
+        }
+
+        fill_nevents_900_Inf = {
+            "nEvents_900_Inf" : counts[mask_900_Inf],
+            "process"   : hist_axis_name,
+            "weight"    : None,
             "eft_coeff" : None,
         }
 
@@ -217,6 +253,9 @@ class AnalysisProcessor(processor.ProcessorABC):
         }
 
         hout['nEvents'].fill(**fill_nevents)
+        hout['nEvents_0_700'].fill(**fill_nevents_0_700)
+        hout['nEvents_700_900'].fill(**fill_nevents_700_900)
+        hout['nEvents_900_Inf'].fill(**fill_nevents_900_Inf)
         hout['sow_0_700'].fill(**fill_sow_0_700)
         hout['sow_700_900'].fill(**fill_sow_700_900)
         hout['sow_900_Inf'].fill(**fill_sow_900_Inf)

@@ -83,6 +83,7 @@ if __name__ == "__main__":
 
     for year in years: 
         year_procs = [p for p in proc_list if year in p]
+        print(year_procs)
 
         for rwgt in wcs.keys():
         # for rwgt in ['VeryLargeWC']:

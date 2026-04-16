@@ -34,11 +34,10 @@ NanoAODSchema.warn_missing_crossrefs = False
 np.seterr(divide='ignore', invalid='ignore', over='ignore')
 
 class AnalysisProcessor(processor.ProcessorABC):
-    def __init__(self, samples, lep_cat, wc_names_lst=[], hist_lst=None, dtype=np.float32):
+    def __init__(self, samples, wc_names_lst=[], hist_lst=None, dtype=np.float32):
         self._samples = samples
         self._wc_names_lst = wc_names_lst
         self._dtype = dtype 
-        self._lep_cat = lep_cat
 
         proc_axis = hist.axis.StrCategory([], name="process", growth=True)
 
