@@ -1,5 +1,6 @@
 {
-  "xsec": 77.0803,
+  "xsec": 77.343,
+  "old_xsec": 77.0803,
   "year": "2016",
   "treeName": "Events",
   "histAxisName": "TT01j2l_UL16_mtt_0to700",
@@ -212,7 +213,7 @@
     "/store/user/hnelson2/mc/ttbarEFT_Run2/UL16/postSIM/v1/NAOD_TTto2L2Nu_1Jets_smeft_MTT_0to700/NAOD-00000_436626.root"
   ],
   "nEvents": 7252593,
-  "nSumOfWeights": 1421266025.13003,
+  "nSumOfWeights": 1.03770819e+09,
   "isData": false,
   "path": [
     "/store/user/hnelson2/mc/ttbarEFT_Run2/UL16/postSIM/v1/NAOD_TTto2L2Nu_1Jets_smeft_MTT_0to700"

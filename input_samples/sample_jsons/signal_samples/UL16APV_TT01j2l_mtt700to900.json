@@ -1,5 +1,6 @@
 {
-  "xsec": 6.9496,
+  "xsec": 6.705,
+  "old_xsec": 6.9496,
   "year": "2016APV",
   "treeName": "Events",
   "histAxisName": "TT01j2l_UL16APV_mtt_700to900",
@@ -1718,7 +1719,7 @@
     "/store/user/hnelson2/mc/ttbarEFT_Run2/UL16APV/postLHE/v1/NAOD_TTto2L2Nu_1Jets_smeft_MTT_700to900/NAOD-00000_128701.root"
   ],
   "nEvents": 1691404,
-  "nSumOfWeights": 331498333.5115002,
+  "nSumOfWeights": 1.67125184e+08,
   "isData": false,
   "path": [
     "/store/user/hnelson2/mc/ttbarEFT_Run2/UL16APV/postLHE/v1/NAOD_TTto2L2Nu_1Jets_smeft_MTT_700to900"
