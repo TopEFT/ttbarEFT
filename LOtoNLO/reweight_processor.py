@@ -89,7 +89,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         ######## Top selection ########
 
         gen_top = ak.pad_none(genpart[is_final_mask & (abs(genpart.pdgId) == 6)],2)
-        avg_toppt = np.divide((gen_top[:,0] + gen_top[:,1]).pt, 2)
+        avg_toppt = np.divide((gen_top[:,0].pt + gen_top[:,1].pt), 2)
 
         ######## Normalization ########
         if eft_coeffs is None:

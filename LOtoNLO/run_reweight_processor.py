@@ -23,7 +23,7 @@ import topcoffea.modules.remote_environment as remote_environment
 
 import ndcctools.taskvine as vine
 
-import reweight_processor as analysis_processor
+# import reweight_processor as analysis_processor
 
 def check_preprocessed_data(input_data, preprocessed_data_path): 
     check = False 
@@ -113,6 +113,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='You can customize your run')
     parser.add_argument('inputFile',            nargs='?', help = 'Json file(s) containing files and metadata')
+    parser.add_argument('--processor', '-p',    default='analysis_processor.py', help='Specify processor file name')
     parser.add_argument('--executor','-x',      default='work_queue', help = 'Which executor to use')
     parser.add_argument('--outname','-o',       default='histos', help = 'Name of the output file with histograms')
     parser.add_argument('--no-group',           action='store_false', default=True, dest='aggregate', help='Disable output histogram combination')
@@ -121,7 +122,7 @@ if __name__ == '__main__':
     parser.add_argument('--wc-list',            action='extend', nargs='+', help = 'Specify a list of Wilson coefficients to use in filling histograms.')
     parser.add_argument('--hist-list',          action='extend', nargs='+', help = 'Specify a list of histograms to fill.')
     parser.add_argument('--chunksize','-s',     default=100000  , help = 'Number of events per chunk')
-    parser.add_argument('--nchunks','-c',       default=5  , help = 'Max number of chunks for IterativeExecutor')
+    parser.add_argument('--nchunks','-c',       default=2  , help = 'Max number of chunks for IterativeExecutor')
     parser.add_argument('--port',               default='9123-9130', help = 'Specify the Work Queue port. An integer PORT or an integer range PORT_MIN-PORT_MAX.')
     
     args        = parser.parse_args()
@@ -129,7 +130,7 @@ if __name__ == '__main__':
     executor    = args.executor
     outname     = args.outname
     aggregate   = args.aggregate
-
+    proc_file   = args.processor
     prefix      = args.prefix
     treename    = args.treename
     wc_lst      = args.wc_list if args.wc_list is not None else []
@@ -142,6 +143,8 @@ if __name__ == '__main__':
     print(f"running with aggregate setting: {aggregate}")
     if aggregate:
         print("True for aggregate")
+
+    analysis_processor = importlib.import_module(proc_file[:-3])
 
     ### Check json or yaml ###
     if inputFile.endswith('.json'):
@@ -258,10 +261,10 @@ if __name__ == '__main__':
             mgr, #taskvine manager,
             data = preprocessed_data,
             processors = processor_versions,
-            extra_files = ["reweight_processor.py", "proxy.pem"], #"/users/hnelson2/ttbarEFT-coffea2025/ttbarEFT/params/channels.json", 
+            extra_files = [proc_file, "proxy.pem"], #"/users/hnelson2/ttbarEFT-coffea2025/ttbarEFT/params/channels.json", 
             schema=NanoAODSchema,
             max_task_retries= 10, # default=10
-            step_size = 500000, # 500000,
+            step_size = 10000, # 500000,
             # step_size=1000000, #equivalent to chunksize, default=100k
             resources_processing={"cores": 1, "memory":1000},
             resources_accumulating={"cores": 1},
