@@ -39,6 +39,7 @@ default_modules = {
             "dill",
             "xrootd",
             "setuptools==80.9.0",
+            "onnxruntime",
         ],
     },
     "pip": ["topcoffea"],

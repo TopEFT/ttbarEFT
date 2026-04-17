@@ -20,6 +20,10 @@
 			"regular": [40, 70, 110], 
 			"label": "mll (Z window) [GeV]"
 		},
+		"mllbb": {
+			"regular": [50, 0, 1000],
+			"label": "mllbb [GeV]"
+		},
 	    "ptll": {
 	    	"regular": [25, 0, 500],
 	    	"label": "$p_T(ll)$ [GeV]"

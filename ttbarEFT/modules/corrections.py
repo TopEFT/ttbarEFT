@@ -5,6 +5,7 @@ import awkward as ak
 import re
 import yaml
 import uproot
+import onnxruntime as ort
 
 import correctionlib
 
@@ -1092,29 +1093,18 @@ def ApplyRochesterCorrections(mu, year, isData):
 ######### TT LO to NNLO  Corrections #########
 ##############################################
 
-def GetNLO_SF_Lookup(year, top_pt):
+def GetNLO_SF_Lookup(top_pt):
 
-    if year not in clib_year_map.keys(): 
-        raise Exception(f"Error: Unknown year \"{year}\".")
-
-    pathToNLOsf = ttbarEFT_path(f'data/TT_LOtoNLO/UL/TT_LOtoNLO.pkl.gz')
+    pathToNLOsf = ttbarEFT_path(f'data/LOtoNLO/ttbarLO_SF.pkl.gz')
     
     hists = {}
     with gzip.open(pathToNLOsf) as fin:
-        h = pickle.load(fin)['TT_SF']
-
-    # h = hists['jetptetaflav']
-    # hnum = h[{'WP': wp}]
-    # hden = h[{'WP': 'all'}]
+        h = pickle.load(fin)['ttbarLO_SF']
 
     SF_lookup = lookup_tools.dense_lookup.dense_lookup(
         h.values(), 
         [ax.edges for ax in h.axes]
     )
-
-    # def evaluate_SF(top_pt):
-        # return eff_lookup(top_pt)
-    # return evaluate_SF
 
     return SF_lookup(top_pt)
     
@@ -1123,14 +1113,19 @@ def GetNLO_Weight(events, dataset):
 
     NLO_weight = ak.ones_like(events.event, dtype=float)
 
-    if ('TTTo2L2Nu' in dataset) or ('TT01j2l' in dataset):
+    if ('TT01j2l' in dataset):
+        print(f"\n\n applying NLO weight")
         genpart = events.GenPart
         is_final_mask = genpart.hasFlags(["fromHardProcess","isLastCopy"])
         gen_top = ak.pad_none(genpart[is_final_mask & (abs(genpart.pdgId) == 6)],2)
         top1 = gen_top[:,0]
         top2 = gen_top[:,1]
 
-        NLO_weight = np.sqrt(GetNLO_SF_Lookup(top1.pt)*GetNLO_SF_Lookup(top2.pt))
+        avg_toppt = (top1.pt+top2.pt)/2
+
+        NLO_weight = ak.fill_none(GetNLO_SF_Lookup(avg_toppt), 1.0)
+
+    return NLO_weight
 
 
 def GetNNLO_EventWeight(events, dataset):
@@ -1141,15 +1136,73 @@ def GetNNLO_EventWeight(events, dataset):
         return (np.multiply(0.103, np.exp(-0.0118*pt)) - np.multiply(0.000134, pt) + 0.973)
 
     if ('TTTo2L2Nu' in dataset) or ('TT01j2l' in dataset):
+        print(f"\n\n apply NNLO weight")
         genpart = events.GenPart
         is_final_mask = genpart.hasFlags(["fromHardProcess","isLastCopy"])
         gen_top = ak.pad_none(genpart[is_final_mask & (abs(genpart.pdgId) == 6)],2)
         top1 = gen_top[:,0]
         top2 = gen_top[:,1]
 
-        NNLO_weight = np.sqrt(calculate_NNLO_SF(top1.pt)*calculate_NNLO_SF(top2.pt))
+        sf1 = ak.fill_none(calculate_NNLO_SF(top1.pt), 1.0)
+        sf2 = ak.fill_none(calculate_NNLO_SF(top2.pt), 1.0)
+
+        NNLO_weight = np.sqrt(sf1*sf2)
 
     return NNLO_weight
+
+
+def GetHdampReweight(events, dataset, var='up'):
+    
+    final_weights = ak.ones_like(events.event, dtype=float)
+
+    if ('TTTo2L2Nu' in dataset) or ('TT01j2l' in dataset):
+        def get_features(p, pdg_id):
+            return ak.concatenate([
+                np.log10(p.pt)[:, np.newaxis],
+                p.rapidity[:, np.newaxis],
+                p.phi[:, np.newaxis],
+                (p.mass / maxM)[:, np.newaxis],
+                ak.full_like(p.pt, PID2FLOAT_MAP.get(pdg_id, 0))[:, np.newaxis],
+                ak.full_like(p.pt, hdamp)[:, np.newaxis]
+            ], axis=1)
+
+        allowed_var = ['up', 'down']
+        if var not in allowed_var: 
+            raise ValueError(f"Unknown variation '{var}'.")
+        
+        ort_sess = ort.InferenceSession(ttbarEFT_path(f"data/POG/TOP/mymodel12_hdamp_{var}_13TeV.onnx"))
+        input_name = ort_sess.get_inputs()[0].name
+        label_name = ort_sess.get_outputs()[0].name
+        print("input_name: "+str(input_name))
+        print("label_name: "+str(label_name))
+
+        hdamp = 1.379 ##This value is the value of hdamp of your NanoAOD divided by 172.5
+        maxM =  243.95 ##This value is needed to normalise the mass of the particles in each event and comes from the maximum mass value we had in the training+validation sample
+
+        # PDGid to small float dictionary
+        PID2FLOAT_MAP = {6: .1, -6: .2}
+        
+        genpart = events.GenPart
+        is_first_mask = genpart.hasFlags(["isLastCopy"])
+        tops = genpart[is_first_mask & (genpart.pdgId == 6)]
+        atops = genpart[is_first_mask & (genpart.pdgId == -6)]
+        
+        top_features = get_features(tops, 6)
+        atop_features = get_features(atops, -6)
+        
+        P0 = ak.concatenate([top_features[:, np.newaxis, :], atop_features[:, np.newaxis, :]], axis=1)
+        P0_np = ak.to_numpy(P0)
+        print(P0_np.shape)
+        P0_input = P0_np.astype(np.float32)
+        P0_input = np.squeeze(P0_input, axis=-1)
+        print(f"Shape of P0_input: {P0_input.shape}")
+        
+        ptt = tops[:, 0] + atops[:, 0]
+        preds = ort_sess.run([label_name], {input_name: P0_input})[0]
+        weights = preds[:, 0] / preds[:, 1]
+        final_weights = np.where(ptt.pt < 1000, weights, 1.0)
+
+    return final_weights
 
 
 #####################################

@@ -1,4 +1,68 @@
-SR_CHANNELS: 
+# SR channels for exactly 2 b jets
+SR_CHANNELS:
+  ee:
+    2b_2j:
+      name: ee_2b_2j
+      masks:
+        - DYmask
+        - minMETpt
+        - bmask_exactly2med
+        - exactly_2j
+    2b_3j:
+      name: ee_2b_3j
+      masks:
+        - DYmask
+        - minMETpt
+        - bmask_exactly2med
+        - exactly_3j
+    2b_4j:
+      name: ee_2b_4j
+      masks:
+        - DYmask
+        - minMETpt
+        - bmask_exactly2med
+        - atleast_4j       
+  mm:
+    2b_2j:
+      name: mm_2b_2j
+      masks:
+        - DYmask
+        - minMETpt
+        - bmask_exactly2med
+        - exactly_2j
+    2b_3j:
+      name: mm_2b_3j
+      masks:
+        - DYmask
+        - minMETpt
+        - bmask_exactly2med
+        - exactly_3j
+    2b_4j:
+      name: mm_2b_4j
+      masks:
+        - DYmask
+        - minMETpt
+        - bmask_exactly2med
+        - atleast_4j       
+  em:
+    2b_2j:
+      name: em_2b_2j
+      masks:
+        - bmask_exactly2med
+        - exactly_2j
+    2b_3j:
+      name: em_2b_3j
+      masks:
+        - bmask_exactly2med
+        - exactly_3j
+    2b_4j:
+      name: em_2b_4j
+      masks:
+        - bmask_exactly2med
+        - atleast_4j    
+
+# SR channels with multiple b jets
+SR_CHANNELS_multibjet: 
   ee: 
     1j_1b:
       name: ee_1j_1b
@@ -15,7 +79,7 @@ SR_CHANNELS:
         - exactly_2j
         - bmask_exactly1med
     2j_2b:
-      name: ee_2j_1b
+      name: ee_2j_2b
       masks:
         - DYmask
         - minMETpt
@@ -37,13 +101,12 @@ SR_CHANNELS:
         - exactly_2j
         - bmask_exactly1med
     2j_2b:
-      name: mm_2j_1b
+      name: mm_2j_2b
       masks:
         - DYmask
         - minMETpt
         - atleast_2j
         - bmask_exactly2med
-
   em: 
     1j_1b:
       name: em_1j_0b
@@ -61,25 +124,37 @@ SR_CHANNELS:
         - exactly_2j
         - bmask_exactly1med
     2j_2b:
-      name: em_2j_1b
+      name: em_2j_2b
+      masks:
+        - atleast_2j
+        - bmask_exactly2med   
+    
+# SR channels for 2j2b region 
+SR_CHANNELS_mllbb:
+  ee:
+    2j_2b:
+      name: ee_2j_2b
+      masks:
+        - DYmask
+        - minMETpt
+        - atleast_2j
+        - bmask_exactly2med
+  mm:
+    2j_2b:
+      name: mm_2j_2b
+      masks:
+        - DYmask
+        - minMETpt
+        - atleast_2j
+        - bmask_exactly2med
+  em:
+    2j_2b:
+      name: em_2j_2b
       masks:
         - atleast_2j
         - bmask_exactly2med
 
-# CR_CHANNELS:
-#   ee:
-#     jet_list:
-#       - exactly_0j
-#       - atleast_1j
-#   mm:
-#     jet_list:
-#       - exactly_0j
-#       - atleast_1j
-#   em:
-#     jet_list:
-#       - exactly_0j
-#       - atleast_1j
-
+# CR channels with exactly zero bjets
 CR_CHANNELS_0b:
   ee:
     0j_0b:
@@ -116,7 +191,7 @@ CR_CHANNELS_0b:
       - atleast_1j
       - bmask_exactly0med
 
-
+# CR channels with no restriction on num b jets
 CR_CHANNELS_allb:
   ee: 
     0j_allb:

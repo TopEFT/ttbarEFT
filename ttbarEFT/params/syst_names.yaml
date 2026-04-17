@@ -12,6 +12,7 @@ wgt_correction_bases:
   - ISR
   - renorm
   - fact
+  - hdamp
 
 btag_var_2016APV:
   - btagSFbc_correlated

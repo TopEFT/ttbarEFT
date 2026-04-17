@@ -1,0 +1,8 @@
+### 2017 Non-EFT MC Samples for Control Regions ###
+
+vast:
+  # redirector : 'file:///cms/cephfs/data/' # direct file access
+  # redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
+  redirector: 'file:///project01/ndcms/hnelson2/' # access to files on vast
+  jsonFiles: 
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_TTGJets_ptSkim.json'
