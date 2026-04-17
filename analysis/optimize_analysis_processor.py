@@ -63,17 +63,16 @@ np.seterr(divide='ignore', invalid='ignore', over='ignore')
 
 
 class AnalysisProcessor(processor.ProcessorABC):
-    def __init__(self, samples, lep_cat, wc_names_lst=[], hist_lst=None, do_errors=False, syst_list=[], dtype=np.float32):
+    def __init__(self, samples, lep_cat, wc_names_lst=[], hist_lst=None, do_errors=False, doPDF=False, syst_list=[], dtype=np.float32):
         self._samples = samples
         self._lep_cat = lep_cat
         self._wc_names_lst = wc_names_lst
         self._do_errors = do_errors
+        self._doPDF = doPDF
 
         self._syst_list = syst_list
-        # self._do_systematics = syst_list is not None # only do systematics if sys_list is not None
         self._dtype = dtype 
         
-
         proc_axis = hist.axis.StrCategory([], name="process", growth=True)
         chan_axis = hist.axis.StrCategory([], name="channel", growth=True)
         syst_axis = hist.axis.StrCategory([], name="systematic", label=r"Systematic Uncertainty", growth=True)
@@ -99,6 +98,16 @@ class AnalysisProcessor(processor.ProcessorABC):
                 wc_names = wc_names_lst, 
                 label=r'Events',
             )
+
+        if self._doPDF:
+            histograms['LHEPDFweights'] = hist.Hist(
+                proc_axis, 
+                chan_axis, 
+                hist.axis.Regular(*axes_info['CR_axes']['mllbb']['regular'], name='mllbb', label='mllbb [GeV]'),
+                hist.axis.Integer(0, 103, name="PDFindex", label="LHEPDFweight Index"),
+                storage=hist.storage.Double()
+            )
+
 
         self._accumulator = histograms
 
@@ -199,10 +208,11 @@ class AnalysisProcessor(processor.ProcessorABC):
         with open(ttbarEFT_path("params/channels.yaml"), "r") as f:
             cat_dict=yaml.safe_load(f)
 
-        # CR_cat_dict = cat_dict['CR_CHANNELS']
-        CR_cat_dict = cat_dict['UPDATED_CR_CHANNELS']
-        SR_cat_dict = cat_dict['SR_CHANNELS']
 
+        SR_cat_dict = cat_dict['SR_CHANNELS_mllbb']
+        CR_cat_dict = cat_dict['CR_CHANNELS_allb']
+
+        channels = SR_cat_dict
 
         ######### Initialize Objects #########
         met  = events.MET
@@ -251,7 +261,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         events['leps_pt_sorted'] = leps_sorted
         tt_es.addLepCatMasks(events) 
         tt_es.add2losMask(events, year, isData)
-        tt_se.addmllMasks(events)
+        tt_es.addmllMasks(events)
 
         ######## Create objects for dense axes ##########
         leps_sorted = ak.pad_none(leps_sorted, 2)
@@ -293,8 +303,10 @@ class AnalysisProcessor(processor.ProcessorABC):
             tc_cor.AttachPSWeights(events) #QScale uncertainties
             weights_obj_base.add('ISR', events.nom, events.ISRUp*(sow/sow_ISRUp), events.ISRDown*(sow/sow_ISRDown))
             weights_obj_base.add('FSR', events.nom, events.FSRUp*(sow/sow_FSRUp), events.FSRDown*(sow/sow_FSRDown))
-
+            
+            weights_obj_base.add('ttbar_NLO', tt_cor.GetNLO_Weight(events, dataset))
             weights_obj_base.add('ttbar_NNLO', tt_cor.GetNNLO_EventWeight(events, dataset))
+            weights_obj_base.add('hdamp', events.nom, tt_cor.GetHdampReweight(events, dataset, var='up'), tt_cor.GetHdampReweight(events, dataset, var='down'))
 
         # for Run2, Jet Corrections are applied to Data, only run this on MC
         if not isData:
@@ -305,9 +317,6 @@ class AnalysisProcessor(processor.ProcessorABC):
 
             raw_met = met
             cleanedJets['pt_orig'] = cleanedJets.pt     # NECESSARY FOR MET CORRECTIONS LATER 
-            # cleanedJets["pt_raw"] = (1 - cleanedJets.rawFactor)*cleanedJets.pt
-            # cleanedJets["mass_raw"] = (1 - cleanedJets.rawFactor)*cleanedJets.mass
-            # # cleanedJets["rho"] = ak.broadcast_arrays(events.fixedGridRhoFastjetAll, cleanedJets.pt)[0] #THIS LINE BREAKS THE JETS BUT NOT IN A WAY THAT FAILS
             rho_jagged = ak.ones_like(cleanedJets.pt) * events.fixedGridRhoFastjetAll
             cleanedJets = ak.with_field(cleanedJets, rho_jagged, "Rho")
             cleanedJets["pt_gen"] = ak.values_astype(ak.fill_none(cleanedJets.matched_gen.pt, 0), np.float32)
@@ -411,9 +420,46 @@ class AnalysisProcessor(processor.ProcessorABC):
                         # TODO: maybe change events.nom to btag_eventweight? depends on how this will be used in combine
                         weights_obj_base_for_kinematic_syst.add(f'btagSF{b_syst}', events.nom, event_weight_up/btag_eventweight, event_weight_down/btag_eventweight)
 
-            # add HEM veto using "good" leptons and jets
+
+            ######## Create objects for dense axes ##########
+            bjets = goodJets[isBtagJetsMedium] 
+            bjets_sorted = bjets[ak.argsort(bjets.pt, axis=-1,ascending=False)] 
+            bjets_padded = ak.pad_none(bjets_sorted, 2)
+
+            b0 = ak.fill_none(bjets_padded[:, 0], 0)
+            b1 = ak.fill_none(bjets_padded[:, 1], 0)
+
+            def get_sum_mass(obj_list):
+                # Manually calculate px, py, pz, and energy for each object
+                total_px = 0
+                total_py = 0
+                total_pz = 0
+                total_e  = 0
+                
+                for obj in obj_list:
+                    # Calculate components from pt, eta, phi, mass
+                    px = obj.pt * np.cos(obj.phi)
+                    py = obj.pt * np.sin(obj.phi)
+                    pz = obj.pt * np.sinh(obj.eta)
+                    # Energy = sqrt(p^2 + m^2)
+                    p2 = px**2 + py**2 + pz**2
+                    energy = np.sqrt(p2 + obj.mass**2)
+                    
+                    total_px = total_px + px
+                    total_py = total_py + py
+                    total_pz = total_pz + pz
+                    total_e  = total_e + energy
+                
+                # Invariant mass: M = sqrt(E^2 - p^2)
+                m2 = total_e**2 - (total_px**2 + total_py**2 + total_pz**2)
+                return np.sqrt(np.maximum(0, m2))
+
+            # Use the function for your 4-object system
+            mllbb = get_sum_mass([l0, l1, b0, b1])
+
+
+            ######## HEM veto ########
             HEM_veto_mask, HEM_event_weight = tt_es.getHemMask(events, year, isData, jets=goodJets)
-            
             if not isData:
                 weights_obj_base_for_kinematic_syst.add(f'HEM', HEM_event_weight)
             
@@ -424,7 +470,6 @@ class AnalysisProcessor(processor.ProcessorABC):
                 selections.add('is_good_lumi', lumi_mask)
 
             selections.add('pass_trg', pass_trg)
-            # selections.add('2los', events.is2los)
 
             if isData: 
                 selections.add("ee",  (events.is_ee & events.is2los & pass_trg))    # data always has trig pass requirement
@@ -470,9 +515,15 @@ class AnalysisProcessor(processor.ProcessorABC):
             dense_axis_variables['j0eta'] = j0.eta
             dense_axis_variables['j0phi'] = j0.phi
             dense_axis_variables['MET'] = met.pt
+            dense_axis_variables['mllbb'] = mllbb
 
             jet_variables = ['j0pt', 'j0eta', 'j0phi']
 
+            # print(f"\n\n weights_obj_base_for_kinematic_syst: {weights_obj_base_for_kinematic_syst}")
+            # print(f"variations: {weights_obj_base_for_kinematic_syst.variations}")
+            # print(f"weightStats: {weights_obj_base_for_kinematic_syst.weightStatistics}")
+            # print(f"partial NNLO: {weights_obj_base_for_kinematic_syst.partial_weight(include=['ttbar_NNLO'])}")
+            # print(f"partial NLO: {weights_obj_base_for_kinematic_syst.partial_weight(include=['ttbar_NLO'])}")
 
             ########## Fill the histograms ##########
             wgt_var_lst = ["nominal"]
@@ -486,7 +537,7 @@ class AnalysisProcessor(processor.ProcessorABC):
                     wgt_var_lst = wgt_var_lst + event_weight_variations
 
 
-            lep_cat_channels = CR_cat_dict[lep_cat]
+            lep_cat_channels = channels[lep_cat]
             for wgt_fluct in wgt_var_lst: 
 
                 if isData:
@@ -503,8 +554,6 @@ class AnalysisProcessor(processor.ProcessorABC):
                     chan_name = chan_settings['name']
                     mask_list = chan_settings['masks']
 
-                # for jet_cat in CR_cat_dict[lep_cat]['jet_list']: 
-                    # masks that are applied to all categories
                     cuts_list = ['jetvetomap', 'HEMvetomap']
 
                     if isData:
@@ -513,23 +562,37 @@ class AnalysisProcessor(processor.ProcessorABC):
                     cuts_list.append(lep_cat)
                     cuts_list.extend(mask_list)
 
-                    print(f"Filling bin '{chan_name}' using masks: {cuts_list}")
-
+                    # print(f"Filling bin '{chan_name}' using masks: {cuts_list}")
                     event_selection_mask = selections.all(*(cuts_list))
                     eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
-
-                    ### PDF Weights
-                    # pdfWeights = events.LHEPdfWeight
-                    #     for i in range(100): #maybe 101 instead of 100? 
-                    #     # weight = orig_weight[event_selection_mask] * pdfWeights[event_selection_mask]
-
-                    # channel_name = lep_cat
 
                     for dense_axis_name, dense_axis_vals in dense_axis_variables.items():
                         # if the category requires zero jets, don't fill jet histograms
                         if ('exactly_0j' in cuts_list) and (dense_axis_name in jet_variables):
                             # print(f"Skipping '{dense_axis_name}' in category '{lep_cat}_{jet_cat}'. Jet histograms are not filled for categories that don't require a jet")
                             continue
+
+                        # only plot mllbb for categories with two jets
+                        if ('bmask_exactly2med' not in cuts_list) and (dense_axis_name == 'mllbb'):
+                            continue
+
+                        if (dense_axis_name == 'mllbb') and (wgt_fluct == "nominal") and (self._doPDF) and (not isData):
+                            if eft_coeffs is not None:
+                                event_weights_SM = calc_eft_weights(eft_coeffs,np.zeros(len(self._wc_names_lst)))
+                                pdf_weights = (events.LHEPdfWeight*weight*event_weights_SM)[event_selection_mask]
+                            else: 
+                                pdf_weights = (events.LHEPdfWeight*weight)[event_selection_mask]
+                            pdf_index = ak.local_index(pdf_weights, axis=1)
+
+                            mllbb_stacked, index_stacked = ak.broadcast_arrays(mllbb[event_selection_mask], pdf_index)
+
+                            hout['LHEPDFweights'].fill(
+                                    mllbb=ak.flatten(mllbb_stacked),
+                                    process= histAxisName,
+                                    channel=chan_name,
+                                    PDFindex=ak.flatten(index_stacked),
+                                    weight=ak.flatten(pdf_weights),
+                                )
 
                         if dense_axis_name not in self._hist_lst:
                             print(f"Skipping \"{dense_axis_name}\", it is not in the list of hists to include")
