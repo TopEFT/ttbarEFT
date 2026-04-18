@@ -1,0 +1,12 @@
+{
+    "rate_uncertainties" : {
+        "lumi": 1.016,
+        "pdf_scale" : {
+            "tt": 1.0
+          },
+        "qcd_scale" : {
+            "tt": "1.0"
+          }
+    },
+    "correlations" : {}
+}
