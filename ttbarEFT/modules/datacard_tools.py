@@ -129,32 +129,6 @@ class JetScale(RateSystematic):
         else:
             return '-'
 
-# class MissingParton(RateSystematic):
-#     # Maps channel name from pkl file to hist name in missing_parton.root file
-#     CH_MAP = {
-#         "2los_onZ": "2los_onZ_1tau",
-#         "2lss_4t_m": "2lss_4t_m_2b",
-#         "2lss_4t_p": "2lss_4t_p_2b",
-#         "2lss_m": "2lss_m_2b",
-#         "2lss_p": "2lss_p_2b",
-#         "2lss_fwd_m": "2lss_fwd_m_2b",
-#         "2lss_fwd_p": "2lss_fwd_p_2b",
-#         "3l_onZ_1b": "3l_sfz_1b",
-#         "3l_onZ_2b": "3l_sfz_2b",
-#         "3l_p_offZ_1b": "3l1b_p",
-#         "3l_m_offZ_1b": "3l1b_m",
-#         "3l_p_offZ_2b": "3l2b_p",
-#         "3l_m_offZ_2b": "3l2b_m",
-#         "4l_2b": "4l",
-#     }
-
-#     def __init__(self,name,**kwargs):
-#         super().__init__(name,**kwargs)
-
-#     # Override the base implementation to handle the different dict structure
-#     def get_process(self,p,ch,l,j,b):
-#         pass
-
 class DatacardMaker():
     # TODO:
     #   We are abusing the grouping mechanism to also handle renaming processes, but might want to
@@ -343,30 +317,6 @@ class DatacardMaker():
             self.wc_ranges = json.load(wc_ranges_json)
        
         self.rotate = {}
-        # with open(topeft_path("params/SMEFTsim-topU3l_dim6top.yml")) as f:
-        #     yml = yaml.load(f,Loader=yaml.CLoader)
-
-        # self.rotate["CW"] = yml.pop("CW")
-        # self.rotate["SW"] = eval(yml.pop("SW").format(CW=self.rotate["CW"]))
-
-        # for k,v in yml.items():
-        #     if isinstance(v, list):
-        #         kwargs = {}
-        #         for wc in v[1]:
-        #             lo,hi = self.wc_ranges[wc]
-        #             kwargs[wc] = f"{wc}[0,{lo},{hi}]"
-        #         if "{CW}" in v[0]:
-        #             kwargs["CW"] = self.rotate["CW"]
-        #         if "{SW}" in v[0]:
-        #             kwargs["SW"] = self.rotate["SW"]
-        #         self.rotate[k] = v[0].format(**kwargs)
-        #     if isinstance(v, str):
-        #         if v not in self.wc_ranges:
-        #             raise Exception("The WC {v} was not found in params/wc_ranges.json!")
-        #         lo,hi = self.wc_ranges[v]
-        #         v = v.replace(v,f"{v}[0,{lo},{hi}]")
-        #         self.rotate[k] = v
-
 
         if self.year_lst:
             for yr in self.year_lst:
@@ -374,7 +324,6 @@ class DatacardMaker():
                     raise ValueError(f"Invalid year choice '{yr}', should be empty if running over all years or one of: {self.YEARS}")
 
         rate_syst_path = kwargs.pop("rate_systs_path","params/rate_systs.json")
-        # miss_part_path = kwargs.pop("missing_parton_path","data/missing_parton/missing_parton.root")
 
         # TODO: Need to find a better name for this variable
         self.rate_systs = self.load_systematics(rate_syst_path)
@@ -386,7 +335,6 @@ class DatacardMaker():
             # "TTJets",
             # "WJetsToLNu",
             # "TTGJets",  # This is the old low stats convs process, new one should be TTGamma
-
             # "TTGamma",
             # "WWTo2L2Nu","ZZTo4L",#"WZTo3LNu",
             # "WWW","WWW_4F","WWZ_4F","WWZ","WZZ","ZZZ",
@@ -417,8 +365,8 @@ class DatacardMaker():
         #       in a different order
         self.syst_year_corr = {
             # Example of correlated for only 2016 and 2016APV
-            "FFcloseEl": {"2016": ["2016APV"], "2016APV": ["2016"]},
-            "FFcloseMu": {"2016": ["2016APV"], "2016APV": ["2016"]},
+            # "FFcloseEl": {"2016": ["2016APV"], "2016APV": ["2016"]},
+            # "FFcloseMu": {"2016": ["2016APV"], "2016APV": ["2016"]},
 
             # Example of correlated over 2016, 2016APV, 2017, and 2018
             # Note: This is not correct for the analysis, but just serves as an example
@@ -440,20 +388,20 @@ class DatacardMaker():
         #       should correspond to the renamed/re-grouped processes, e.g. use "Diboson" instead of
         #       "ZZ","WZ","WW".
         self.syst_shape_decorrelate = {
-            "ISR": [
-                {
-                    "matches": ["ttH","ttll","tttt","convs"],
-                    "group": "gg",
-                },
-                {
-                    "matches": ["ttlnu","tllq","Diboson","Triboson"],
-                    "group": "qq",
-                },
-                {
-                    "matches": ["tHq"],
-                    "group": "qg"
-                }
-            ],
+            # "ISR": [
+            #     {
+            #         "matches": ["ttH","ttll","tttt","convs"],
+            #         "group": "gg",
+            #     },
+            #     {
+            #         "matches": ["ttlnu","tllq","Diboson","Triboson"],
+            #         "group": "qq",
+            #     },
+            #     {
+            #         "matches": ["tHq"],
+            #         "group": "qg"
+            #     }
+            # ],
             "renorm": [{
                 "matches": [".*"],
                 "group": "",
@@ -614,37 +562,6 @@ class DatacardMaker():
         # Now lets remove the original systematics which we decorrelated into sub-groups
         for syst in to_remove:
             rate_systs.pop(syst)
-
-        # Note: The 'diboson_njets' and 'missing_parton' uncertainties are a bit special, the values we
-        #   store in their corresponding RateSystematic objects will be dictionaries that encode the
-        #   uncertainty split by njets
-
-        # Now deal with the 'diboson_njets' systematic for Dibosons
-        # syst_name = "diboson_njets"
-        # # new_syst = RateSystematic(syst_name)
-        # new_syst = JetScale(syst_name)
-        # for p,per_jet_uncs in rates_json["diboson_njets"].items():
-        #     new_syst.add_process(p,per_jet_uncs)
-        # rate_systs[syst_name] = new_syst
-
-        # Finally, deal with the missing_parton systematic
-        # TODO: This feels pretty hardcoded, but not sure there's any way around it
-        # branch_key = "tllq"
-        # syst_name = "missing_parton"
-        # new_syst = RateSystematic(syst_name)
-
-        # fpath = topeft_path(mp_fpath)
-        # print(f"Opening: {fpath}")
-        # with uproot.open(fpath) as f:
-        #     d = {}
-        #     for k in f.keys():
-        #         k = k.replace(";1","")
-        #         # Note: Values in the ROOT file are computed as the fraction of the rate needed to
-        #         #   reach agreement, so need to add 1 to get the corresponding kapaa value
-        #         d[k] = f[f"{k}/{branch_key}"].array() + 1
-        #     new_syst.add_process("tllq",d)
-        #     new_syst.add_process("tHq",d)
-        # rate_systs[syst_name] = new_syst
 
         return rate_systs
 
@@ -1017,26 +934,14 @@ class DatacardMaker():
                         f[hist_name] = to_hist(arr,hist_name,zero_wgts=zero_out_sumw2)
 
                         num_h += 1
-                    # if km_dist == "njets":
-                    #     # We need to handle certain systematics differently when looking at njets procs
-                    #     if p == "Diboson":
-                    #         # Handle the 'diboson_njets' uncertainty
-                    #         # syst = "diboson_njets"
-                    #         # hist_name = f"{proc_name}_{syst}"
-                    #         # syst_kappa = self.rate_systs[syst].get_process(p)[str(num_j)]
-                    #         # if syst_kappa == "-":
-                    #         #     raise ValueError(f"The kappa value for {syst} is missing!")
-                    #         pass
 
-                    #     if p == "tllq" or p == "tHq":
-                    #         # Handle the 'missing_parton' uncertainty
-                    #         pass
                 # obtain the scalings for scalings.json file
                 print(f"p: {p}")
                 print(f"self.SIGNALS: {self.SIGNALS}")
                 if p in self.SIGNALS:
                     if self.wc_scalings:
-                        scalings = h[{'channel':ch,'process':p,'systematic':'nominal'}].make_scaling(flow='show', wc_list=self.wc_scalings)
+                        # scalings = h[{'channel':ch,'process':p,'systematic':'nominal'}].make_scaling(flow='show', wc_list=self.wc_scalings)
+                        scalings = h[{'channel':ch,'process':p,'systematic':'nominal'}].make_scaling(flow='show')
                         self.scalings_json = self.make_scalings_json(self.scalings,ch,km_dist,p,self.wc_scalings,scalings)
                     else:
                         scalings = h[{'channel':ch,'process':p,'systematic':'nominal'}].make_scaling(flow='show')
@@ -1119,9 +1024,6 @@ class DatacardMaker():
             for k,rate_syst in self.rate_systs.items():
                 syst_name = rate_syst.name
                 left_text = f"{syst_name:<{syst_width}} lnN"
-                if km_dist == "njets" and (syst_name == "diboson_njets" or syst_name == "missing_parton"):
-                    # These systematics are only treated as rate systs for njets distribution
-                    continue
                 row = [f"{left_text:<{left_width}}"]
                 for p in proc_order:
                     proc_name = self.get_process(p) # Strips off any "_sm" or "_lin_*" junk
@@ -1185,7 +1087,7 @@ class DatacardMaker():
 
         outf_json_name = self.FNAME_TEMPLATE.format(cat=ch,kmvar=km_dist,ext="json")
         with open(os.path.join(self.out_dir,f"{outf_json_name}"),"w") as f:
-            print('making', os.path.join(self.out_dir,f"{outf_json_name}"))
+            print('making scalings json:', os.path.join(self.out_dir,f"{outf_json_name}"))
             json.dump(self.scalings_json, f, indent=4)
 
         dt = time.time() - tic
@@ -1265,64 +1167,64 @@ class DatacardMaker():
 
         return r
 
-if __name__ == '__main__':
-    fpath = topeft_path("../analysis/topEFT/histos/may18_fullRun2_withSys_anatest08_np.pkl.gz")
+# if __name__ == '__main__':
+    # fpath = topeft_path("../analysis/topEFT/histos/may18_fullRun2_withSys_anatest08_np.pkl.gz")
 
-    tic = time.time()
-    dc = DatacardMaker(fpath)
+    # tic = time.time()
+    # dc = DatacardMaker(fpath)
 
-    km_dist = "lj0pt"
-    chans = ["2lss_m_4j","2lss_4t_m_4j"]
-    # km_dist = "njets"
-    # chans = ["2lss_m","2lss_4t_m"]
+    # km_dist = "lj0pt"
+    # chans = ["2lss_m_4j","2lss_4t_m_4j"]
+    # # km_dist = "njets"
+    # # chans = ["2lss_m","2lss_4t_m"]
 
-    target_selected = {
-        "tHq": ["ctp", "cptb", "cQq13", "cbW", "cpQ3", "ctW", "cQq83", "ctG"],
-        "tllq": ["cpt", "cptb", "cQlMi", "cQl3i", "ctlTi", "ctli", "cQq13", "cbW", "cpQM", "cpQ3", "ctei", "cQei", "ctW", "ctlSi", "cQq83", "ctZ", "ctG"],
-        "ttH": ["cpt", "ctp", "cptb", "cQq81", "cQq11", "ctq8", "ctq1", "cQq13", "cbW", "cpQM", "cpQ3", "ctW", "cQq83", "ctZ", "ctG"],
-        "ttll": ["cpt", "cptb", "cQlMi", "cQq81", "cQq11", "cQl3i", "ctq8", "ctlTi", "ctq1", "ctli", "cQq13", "cbW", "cpQM", "cpQ3", "ctei", "cQei", "ctW", "ctlSi", "cQq83", "ctZ", "ctG"],
-        "ttlnu": ["cpt", "ctp", "cQlMi", "cQq81", "cQq11", "cQl3i", "ctq8", "ctlTi", "ctq1", "ctli", "cQq13", "cpQM", "cpQ3", "ctW", "ctlSi", "cQq83", "ctZ", "ctG"],
-        "tttt": ["cpt", "ctp", "cptb", "cQq81", "cQq11", "ctq8", "ctq1", "cQq13", "cbW", "cpQM", "cpQ3", "ctW", "cQq83", "ctZ", "ctG", "ctt1", "cQt1", "cQt8", "cQQ1"]
-    }
+    # target_selected = {
+    #     "tHq": ["ctp", "cptb", "cQq13", "cbW", "cpQ3", "ctW", "cQq83", "ctG"],
+    #     "tllq": ["cpt", "cptb", "cQlMi", "cQl3i", "ctlTi", "ctli", "cQq13", "cbW", "cpQM", "cpQ3", "ctei", "cQei", "ctW", "ctlSi", "cQq83", "ctZ", "ctG"],
+    #     "ttH": ["cpt", "ctp", "cptb", "cQq81", "cQq11", "ctq8", "ctq1", "cQq13", "cbW", "cpQM", "cpQ3", "ctW", "cQq83", "ctZ", "ctG"],
+    #     "ttll": ["cpt", "cptb", "cQlMi", "cQq81", "cQq11", "cQl3i", "ctq8", "ctlTi", "ctq1", "ctli", "cQq13", "cbW", "cpQM", "cpQ3", "ctei", "cQei", "ctW", "ctlSi", "cQq83", "ctZ", "ctG"],
+    #     "ttlnu": ["cpt", "ctp", "cQlMi", "cQq81", "cQq11", "cQl3i", "ctq8", "ctlTi", "ctq1", "ctli", "cQq13", "cpQM", "cpQ3", "ctW", "ctlSi", "cQq83", "ctZ", "ctG"],
+    #     "tttt": ["cpt", "ctp", "cptb", "cQq81", "cQq11", "ctq8", "ctq1", "cQq13", "cbW", "cpQM", "cpQ3", "ctW", "cQq83", "ctZ", "ctG", "ctt1", "cQt1", "cQt8", "cQQ1"]
+    # }
 
-    selected_wcs = dc.get_selected_wcs(km_dist)
-    for p,tar_wcs in target_selected.items():
-        if p not in selected_wcs:
-            print(f"Skipping {p} for selected WC comparison")
-            continue
-        sel_wcs = selected_wcs[p]
-        print(f"old {p:>5}: {sorted(tar_wcs)}")
-        print(f"new {p:>5}: {sorted(sel_wcs)}")
-        miss_old = set(tar_wcs).difference(sel_wcs)
-        miss_new = sel_wcs.difference(set(tar_wcs))
+    # selected_wcs = dc.get_selected_wcs(km_dist)
+    # for p,tar_wcs in target_selected.items():
+    #     if p not in selected_wcs:
+    #         print(f"Skipping {p} for selected WC comparison")
+    #         continue
+    #     sel_wcs = selected_wcs[p]
+    #     print(f"old {p:>5}: {sorted(tar_wcs)}")
+    #     print(f"new {p:>5}: {sorted(sel_wcs)}")
+    #     miss_old = set(tar_wcs).difference(sel_wcs)
+    #     miss_new = sel_wcs.difference(set(tar_wcs))
 
-        print(f"Missing from old: {sorted(miss_old)}")
-        print(f"Missing from new: {sorted(miss_new)}")
-        print("-"*50)
+    #     print(f"Missing from old: {sorted(miss_old)}")
+    #     print(f"Missing from new: {sorted(miss_new)}")
+    #     print("-"*50)
 
-    for cat in dc.channels(km_dist):
-        if not cat in chans:
-            continue
-        r = dc.analyze(km_dist,cat,selected_wcs, True)
-    dt = time.time() - tic
-    print(f"Total Time: {dt:.2f} s")
+    # for cat in dc.channels(km_dist):
+    #     if not cat in chans:
+    #         continue
+    #     r = dc.analyze(km_dist,cat,selected_wcs, True)
+    # dt = time.time() - tic
+    # print(f"Total Time: {dt:.2f} s")
 
-    wc_to_terms = {}
-    h = dc.hists[km_dist]
-    wcs = ["sm"] + h._wcnames
+    # wc_to_terms = {}
+    # h = dc.hists[km_dist]
+    # wcs = ["sm"] + h._wcnames
 
-    index = 0
-    for i in range(len(wcs)):
-        wc1 = wcs[i]
-        wc_to_terms[wc1] = set()
-        for j in range(i+1):
-            wc2 = wcs[j]
-            wc_to_terms[wc1].add(index)
-            wc_to_terms[wc2].add(index)
-            index += 1
+    # index = 0
+    # for i in range(len(wcs)):
+    #     wc1 = wcs[i]
+    #     wc_to_terms[wc1] = set()
+    #     for j in range(i+1):
+    #         wc2 = wcs[j]
+    #         wc_to_terms[wc1].add(index)
+    #         wc_to_terms[wc2].add(index)
+    #         index += 1
 
-    for wc in wcs:
-        terms = sorted(wc_to_terms[wc])
-        s1 = ", ".join([f"{x:>3d}" for x in terms[:6]])
-        s2 = terms[-1]
-        print(f"{wc:>5}: [{s1}, ... , {s2:>3d} ]")
+    # for wc in wcs:
+    #     terms = sorted(wc_to_terms[wc])
+    #     s1 = ", ".join([f"{x:>3d}" for x in terms[:6]])
+    #     s2 = terms[-1]
+    #     print(f"{wc:>5}: [{s1}, ... , {s2:>3d} ]")
