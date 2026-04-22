@@ -131,5 +131,8 @@
   "nSumOfWeights_LHEPDFweights99": 8869297.888867378,
   "nSumOfWeights_LHEPDFweights100": 8868729.611143112,
   "nSumOfWeights_LHEPDFweights101": 8520326.41605512,
-  "nSumOfWeights_LHEPDFweights102": 9242453.759307021
+  "nSumOfWeights_LHEPDFweights102": 9242453.759307021,
+  "nSumOfWeights_hdampUp": 8868805.091133118,
+  "nSumOfWeights_hdampDown": 8868805.091133118,
+  "nSumOfWeights_toppt": 8868805.091133118
 }

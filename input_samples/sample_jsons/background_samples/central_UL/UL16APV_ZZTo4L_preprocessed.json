@@ -1,0 +1,311 @@
+{
+  "UL16APV_ZZTo4L": {
+    "files": {
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/323DBA8A-85FA-7747-B88C-D388D661F5B4.root": {
+        "object_path": "Events",
+        "num_entries": 1836000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/F696AD0F-38E1-EC43-9B51-E9F18EE64FF6.root": {
+        "object_path": "Events",
+        "num_entries": 1836000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/22A67094-758D-984E-8E26-04742A7D84C6.root": {
+        "object_path": "Events",
+        "num_entries": 680000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/64068827-1DA4-3840-A540-BCC76D855306.root": {
+        "object_path": "Events",
+        "num_entries": 1836000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/C51D2FFE-0D7F-DA4C-BE68-4A2752301C47.root": {
+        "object_path": "Events",
+        "num_entries": 272000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/6D774C4C-83E4-F943-A02B-50C9DC03B26A.root": {
+        "object_path": "Events",
+        "num_entries": 952000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/547D3B37-8F58-134B-9B12-DEA5FA0CA364.root": {
+        "object_path": "Events",
+        "num_entries": 1302000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/343A6665-EDBA-4D4D-97C5-4131AD08B1FF.root": {
+        "object_path": "Events",
+        "num_entries": 1058000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/0C2C0B6C-F5BA-384E-A8BC-622F83917C1E.root": {
+        "object_path": "Events",
+        "num_entries": 1224000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/3BFB2B43-4A35-844F-8BE5-12AE1CF78D45.root": {
+        "object_path": "Events",
+        "num_entries": 919000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/371FB2F6-D658-5848-B865-0C8F47E71FE5.root": {
+        "object_path": "Events",
+        "num_entries": 748000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/2ADFDD4F-2123-6C48-834D-0A8AB71055B8.root": {
+        "object_path": "Events",
+        "num_entries": 1836000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/A9C21F5A-81E2-494D-B586-0BAC14D61D28.root": {
+        "object_path": "Events",
+        "num_entries": 1836000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/9956DC97-2360-6042-8693-A97214655D80.root": {
+        "object_path": "Events",
+        "num_entries": 1836000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/3F917AF6-9741-044F-85A3-E83B68C75EB3.root": {
+        "object_path": "Events",
+        "num_entries": 136000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/6F4A57CE-1823-E74D-A0FE-15558DCB945B.root": {
+        "object_path": "Events",
+        "num_entries": 1269000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/4C783FAE-48ED-BD46-94C6-13CAECA2E0C7.root": {
+        "object_path": "Events",
+        "num_entries": 800000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/22C0A66C-C17C-C64E-8399-C4A3B313D413.root": {
+        "object_path": "Events",
+        "num_entries": 1768000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/A3AF1720-A6FF-B340-9F86-923558B5ACE2.root": {
+        "object_path": "Events",
+        "num_entries": 1278000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/0B142CBE-FA40-404B-B54A-F43C9E6508B6.root": {
+        "object_path": "Events",
+        "num_entries": 955000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/B9397E2F-1167-914C-BDBF-91E9055224D5.root": {
+        "object_path": "Events",
+        "num_entries": 1360000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/C1435377-8D45-AB4C-A18A-BD325BAC665F.root": {
+        "object_path": "Events",
+        "num_entries": 701000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/FD75B736-BE60-3E42-8F76-A32FBBF0339C.root": {
+        "object_path": "Events",
+        "num_entries": 1840000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/EC5F2600-1FDD-444F-9F5D-419A28E96568.root": {
+        "object_path": "Events",
+        "num_entries": 748000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/05ECA0E5-94DE-8D41-B9B0-0F74F85FDA2F.root": {
+        "object_path": "Events",
+        "num_entries": 11000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/D6A72365-9B35-A24A-8B38-DE3CBA35EC29.root": {
+        "object_path": "Events",
+        "num_entries": 1836000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/3CB8EFD5-1ABC-4048-9314-8CC2A04B49E0.root": {
+        "object_path": "Events",
+        "num_entries": 997000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/183774ED-E18D-434B-999F-4AD945AC4C79.root": {
+        "object_path": "Events",
+        "num_entries": 988000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/9A64929A-E111-B74D-ABC5-2BB6A3197430.root": {
+        "object_path": "Events",
+        "num_entries": 1836000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/C209B64E-437D-DE4A-90C1-3D879EF7349B.root": {
+        "object_path": "Events",
+        "num_entries": 1120000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/C5A81AD1-421B-A543-8A80-A03DB81B440C.root": {
+        "object_path": "Events",
+        "num_entries": 1140000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/C11650D5-A4B5-A949-BC15-15446F10AE59.root": {
+        "object_path": "Events",
+        "num_entries": 544000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/B0708AD0-36EE-0548-9D9E-DA909B809C00.root": {
+        "object_path": "Events",
+        "num_entries": 1002000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/BD0ACB7E-7DD4-9B4A-8D5C-9153A75BFDC4.root": {
+        "object_path": "Events",
+        "num_entries": 1836000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/FE88E820-3D97-604D-BE86-92F0AB644A71.root": {
+        "object_path": "Events",
+        "num_entries": 1427000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/29FCFC65-09BE-7D49-A492-AEDD679A48F1.root": {
+        "object_path": "Events",
+        "num_entries": 597000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/E5ED50B6-636D-2F48-93E5-8C9801BF9AB8.root": {
+        "object_path": "Events",
+        "num_entries": 1755000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/739DD812-0476-684F-9D25-F31D0F5E4F04.root": {
+        "object_path": "Events",
+        "num_entries": 136000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/74047E43-A851-174F-BE3E-8305CE79B8C3.root": {
+        "object_path": "Events",
+        "num_entries": 1836000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/553F0730-6B67-9E4D-8BD0-A3676DD04423.root": {
+        "object_path": "Events",
+        "num_entries": 476000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/8CE3D37F-3C8D-6747-9D86-913774624C12.root": {
+        "object_path": "Events",
+        "num_entries": 604000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/D19E636C-8FBE-6E4B-82A0-78C11936E6C1.root": {
+        "object_path": "Events",
+        "num_entries": 863000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/D972120A-4BEC-0549-AA4D-263AE651A711.root": {
+        "object_path": "Events",
+        "num_entries": 1339000
+      },
+      "file:///cms/cephfs/data//store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/2430000/68586457-B51E-F547-AAE8-DFAD8833937C.root": {
+        "object_path": "Events",
+        "num_entries": 322000
+      }
+    },
+    "object_path": "Events",
+    "metadata": {
+      "xsec": 1.256,
+      "year": "2016APV",
+      "treeName": "Events",
+      "histAxisName": "ZZTo4L_centralUL16APV",
+      "options": "",
+      "era": "",
+      "WCnames": [],
+      "nEvents": 49691000,
+      "nSumOfWeights": 65835432.913600005,
+      "isData": false,
+      "path": "/store/mc/RunIISummer20UL16NanoAODAPVv9/ZZTo4L_TuneCP5_13TeV_powheg_pythia8/NANOAODSIM/106X_mcRun2_asymptotic_preVFP_v11-v1/",
+      "nSumOfWeights_ISRUp": 65834917.26776737,
+      "nSumOfWeights_ISRDown": 65836038.35182634,
+      "nSumOfWeights_FSRUp": 65832295.98783657,
+      "nSumOfWeights_FSRDown": 65838690.31778748,
+      "nSumOfWeights_renormUp": 64729552.936653174,
+      "nSumOfWeights_renormDown": 67226412.17992896,
+      "nSumOfWeights_factUp": 68654914.12251876,
+      "nSumOfWeights_factDown": 61386870.74208675,
+      "nSumOfWeights_renormfactUp": 68017999.42206925,
+      "nSumOfWeights_renormfactDown": 63159674.07879491,
+      "nSumOfWeights_LHEPDFweights0": 65835433.223212,
+      "nSumOfWeights_LHEPDFweights1": 66103695.06609772,
+      "nSumOfWeights_LHEPDFweights2": 65614838.01022498,
+      "nSumOfWeights_LHEPDFweights3": 65765641.050192066,
+      "nSumOfWeights_LHEPDFweights4": 65988958.42368852,
+      "nSumOfWeights_LHEPDFweights5": 65831622.879190974,
+      "nSumOfWeights_LHEPDFweights6": 65692727.0790325,
+      "nSumOfWeights_LHEPDFweights7": 65966233.22671762,
+      "nSumOfWeights_LHEPDFweights8": 65931051.130388185,
+      "nSumOfWeights_LHEPDFweights9": 65932197.26454002,
+      "nSumOfWeights_LHEPDFweights10": 65846686.39884287,
+      "nSumOfWeights_LHEPDFweights11": 65808627.83235488,
+      "nSumOfWeights_LHEPDFweights12": 65940525.925731614,
+      "nSumOfWeights_LHEPDFweights13": 65808381.84356826,
+      "nSumOfWeights_LHEPDFweights14": 65828687.55557321,
+      "nSumOfWeights_LHEPDFweights15": 65845093.94699991,
+      "nSumOfWeights_LHEPDFweights16": 65854528.74914693,
+      "nSumOfWeights_LHEPDFweights17": 65738876.97124538,
+      "nSumOfWeights_LHEPDFweights18": 65804976.39498197,
+      "nSumOfWeights_LHEPDFweights19": 65909769.93483694,
+      "nSumOfWeights_LHEPDFweights20": 65860893.08460115,
+      "nSumOfWeights_LHEPDFweights21": 65989199.38135706,
+      "nSumOfWeights_LHEPDFweights22": 65858538.31038254,
+      "nSumOfWeights_LHEPDFweights23": 65802665.67926168,
+      "nSumOfWeights_LHEPDFweights24": 65932334.11077807,
+      "nSumOfWeights_LHEPDFweights25": 65893398.91090751,
+      "nSumOfWeights_LHEPDFweights26": 65632237.294030115,
+      "nSumOfWeights_LHEPDFweights27": 65829813.48244424,
+      "nSumOfWeights_LHEPDFweights28": 65898665.6134833,
+      "nSumOfWeights_LHEPDFweights29": 65630419.18739792,
+      "nSumOfWeights_LHEPDFweights30": 65802662.742072165,
+      "nSumOfWeights_LHEPDFweights31": 65843490.04312307,
+      "nSumOfWeights_LHEPDFweights32": 65807434.5065051,
+      "nSumOfWeights_LHEPDFweights33": 65855575.66634171,
+      "nSumOfWeights_LHEPDFweights34": 65801691.75877235,
+      "nSumOfWeights_LHEPDFweights35": 65827827.87373513,
+      "nSumOfWeights_LHEPDFweights36": 65860099.602346815,
+      "nSumOfWeights_LHEPDFweights37": 65819090.23175444,
+      "nSumOfWeights_LHEPDFweights38": 65853834.05861479,
+      "nSumOfWeights_LHEPDFweights39": 65821299.861871846,
+      "nSumOfWeights_LHEPDFweights40": 65814941.77173433,
+      "nSumOfWeights_LHEPDFweights41": 65854466.07092176,
+      "nSumOfWeights_LHEPDFweights42": 65857479.1215267,
+      "nSumOfWeights_LHEPDFweights43": 65835737.89140528,
+      "nSumOfWeights_LHEPDFweights44": 65833698.0348605,
+      "nSumOfWeights_LHEPDFweights45": 65863757.513284184,
+      "nSumOfWeights_LHEPDFweights46": 65840289.632641144,
+      "nSumOfWeights_LHEPDFweights47": 65821214.59517143,
+      "nSumOfWeights_LHEPDFweights48": 65866735.53185689,
+      "nSumOfWeights_LHEPDFweights49": 65836080.59771983,
+      "nSumOfWeights_LHEPDFweights50": 65831070.32533816,
+      "nSumOfWeights_LHEPDFweights51": 65842683.98832997,
+      "nSumOfWeights_LHEPDFweights52": 65827788.452607684,
+      "nSumOfWeights_LHEPDFweights53": 65840449.52558692,
+      "nSumOfWeights_LHEPDFweights54": 65835901.91223189,
+      "nSumOfWeights_LHEPDFweights55": 65842414.30344133,
+      "nSumOfWeights_LHEPDFweights56": 65835629.51567037,
+      "nSumOfWeights_LHEPDFweights57": 65841127.45318545,
+      "nSumOfWeights_LHEPDFweights58": 65850699.89422713,
+      "nSumOfWeights_LHEPDFweights59": 65820652.931258574,
+      "nSumOfWeights_LHEPDFweights60": 65832044.11552519,
+      "nSumOfWeights_LHEPDFweights61": 65833389.794795275,
+      "nSumOfWeights_LHEPDFweights62": 65838448.81860662,
+      "nSumOfWeights_LHEPDFweights63": 65832795.84256964,
+      "nSumOfWeights_LHEPDFweights64": 65814734.13249102,
+      "nSumOfWeights_LHEPDFweights65": 65853480.83297203,
+      "nSumOfWeights_LHEPDFweights66": 65819273.7535066,
+      "nSumOfWeights_LHEPDFweights67": 65841273.93113316,
+      "nSumOfWeights_LHEPDFweights68": 65842763.32055455,
+      "nSumOfWeights_LHEPDFweights69": 65824024.14454673,
+      "nSumOfWeights_LHEPDFweights70": 65850083.940944895,
+      "nSumOfWeights_LHEPDFweights71": 65832060.17881854,
+      "nSumOfWeights_LHEPDFweights72": 65842333.79666407,
+      "nSumOfWeights_LHEPDFweights73": 65848231.154054634,
+      "nSumOfWeights_LHEPDFweights74": 65842596.57873199,
+      "nSumOfWeights_LHEPDFweights75": 65841383.80491401,
+      "nSumOfWeights_LHEPDFweights76": 65829346.59012162,
+      "nSumOfWeights_LHEPDFweights77": 65851619.57436967,
+      "nSumOfWeights_LHEPDFweights78": 65839245.25720301,
+      "nSumOfWeights_LHEPDFweights79": 65828998.67952972,
+      "nSumOfWeights_LHEPDFweights80": 65828997.3915706,
+      "nSumOfWeights_LHEPDFweights81": 65833234.76347718,
+      "nSumOfWeights_LHEPDFweights82": 65825400.23833253,
+      "nSumOfWeights_LHEPDFweights83": 65837986.91441055,
+      "nSumOfWeights_LHEPDFweights84": 65847689.870278135,
+      "nSumOfWeights_LHEPDFweights85": 65825358.28328192,
+      "nSumOfWeights_LHEPDFweights86": 65830033.685336,
+      "nSumOfWeights_LHEPDFweights87": 65833189.73395866,
+      "nSumOfWeights_LHEPDFweights88": 65831792.610247046,
+      "nSumOfWeights_LHEPDFweights89": 65838825.873063534,
+      "nSumOfWeights_LHEPDFweights90": 65828707.07788263,
+      "nSumOfWeights_LHEPDFweights91": 65826360.046360806,
+      "nSumOfWeights_LHEPDFweights92": 65840838.467605755,
+      "nSumOfWeights_LHEPDFweights93": 65830124.79540236,
+      "nSumOfWeights_LHEPDFweights94": 65846833.92998007,
+      "nSumOfWeights_LHEPDFweights95": 65832466.190067515,
+      "nSumOfWeights_LHEPDFweights96": 65842245.20105105,
+      "nSumOfWeights_LHEPDFweights97": 65814161.704385825,
+      "nSumOfWeights_LHEPDFweights98": 65839171.15207648,
+      "nSumOfWeights_LHEPDFweights99": 65841560.89988372,
+      "nSumOfWeights_LHEPDFweights100": 65839737.854794316,
+      "nSumOfWeights_LHEPDFweights101": 64828750.74518222,
+      "nSumOfWeights_LHEPDFweights102": 66929263.01855952,
+      "redirector": "file:///cms/cephfs/data/",
+      "dataset": "UL16APV_ZZTo4L"
+    }
+  }
+}

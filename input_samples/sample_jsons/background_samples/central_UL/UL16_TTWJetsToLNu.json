@@ -25,7 +25,7 @@
   "isData": false,
   "path": "/store/mc/RunIISummer20UL16NanoAODv9/TTWJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-madspin-pythia8/NANOAODSIM/",
   "nSumOfWeights_ISRUp": 1124598.9858299994,
-  "nSumOfWeights_ISRDown": 1098606.381533673,
+  "nSumOfWeights_ISRDown": 1098606.3815336733,
   "nSumOfWeights_FSRUp": 1114473.3506282307,
   "nSumOfWeights_FSRDown": 1112146.6812226828,
   "nSumOfWeights_renormUp": 1002727.124626067,
@@ -136,5 +136,8 @@
   "nSumOfWeights_LHEPDFweights99": 1113187.7081399113,
   "nSumOfWeights_LHEPDFweights100": 1113141.036866665,
   "nSumOfWeights_LHEPDFweights101": 1069366.0599819669,
-  "nSumOfWeights_LHEPDFweights102": 1155028.36024221
+  "nSumOfWeights_LHEPDFweights102": 1155028.36024221,
+  "nSumOfWeights_hdampUp": 1113150.3928158283,
+  "nSumOfWeights_hdampDown": 1113150.3928158283,
+  "nSumOfWeights_toppt": 1113150.3928158283
 }

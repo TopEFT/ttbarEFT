@@ -28,11 +28,11 @@
   "nSumOfWeights_ISRDown": 103257324.60063878,
   "nSumOfWeights_FSRUp": 103255880.67142248,
   "nSumOfWeights_FSRDown": 103242164.76131943,
-  "nSumOfWeights_renormUp": 98355064.90556389,
-  "nSumOfWeights_renormDown": 108256630.55182876,
+  "nSumOfWeights_renormUp": 98355064.9055639,
+  "nSumOfWeights_renormDown": 108256630.55182877,
   "nSumOfWeights_factUp": 106095275.06449333,
   "nSumOfWeights_factDown": 100377623.24303484,
-  "nSumOfWeights_renormfactUp": 101371229.90725799,
+  "nSumOfWeights_renormfactUp": 101371229.907258,
   "nSumOfWeights_renormfactDown": 106132507.63305101,
   "nSumOfWeights_LHEPDFweights0": -6720889.523457533,
   "nSumOfWeights_LHEPDFweights1": -6614162.824952385,
@@ -136,5 +136,8 @@
   "nSumOfWeights_LHEPDFweights99": -6728039.244312426,
   "nSumOfWeights_LHEPDFweights100": -6754335.562844184,
   "nSumOfWeights_LHEPDFweights101": 0.0,
-  "nSumOfWeights_LHEPDFweights102": 0.0
+  "nSumOfWeights_LHEPDFweights102": 0.0,
+  "nSumOfWeights_hdampUp": 103260113.11653137,
+  "nSumOfWeights_hdampDown": 103260113.11653137,
+  "nSumOfWeights_toppt": 103260113.11653137
 }

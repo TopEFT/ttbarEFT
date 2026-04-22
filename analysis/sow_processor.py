@@ -65,6 +65,8 @@ class AnalysisProcessor(processor.ProcessorABC):
             "SumOfWeights_factDown":        HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
             "SumOfWeights_renormfactUp":    HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
             "SumOfWeights_renormfactDown":  HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
+            "SumOfWeights_hdampUp":         HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
+            "SumOfWeights_hdampDown":       HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
             "SumOfWeights_toppt":           HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
         }
 
@@ -106,13 +108,16 @@ class AnalysisProcessor(processor.ProcessorABC):
         norm = xsec/sow
 
         # attach PS and Qscale weights to events object 
-        # tc_cor.AttachPSWeights(events)
-        # tt_cor.AttachScaleWeights(events)
+        tc_cor.AttachPSWeights(events)
+        tt_cor.AttachScaleWeights(events)
 
         # get arrays of top pt reweights
         LOtoNLO_weights = tt_cor.GetNLO_Weight(events, dataset)
         NLOtoNNLO_weights = tt_cor.GetNNLO_EventWeight(events, dataset)
 
+        ### hdamp ###
+        hdampUp_weights = tt_cor.GetHdampReweight(events, dataset, var='up')
+        hdampDown_weights = tt_cor.GetHdampReweight(events, dataset, var='down')
 
         ### LHEPdfWeights ###
         if eft_coeffs is not None:
@@ -162,7 +167,11 @@ class AnalysisProcessor(processor.ProcessorABC):
         hout["SumOfWeights_factDown"].fill(process=dataset,       SumOfWeights=counts, weight=wgts*events.factDown,       eft_coeff=eft_coeffs) # , eft_err_coeff=eft_w2_coeffs)
         hout["SumOfWeights_renormfactUp"].fill(process=dataset,   SumOfWeights=counts, weight=wgts*events.renormfactUp,   eft_coeff=eft_coeffs) # , eft_err_coeff=eft_w2_coeffs)
         hout["SumOfWeights_renormfactDown"].fill(process=dataset, SumOfWeights=counts, weight=wgts*events.renormfactDown, eft_coeff=eft_coeffs) # , eft_err_coeff=eft_w2_coeffs)        
-        hout["SumOfWeights_toppt"].fill(process=dataset, SumOfWeights=counts, weight=wgts*LOtoNLO_weights*NLOtoNNLO_weights, eft_coeff=eft_coeffs)
+        
+        hout["SumOfWeights_hdampUp"].fill(process=dataset, SumOfWeights=counts, weight=wgts*hdampUp_weights, eft_coeff=eft_coeffs)
+        hout["SumOfWeights_hdampDown"].fill(process=dataset, SumOfWeights=counts, weight=wgts*hdampDown_weights, eft_coeff=eft_coeffs)
+
+        hout["SumOfWeights_toppt"].fill(process=dataset, SumOfWeights=counts, weight=wgts * LOtoNLO_weights * NLOtoNNLO_weights, eft_coeff=eft_coeffs)
 
         hout['sow_LHEPDFweights'].fill(
             SumOfWeights=ak.flatten(counts_stacked),

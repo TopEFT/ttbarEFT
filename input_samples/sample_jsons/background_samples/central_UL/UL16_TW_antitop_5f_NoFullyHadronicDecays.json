@@ -30,8 +30,8 @@
   "nSumOfWeights_renormDown": 124551883.11284778,
   "nSumOfWeights_factUp": 122056980.29029936,
   "nSumOfWeights_factDown": 115488329.94633484,
-  "nSumOfWeights_renormfactUp": 116619342.62164572,
-  "nSumOfWeights_renormfactDown": 122113567.1106129,
+  "nSumOfWeights_renormfactUp": 116619342.62164573,
+  "nSumOfWeights_renormfactDown": 122113567.11061291,
   "nSumOfWeights_LHEPDFweights0": -7674864.349836955,
   "nSumOfWeights_LHEPDFweights1": -7552490.736560019,
   "nSumOfWeights_LHEPDFweights2": -7607198.364155524,
@@ -134,5 +134,8 @@
   "nSumOfWeights_LHEPDFweights99": -7683086.0134760635,
   "nSumOfWeights_LHEPDFweights100": -7713703.110741858,
   "nSumOfWeights_LHEPDFweights101": 0.0,
-  "nSumOfWeights_LHEPDFweights102": 0.0
+  "nSumOfWeights_LHEPDFweights102": 0.0,
+  "nSumOfWeights_hdampUp": 118799348.67233276,
+  "nSumOfWeights_hdampDown": 118799348.67233276,
+  "nSumOfWeights_toppt": 118799348.67233276
 }

@@ -298,6 +298,7 @@ if __name__ == '__main__':
             'renormUp', 'renormDown',
             'factUp', 'factDown',
             'renormfactUp', 'renormfactDown',
+            'hdampUp', 'hdampDown'
         ]
 
         variables = hists['sow'].keys()
@@ -310,18 +311,17 @@ if __name__ == '__main__':
             for weight in WEIGHTS_NAME_LST:
                 updates[f"nSumOfWeights_{weight}"] = float(hists['sow'][f"SumOfWeights_{weight}"][{'process':proc}].as_hist({}).values()[0])
 
-            # for just ttbar samples save the top pt sow
-            if (('TT01j2l' in proc) or ('TTTo2L2Nu' in proc)) and ('SumOfWeights_toppt' in variables): 
+            if ('SumOfWeights_toppt' in variables): 
                 updates[f"nSumOfWeights_toppt"] = float(hists['sow'][f"SumOfWeights_toppt"][{'process':proc}].as_hist({}).values()[0])
 
             # add PDF sow variations
             if 'sow_LHEPDFweights' in variables:
                 PDFweights = hists['sow']['sow_LHEPDFweights'][{'process':proc}]
-                updates = {}
                 for i in PDFweights.axes['PDFindex']:
                     sow = PDFweights[{'PDFindex':i}].values()[0]
-                    updates[f"nSumOfWeights_LHEPDFweights{i}"] = sow
+                    updates[f"nSumOfWeights_LHEPDFweights{i}"] = float(sow)
 
+            print(f"updates.keys(): {updates.keys()}")
             update_json(json_path,dry_run=False,verbose=True, **updates)
 
             try: 
