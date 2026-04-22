@@ -273,36 +273,6 @@ if __name__ == '__main__':
         hists = runner(fileset=input_data, processor_instance=proc_instance, treename=treename)
 
 
-    ###############################
-    ###### Update JSON files ###### 
-    ###############################
-
-    WEIGHTS_NAME_LST = [
-        # 'nom',
-        'ISRUp', 'ISRDown',
-        'FSRUp', 'FSRDown',
-        'renormUp', 'renormDown',
-        'factUp', 'factDown',
-        'renormfactUp', 'renormfactDown',
-    ]
-
-    variables = hists['sow'].keys()
-    processes = list(hists['sow']['SumOfWeights'].axes['process'])
-
-    for proc in processes: 
-        json_path = os.path.join(relpath, f"{proc}.json")
-
-        updates = {}
-        for weight in WEIGHTS_NAME_LST:
-            updates[f"nSumOfWeights_{weight}"] = float(hists['sow'][f"SumOfWeights_{weight}"][proc].as_hist({}).values()[0])
-        update_json(json_path,dry_run=False,verbose=True, **updates)
-        try: 
-            print(f"sow at SM: {hists['sow']['SumOfWeights'][proc].as_hist({}).values()[0]}")
-        except: 
-            print(f"error in sow pritn statemet")
-
-    print(f"\n\n WARNING: This script does not update the base sum of weights. If this is an EFT sample, update the sow manually using the pkl this script produces")
-
     ##########################
     ###### Save Outputs ###### 
     ##########################
@@ -313,6 +283,54 @@ if __name__ == '__main__':
     with gzip.open(out_pkl_file, "wb") as fout:
         cloudpickle.dump(hists, fout)
         print(f"Done! \n\n")
+
+
+    ###############################
+    ###### Update JSON files ###### 
+    ###############################
+
+    if executor == 'ddr':
+
+        WEIGHTS_NAME_LST = [
+            # 'nom',
+            'ISRUp', 'ISRDown',
+            'FSRUp', 'FSRDown',
+            'renormUp', 'renormDown',
+            'factUp', 'factDown',
+            'renormfactUp', 'renormfactDown',
+        ]
+
+        variables = hists['sow'].keys()
+        processes = list(hists['sow']['SumOfWeights'].axes['process'])
+
+        for proc in processes: 
+            json_path = os.path.join(relpath, f"{proc}.json")
+
+            updates = {}
+            for weight in WEIGHTS_NAME_LST:
+                updates[f"nSumOfWeights_{weight}"] = float(hists['sow'][f"SumOfWeights_{weight}"][{'process':proc}].as_hist({}).values()[0])
+
+            # for just ttbar samples save the top pt sow
+            if (('TT01j2l' in proc) or ('TTTo2L2Nu' in proc)) and ('SumOfWeights_toppt' in variables): 
+                updates[f"nSumOfWeights_toppt"] = float(hists['sow'][f"SumOfWeights_toppt"][{'process':proc}].as_hist({}).values()[0])
+
+            # add PDF sow variations
+            if 'sow_LHEPDFweights' in variables:
+                PDFweights = hists['sow']['sow_LHEPDFweights'][{'process':proc}]
+                updates = {}
+                for i in PDFweights.axes['PDFindex']:
+                    sow = PDFweights[{'PDFindex':i}].values()[0]
+                    updates[f"nSumOfWeights_LHEPDFweights{i}"] = sow
+
+            update_json(json_path,dry_run=False,verbose=True, **updates)
+
+            try: 
+                print(f"sow at SM: {hists['sow']['SumOfWeights'][proc].as_hist({}).values()[0]}")
+            except: 
+                print(f"error in sow print statement")
+
+        print(f"\n\n WARNING: This script does not update the base sum of weights. If this is an EFT sample, update the sow manually using the pkl this script produces")
+
 
     tend = time.time()
     print(f"\n\nTotal processing time: {tend-tstart}")
