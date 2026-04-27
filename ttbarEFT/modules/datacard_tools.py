@@ -490,16 +490,20 @@ class DatacardMaker():
                 pass
 
             # Remove 'central', 'private', '_4F' text from process names
+            print(f"histogram before grouping: {h}")
             grp_map = {}
             for x in h.axes["process"]:
                 new_name = (
                     x.replace("private", "").replace("central", "").replace("_4F", "")
                 )
                 grp_map[new_name] = x
+
+            print(f"group map: {grp_map}")
             h = h.group("process", grp_map)
 
             h = self.group_processes(h)
-            h = self.correlate_years(h)
+            # h = self.correlate_years(h)
+            print(f"histogram after grouping: {h}")
 
             num_systs = len(h.axes["systematic"])
             print(f"Num. Systematics: {num_systs}")
