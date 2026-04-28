@@ -39,6 +39,9 @@ def load_pickle(fname):
 
 def run_local(dc,km_dists,channels,selected_wcs, crop_negative_bins, wcs_dict):
     for km_dist in km_dists:
+
+        # if km_dist == "mllbb":
+        #     dc.add_pdf_shapes(km_dist)
         all_chs = dc.channels(km_dist)
         matched_chs = regex_match(all_chs,channels)
         if channels:
@@ -116,7 +119,7 @@ def main():
         "verbose": verbose,
         "year_lst": years,
         "use_AAC":  use_AAC,
-        "wc_vals": wc_vals,
+        "wc_vads": wc_vals,
         "wc_scalings": wc_scalings,
     }
 
@@ -176,9 +179,34 @@ def main():
     print("Making scalings-preselect.json file...")
     with open(os.path.join(out_dir,"scalings-preselect.json"),"w") as f:
         json.dump(dc.scalings, f, indent=4)
+    print(f"original scalings json saved to {os.path.join(out_dir,"scalings-preselect.json")}")
+
+
+    CATSELECTED = []
+    for i in dc.scalings:
+        chan_name = i['channel']
+        if chan_name not in CATSELECTED:
+            CATSELECTED.extend([chan_name])
+        else: continue
+    CATSELECTED = sorted(CATSELECTED)
+
+    new_scalings = []
+    for ch_index, channel_name in enumerate(CATSELECTED, start=1):
+        matches = [item for item in dc.scalings if item.get("channel") == channel_name]
+        if not matches:
+            raise ValueError(f"Channel '{channel_name}' not found in scalings_content")
+        for item in matches:
+            new_item = item.copy()
+            new_item["channel"] = f"ch{ch_index}"
+            new_scalings.append(new_item)
+
+    with open(os.path.join(out_dir,"scalings.json"), 'w') as file:
+        json.dump(new_scalings, file, indent=4)   
+    print(f"reordered scalings json saved to {os.path.join(out_dir,"scalings.json")}")
 
     dt = time.time() - tic
     print(f"Total Time: {dt:.2f} s")
     print("Finished!")
+
 
 main()

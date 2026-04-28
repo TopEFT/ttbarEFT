@@ -32,11 +32,11 @@ def to_hist(arr,name,zero_wgts=False):
     clipped = []
     for i in range(2):  # first entry is sum(weight), second entry is sum(weight^2)
         if arr[i] is not None:
-            # if "PDF" in name:   # don't remove the 0th bin from PDF, since it's calculated separately it's already removed 
-            #     clipped.append(np.array(arr[i]))
-            # else: 
-                # clipped.append(np.array(arr[i][1:]))  # Strip off the underoverflow bin
-            clipped.append(np.array(arr[i][1:]))  # Strip off the underoverflow bin
+            if "PDF" in name:   # don't remove the 0th bin from PDF, since it's calculated separately it's already removed 
+                clipped.append(np.array(arr[i]))
+            else: 
+                clipped.append(np.array(arr[i][1:]))  # Strip off the underoverflow bin
+            # clipped.append(np.array(arr[i][1:]))  # Strip off the underoverflow bin
         else:
             clipped[i] = None
 
@@ -998,9 +998,9 @@ class DatacardMaker():
                         print(f"pdf_down: {pdf_down}")
                         print(f"pdf_var: {pdf_var_full}")
 
-                        for syst_name, vals in [("PDFUp", pdf_up[0]), ("PDFDown", pdf_down[0])]:
+                        for syst_name, vals in [("PDFUp", pdf_up), ("PDFDown", pdf_down)]:
                             hist_name = f"{p}_sm_{syst_name}"
-                            arr = [vals, pdf_var] 
+                            arr = [vals, pdf_var_full] 
                             # f[hist_name] = to_hist(arr, hist_name, zero_wgts=(p != "fakes"))
                             f[hist_name] = to_hist(arr, hist_name, zero_wgts=None)
                             
