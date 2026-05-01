@@ -116,8 +116,10 @@ if __name__ == '__main__':
     parser.add_argument('--processor', '-p',    default='analysis_processor.py', help='Specify processor file name')
     parser.add_argument('--outname','-o',       default='histos', help = 'Name of the output file with histograms')
     parser.add_argument('--no-group',           action='store_false', default=True, dest='aggregate', help='Disable output histogram combination')
-    parser.add_argument('--doerr',              default=False, help='Specify if statistical errors should be saved for nominal case')
-    parser.add_argument('--dosyst',             default=None, action='extend', nargs='+', help='Specify if systematic variations should be calculated and saved')
+    parser.add_argument('--doerr',              action='store_true', default=True, help='Specify if statistical errors should be saved for nominal case')
+    parser.add_argument('--doSR',               action='store_true', default=False, help='Specify if the SR channels & hists should be run over, else defaults to CR')
+    parser.add_argument('--doPDF',              action='store_true', default=True, help='Specify if the PDF uncert should be done')
+    parser.add_argument('--syst-list',          default=None, action='extend', nargs='+', help='Specify if systematic variations should be calculated and saved')
     parser.add_argument('--prefix', '-r',       nargs='?', default='', help = 'Prefix or redirector to look for the files')
     parser.add_argument('--treename',           default='Events', help = 'Name of the tree inside the files')
     parser.add_argument('--wc-list',            action='extend', nargs='+', help = 'Specify a list of Wilson coefficients to use in filling histograms.')
@@ -133,8 +135,9 @@ if __name__ == '__main__':
     outname     = args.outname
     aggregate   = args.aggregate
     do_err      = args.doerr
-    do_syst     = args.dosyst
-
+    doSR        = args.doSR
+    doPDF       = args.doPDF
+    syst_list   = args.syst_list
     prefix      = args.prefix
     treename    = args.treename
     wc_lst      = args.wc_list if args.wc_list is not None else []
@@ -143,19 +146,17 @@ if __name__ == '__main__':
     nchunks     = int(args.nchunks) # if not args.nchunks is None else args.nchunks
     ports       = args.port
 
-    # proc_name   = args.processor[:-3]
-
-    # print("\n\nrunning with processor: ", proc_file, '\n')
-    # analysis_processor = importlib.import_module(proc_name)
-
-    print(f"running with aggregate setting: {aggregate}")
     if aggregate:
-        print("True for aggregate")
+        print("Datasets will be aggregated at the end...")
 
     print("\n\nrunning with processor: ", proc_file, '\n')
-    analysis_processor = importlib.import_module(proc_file[:-3])
+    print(f"run settings: ")
+    print(f"\t MC stat err: {do_err}")
+    print(f"\t doSR: {doSR}")
+    print(f"\t doPDF: {doPDF}")
+    print(f"\t syst_list: {syst_list}")
 
-    print(f"running with syst options: {do_syst}")
+    analysis_processor = importlib.import_module(proc_file[:-3])
 
     ### Check json or yaml ###
     if inputFile.endswith('.json'):
@@ -202,17 +203,18 @@ if __name__ == '__main__':
                 if wc not in wc_lst:
                     wc_lst.append(wc)
     if len(wc_lst) > 0: 
-        print(f"Wilson Coefficients: {wc_lst}")
+        print(f"\tWilson Coefficients: {wc_lst}")
     else: 
-        print(f"Wilson Coefficients: NONE SPECIFIED")
+        print(f"\tWilson Coefficients: NONE SPECIFIED")
+    print(f"\n\n")
 
     # Run the processor and get the output
     tstart = time.time()
 
     processor_versions = {
-        "ee" : analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=["all"]),
-        "mm" : analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='mm', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=["all"]),
-        "em" : analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=True, syst_list=["all"]),
+        "ee" : analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, doSR=doSR, doPDF=doPDF, syst_list=syst_list),
+        "mm" : analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='mm', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, doSR=doSR, doPDF=doPDF, syst_list=syst_list),
+        "em" : analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, doSR=doSR, doPDF=doPDF, syst_list=syst_list),
     }
 
     ### RUN PROCESSOR USING VINE REDUCE ###
@@ -230,10 +232,11 @@ if __name__ == '__main__':
         mgr = vine.Manager(
             port=port, 
             name=f"{os.environ['USER']}-vineReduce-{timestamp}",
+            run_info_path = "/project01/ndcms/hnelson2/vine-run-info/"
         )
         mgr.tune("hungry-minimum", 1)
         mgr.enable_monitoring(watchdog=False)
-        mgr.enable_disconnect_slow_workers(5)
+        # mgr.enable_disconnect_slow_workers(5)
 
         # get X509 proxy file
         x509_proxy = f"/tmp/x509up_u{os.getuid()}"
@@ -277,8 +280,7 @@ if __name__ == '__main__':
             extra_files = [proc_file, "proxy.pem"], #"/users/hnelson2/ttbarEFT-coffea2025/ttbarEFT/params/channels.json", 
             schema=NanoAODSchema,
             max_task_retries= 10, # default=10
-            step_size = 500000, # 500000,
-            # step_size=1000000, #equivalent to chunksize, default=100k
+            step_size = chunksize, # 500000,
             resources_processing={"cores": 1},
             resources_accumulating={"cores": 1},
             results_directory=results_dir,
@@ -311,7 +313,10 @@ if __name__ == '__main__':
     elif executor == 'iterative': 
 
         flist = preprocessing_for_taskvine(samplesdict)
-        proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=False, syst_list=[])
+        proc_instance = processor_versions['em']
+        # proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=['mllbb'], do_errors=do_err, doSR=True, doPDF=True, syst_list=[])
+        # proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=False, syst_list=['METunclustUp', 'METunclustDown'], doPDF=False)
+        # proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=False, syst_list=[])
         # proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=do_err, syst_list=['elecID', 'muonID', 'muonISO','trigSF'])
         exec_instance = processor.IterativeExecutor()
         runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)

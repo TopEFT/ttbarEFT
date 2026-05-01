@@ -553,7 +553,8 @@ def ApplyJetCorrections(year, corr_type, isData, era, useclib=True, savelevels=F
     else: 
         raise ValueError(f"Unknown correction type \"{corr_type}\".")
 
-def ApplyJetSystematics(year, corr_type, original_obj,syst_var):
+
+def ApplyJetSystematics(year, corr_type, original_obj, syst_var):
 
     if (syst_var == 'nominal'):
         return original_obj
@@ -592,48 +593,30 @@ def ApplyJetSystematics(year, corr_type, original_obj,syst_var):
         return getattr(original_obj[base_field], suffix)
 
 
-# def ApplyJetSystematics(year,cleanedJets,syst_var):
+def GetMETunclust(year, original_obj, syst_var):
 
-#     # getattr(cleanedJets, f"JER.up.pt")
-#     if (syst_var == 'nominal'):
-#         return cleanedJets
+    met_x = original_obj.pt * np.cos(original_obj.phi) 
+    met_y = original_obj.pt * np.sin(original_obj.phi) 
 
-#     if syst_var.endswith('Up'): 
-#         suffix = 'up'
-#         if syst_var.startswith(f'JER_{year}'):
-#             base_field = "JER"
-#         elif syst_var == "JESUp":
-#             base_field = "JES_jes"
-#         else: 
-#             base_field = syst_var[:-2]
-            
-#     elif syst_var.endswith('Down'):
-#             suffix = 'down'
-#             if syst_var.startswith(f'JER_{year}'):
-#                 base_field = "JER"
-#             elif syst_var == "JESDown":
-#                 base_field = "JES_jes"
-#             else:
-#                 base_field = syst_var[:-4]
-#     else: 
-#         raise ValueError(f"Unknown variation {syst_var}.")
-        
-#     if base_field not in cleanedJets.fields:
-#         raise ValueError(f"Field {base_field} not found in jets for variation {syst_var}")
-    
-#     var_record = getattr(cleanedJets[base_field], suffix)
-#     new_jets = ak.with_field(cleanedJets, var_record["pt"], "pt")
-#     new_jets = ak.with_field(new_jets, var_record["mass"], "mass")
-    
-#     return new_jets
+    met_dx = original_obj.MetUnclustEnUpDeltaX 
+    met_dy = original_obj.MetUnclustEnUpDeltaY 
 
-    # # Save `2016APV` as `2016APV` but look up `2016` corrections (no separate APV corrections available)
-    # elif ('Up' in syst_var and syst_var[:-2].replace('APV', '') in cleanedJets.fields):
-    #     return cleanedJets[syst_var.replace('Up', '').replace("Pile", "PileUp").replace('APV', '')].up
-    # elif ('Down' in syst_var and syst_var[:-4].replace('APV', '') in cleanedJets.fields):
-    #     return cleanedJets[syst_var.replace('Down', '').replace('APV', '')].down
-    # else:
-    #     raise Exception(f"Error: Unknown variation \"{syst_var}\".")
+    if "Up" in syst_var: 
+        new_met_x = met_x + met_dx
+        new_met_y = met_y + met_dy
+    elif "Down" in syst_var: 
+        new_met_x = met_x - met_dx
+        new_met_y = met_y - met_dy
+    else:
+        return original_obj
+
+    new_met_pt = np.sqrt(new_met_x**2 + new_met_y**2) 
+    new_met_phi = np.arctan2(new_met_y, new_met_x)
+
+    new_met = ak.with_field(original_obj, new_met_pt, "pt")
+    new_met = ak.with_field(new_met, new_met_phi, "phi")
+
+    return new_met
 
 
 ########################################
@@ -810,17 +793,17 @@ def AttachElectronSF(electrons, year):
     HEEPSF_down = ak.unflatten(HEEPSF_down_flat, ak.num(eta))
 
     # Attach SFs (reco*HEEP) to electrons
-    electrons['SF_ele_nom'] = reco_nom * HEEPSF_nom
-    electrons['SF_ele_up'] = reco_up * HEEPSF_nom * HEEPSF_up 
-    electrons['SF_ele_down'] = reco_down * HEEPSF_nom * HEEPSF_down 
+    # electrons['SF_ele_nom'] = reco_nom * HEEPSF_nom
+    # electrons['SF_ele_up'] = reco_up * HEEPSF_nom * HEEPSF_up 
+    # electrons['SF_ele_down'] = reco_down * HEEPSF_nom * HEEPSF_down 
 
-    # electrons['SF_eleRECO_nom'] = reco_nom 
-    # electrons['SF_eleRECO_up'] = reco_up 
-    # electrons['SF_eleRECO_down'] = reco_down 
+    electrons['SF_eleRECO_nom'] = reco_nom 
+    electrons['SF_eleRECO_up'] = reco_up 
+    electrons['SF_eleRECO_down'] = reco_down 
 
-    # electrons['SF_eleHEEP_nom'] = HEEPSF_nom
-    # electrons['SF_eleHEEP_up'] = HEEPSF_nom * HEEPSF_up 
-    # electrons['SF_eleHEEP_down'] = HEEPSF_nom * HEEPSF_down 
+    electrons['SF_eleHEEP_nom'] = HEEPSF_nom
+    electrons['SF_eleHEEP_up'] = HEEPSF_nom * HEEPSF_up 
+    electrons['SF_eleHEEP_down'] = HEEPSF_nom * HEEPSF_down 
 
     electrons['SF_muonID_nom'] = ak.ones_like(reco_nom)
     electrons['SF_muonID_up'] = ak.ones_like(reco_nom)
@@ -918,17 +901,17 @@ def AttachMuonSF(muons, year):
     muons['SF_muonISO_up'] = ISO_up
     muons['SF_muonISO_down'] = ISO_down
 
-    muons['SF_ele_nom'] = ak.ones_like(pt)
-    muons['SF_ele_up'] = ak.ones_like(pt)
-    muons['SF_ele_down'] = ak.ones_like(pt)   
+    # muons['SF_ele_nom'] = ak.ones_like(pt)
+    # muons['SF_ele_up'] = ak.ones_like(pt)
+    # muons['SF_ele_down'] = ak.ones_like(pt)   
 
-    # muons['SF_eleRECO_nom'] = ak.ones_like(pt)
-    # muons['SF_eleRECO_up'] = ak.ones_like(pt)
-    # muons['SF_eleRECO_down'] = ak.ones_like(pt)
+    muons['SF_eleRECO_nom'] = ak.ones_like(pt)
+    muons['SF_eleRECO_up'] = ak.ones_like(pt)
+    muons['SF_eleRECO_down'] = ak.ones_like(pt)
 
-    # muons['SF_eleHEEP_nom'] = ak.ones_like(pt)
-    # muons['SF_eleHEEP_up'] = ak.ones_like(pt)
-    # muons['SF_eleHEEP_down'] = ak.ones_like(pt)
+    muons['SF_eleHEEP_nom'] = ak.ones_like(pt)
+    muons['SF_eleHEEP_up'] = ak.ones_like(pt)
+    muons['SF_eleHEEP_down'] = ak.ones_like(pt)
 
 
 def Get_ElecIDSF(events):
@@ -940,6 +923,32 @@ def Get_ElecIDSF(events):
     calc_nom = l0.SF_ele_nom * l1.SF_ele_nom
     calc_up = l0.SF_ele_up * l1.SF_ele_up
     calc_down = l0.SF_ele_down * l1.SF_ele_down
+
+    return ak.fill_none(calc_nom, 1.0), ak.fill_none(calc_up, 1.0), ak.fill_none(calc_down, 1.0)
+
+
+def Get_ElecRECOSF(events):
+
+    leps = ak.pad_none(events.leps_pt_sorted, 2)
+    l0 = leps[:,0]
+    l1 = leps[:,1]
+ 
+    calc_nom = l0.SF_eleRECO_nom * l1.SF_eleRECO_nom
+    calc_up = l0.SF_eleRECO_up * l1.SF_eleRECO_up
+    calc_down = l0.SF_eleRECO_down * l1.SF_eleRECO_down
+
+    return ak.fill_none(calc_nom, 1.0), ak.fill_none(calc_up, 1.0), ak.fill_none(calc_down, 1.0)
+
+
+def Get_ElecHEEPSF(events):
+
+    leps = ak.pad_none(events.leps_pt_sorted, 2)
+    l0 = leps[:,0]
+    l1 = leps[:,1]
+ 
+    calc_nom = l0.SF_eleHEEP_nom * l1.SF_eleHEEP_nom
+    calc_up = l0.SF_eleHEEP_up * l1.SF_eleHEEP_up
+    calc_down = l0.SF_eleHEEP_down * l1.SF_eleHEEP_down
 
     return ak.fill_none(calc_nom, 1.0), ak.fill_none(calc_up, 1.0), ak.fill_none(calc_down, 1.0)
 
@@ -1113,6 +1122,27 @@ def GetNLO_Weight(events, dataset):
 
     NLO_weight = ak.ones_like(events.event, dtype=float)
 
+    def calcualte_NLO_weight_22(x):
+        p0 = -2.16361313e+04   # 1.07967616e+00
+        p1 = 2.77994157e+04    # 5.20771350e-04
+        p2 = 1.05253571e+01    # 2.63260682e-06
+        p3 = 2.47965162e+04    # 2.63260682e-06
+        p4 = 3.32168257e+01    # 4.11285113e-06
+        return (p0 + p1*x + p2*x**2) / (1 + p3*x + p4*x**2)
+
+    def calcualte_NLO_weight_44(x):
+        n0 = 9.73848630e-01
+        n1 = 1.48853423e-04
+        n2 = -3.75993502e-04
+        n3 = 6.43916833e-06
+        n4 = 1.01454384e-08
+        d1 = -6.48420500e-03
+        d2 = -1.79916355e-04
+        d3 = 4.09463685e-06
+        d4 = 1.95790951e-08
+
+        return (n0 + n1*x + n2*x**2 + n3*x**3 + n4*x**4) / (1 + d1*x + d2*x**2 + d3*x**3 + d4*x**4)
+
     if ('TT01j2l' in dataset):
         print(f"\n\n applying NLO weight")
         genpart = events.GenPart
@@ -1123,7 +1153,9 @@ def GetNLO_Weight(events, dataset):
 
         avg_toppt = (top1.pt+top2.pt)/2
 
-        NLO_weight = ak.fill_none(GetNLO_SF_Lookup(avg_toppt), 1.0)
+        # NLO_weight = ak.fill_none(GetNLO_SF_Lookup(avg_toppt), 1.0)
+        # NLO_weight = ak.fill_none(calcualte_NLO_weight_22(avg_toppt), 1.0)
+        NLO_weight = ak.fill_none(calcualte_NLO_weight_44(avg_toppt), 1.0)
 
     return NLO_weight
 

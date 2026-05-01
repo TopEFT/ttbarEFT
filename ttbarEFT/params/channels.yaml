@@ -61,6 +61,87 @@ SR_CHANNELS:
         - bmask_exactly2med
         - atleast_4j    
 
+SR_CHANNELS_extra4j:
+  ee:
+    2b_2j:
+      name: ee_2b_2j
+      masks:
+        - DYmask
+        - minMETpt
+        - bmask_exactly2med
+        - exactly_2j
+    2b_3j:
+      name: ee_2b_3j
+      masks:
+        - DYmask
+        - minMETpt
+        - bmask_exactly2med
+        - exactly_3j
+    2b_4j:
+      name: ee_2b_4j
+      masks:
+        - DYmask
+        - minMETpt
+        - bmask_exactly2med
+        - exactly_4j  
+    2b_5j:
+      name: ee_2b_5j
+      masks:
+        - DYmask
+        - minMETpt
+        - bmask_exactly2med
+        - atleast_5j       
+  mm:
+    2b_2j:
+      name: mm_2b_2j
+      masks:
+        - DYmask
+        - minMETpt
+        - bmask_exactly2med
+        - exactly_2j
+    2b_3j:
+      name: mm_2b_3j
+      masks:
+        - DYmask
+        - minMETpt
+        - bmask_exactly2med
+        - exactly_3j
+    2b_4j:
+      name: mm_2b_4j
+      masks:
+        - DYmask
+        - minMETpt
+        - bmask_exactly2med
+        - exactly_4j    
+    2b_5j:
+      name: mm_2b_5j
+      masks:
+        - DYmask
+        - minMETpt
+        - bmask_exactly2med
+        - atleast_5j    
+  em:
+    2b_2j:
+      name: em_2b_2j
+      masks:
+        - bmask_exactly2med
+        - exactly_2j
+    2b_3j:
+      name: em_2b_3j
+      masks:
+        - bmask_exactly2med
+        - exactly_3j
+    2b_4j:
+      name: em_2b_4j
+      masks:
+        - bmask_exactly2med
+        - exactly_4j  
+    2b_5j:
+      name: em_2b_5j
+      masks:
+        - bmask_exactly2med
+        - atleast_5j   
+
 # SR channels with multiple b jets
 SR_CHANNELS_multibjet: 
   ee: 

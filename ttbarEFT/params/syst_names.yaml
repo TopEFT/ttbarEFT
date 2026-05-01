@@ -1,6 +1,7 @@
 wgt_correction_bases: 
-  - elecID
-  # - elecRECO
+  # - elecID
+  - elecRECO
+  - elecHEEP
   - muonID
   - muonISO
   - trigSF
