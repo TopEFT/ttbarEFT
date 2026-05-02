@@ -77,6 +77,8 @@ class AnalysisProcessor(processor.ProcessorABC):
             if dataset.startswith(d):
                 dataset = dataset.split('_')[0]
 
+        run_era=None
+
         hout = self.accumulator
 
 
@@ -101,10 +103,23 @@ class AnalysisProcessor(processor.ProcessorABC):
         leps_sorted = leps[ak.argsort(leps.pt, axis=-1,ascending=False)] 
         events['leps_pt_sorted'] = leps_sorted
 
-        jets['isPres'] = tt_os.is_pres_jet(jets) 
+        # jets['isPres'] = tt_os.is_pres_jet(jets) 
+        # jets['isClean'] = tt_os.isClean(jets, ele_good, drmin=0.4)& tt_os.isClean(jets, mu_good, drmin=0.4)
+        # goodJets = jets[(jets.isPres)&jets.isClean] 
+        # goodJets = goodJets[(goodJets.partonFlavour != 0)]
+
         jets['isClean'] = tt_os.isClean(jets, ele_good, drmin=0.4)& tt_os.isClean(jets, mu_good, drmin=0.4)
-        # jets['isClean'] = tt_os.isClean(jets, leps_sorted, drmin=0.4)
-        goodJets = jets[(jets.isPres)&jets.isClean] 
+        cleanedJets = jets[jets.isClean]
+        cleanedJets = ak.fill_none(cleanedJets, [])
+
+        cleanedJets['pt_orig'] = cleanedJets.pt     # NECESSARY FOR MET CORRECTIONS LATER 
+        rho_jagged = ak.ones_like(cleanedJets.pt) * events.fixedGridRhoFastjetAll
+        cleanedJets = ak.with_field(cleanedJets, rho_jagged, "Rho")
+        cleanedJets["pt_gen"] = ak.values_astype(ak.fill_none(cleanedJets.matched_gen.pt, 0), np.float32)
+        cleanedJets = tt_cor.ApplyJetCorrections(year, corr_type='jets', isData=isData, era=run_era).build(cleanedJets)
+
+        cleanedJets['isGood'] = tt_os.is_pres_jet(cleanedJets)
+        goodJets = cleanedJets[cleanedJets.isGood]
         goodJets = goodJets[(goodJets.partonFlavour != 0)]
 
         medium_tag = "btag_wp_medium_" + year.replace("201", "UL1")

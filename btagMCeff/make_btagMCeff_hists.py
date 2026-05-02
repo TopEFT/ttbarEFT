@@ -22,6 +22,12 @@ from ttbarEFT.modules import plotting_tools_histEFT as plt_tools
 
 np.seterr(divide='ignore', invalid='ignore')
 
+jet_flavor_dict = {
+    '0': 'light jets',
+    '4': 'c jets',
+    '5': 'b jets',
+}
+
 def get_binomial_error(h_eff, h_tot):
         """
         Calculates the binomial error
@@ -55,8 +61,10 @@ def make_err_plot(h_val, xbins, ybins, title, hmin=None, hmax=None, ncolors=20):
 
 def make_2d_plot(h_2d, title, hmin=None, hmax=None, ncolors=20):
 
+    hep.style.use("CMS")
+    fig, ax = plt.subplots(figsize=(18, 8))
+    hep.cms.label("Work in progress", data=False, com=13, loc=0, ax=ax) 
     # fig, ax = plt.subplots(figsize=(16, 8))
-    fig, ax = plt.subplots(figsize=(16, 8))
 
     if hmin==None:
         hmin = np.nanmin(h_2d.values())
@@ -65,9 +73,16 @@ def make_2d_plot(h_2d, title, hmin=None, hmax=None, ncolors=20):
 
     cmap = plt.get_cmap("viridis", ncolors) #18
 
-    hep.hist2dplot(h_2d, ax=ax, labels=True, labels_round=2, labels_fontsize=6, cbarextend=True, cmap=cmap, cmin=hmin, cmax=hmax) #cmin=0, cmax=1.0
-    ax.set_title(f"{title}")
+    h = hep.hist2dplot(h_2d, ax=ax, labels=True, labels_round=2, labels_fontsize=10, cbarextend=True, cmap=cmap, cmin=hmin, cmax=hmax) #, cbar=False) #cmin=0, cmax=1.0
+    ax.set_title(f"{title}", fontsize=30, pad=40)
     ax.set_xlim([30, 1000])
+
+    # cb = fig.colorbar(h[0], ax=ax, orientation='horizontal', 
+    #                   pad=0.15, fraction=0.05, aspect=30)
+    # cb.set_label('Efficiency', fontsize=15) # Or whatever your Z-axis represents
+
+    ax.set_xlabel(r'jet $p_T$ [GeV]')
+    ax.set_ylabel(r'jet $\eta$')
 
     return fig, ax 
 
@@ -107,13 +122,13 @@ if __name__ == "__main__":
         # hmin = 0.5
         # hmax = 0.88
 
-        fig, ax = make_2d_plot(h_eff, title=f"Eff_{flav}", ncolors=19)
+        fig, ax = make_2d_plot(h_eff, title=f"Efficiency: {jet_flavor_dict[str(flav)]}", ncolors=19)
         plt_tools.save_figure(fig, f"Eff_{flav}", outdir)
 
-        fig, ax = make_2d_plot(h_num, title=f"Nbtag_{flav}", ncolors=19)
+        fig, ax = make_2d_plot(h_num, title=f"Number of b tags: {jet_flavor_dict[str(flav)]}", ncolors=19)
         plt_tools.save_figure(fig, f"Nbtag_{flav}", outdir)
 
-        fig, ax = make_2d_plot(h_den, title=f"Ntotal_{flav}", ncolors=19)
+        fig, ax = make_2d_plot(h_den, title=f"Total: {jet_flavor_dict[str(flav)]}", ncolors=19)
         plt_tools.save_figure(fig, f"Ntotal_{flav}", outdir)
 
         pt_bins = [20, 30, 50, 70, 100, 140, 200, 300, 600, 1000]
