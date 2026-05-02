@@ -324,6 +324,7 @@
     "/store/user/hnelson2/mc/ttbarEFT_Run2/UL16APV/postLHE/v1/NAOD_TTto2L2Nu_1Jets_smeft_MTT_900toInf"
   ],
   "nSumOfWeights_toppt": 68775047.41934517,
+  "nSumOfWeights_NNLOpt":74957977.51092795,
   "nSumOfWeights_ISRUp": 81671535.17981175,
   "nSumOfWeights_ISRDown": 75686314.43410109,
   "nSumOfWeights_FSRUp": 78972316.25573039,

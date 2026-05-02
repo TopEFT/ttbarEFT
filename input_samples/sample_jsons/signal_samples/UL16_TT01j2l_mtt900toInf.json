@@ -446,6 +446,7 @@
     "/store/user/hnelson2/mc/ttbarEFT_Run2/UL16/postSIM/v1/NAOD_TTto2L2Nu_1Jets_smeft_MTT_900toInf"
   ],
   "nSumOfWeights_toppt": 73502257.98848397,
+  "nSumOfWeights_NNLOpt": 80109392.58266106,
   "nSumOfWeights_ISRUp": 87262042.55351968,
   "nSumOfWeights_ISRDown": 80915638.24248946,
   "nSumOfWeights_FSRUp": 84363289.13710526,

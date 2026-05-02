@@ -479,6 +479,7 @@
     "/store/user/hnelson2/mc/ttbarEFT_Run2/UL18/postSIM/v4/NAOD_TTto2L2Nu_1Jets_smeft_MTT_0to700"
   ],
   "nSumOfWeights_toppt": 3022807047.189125,
+  "nSumOfWeights_NNLOpt":2995561567.5931168,
   "nSumOfWeights_ISRUp": 3121209181.576244,
   "nSumOfWeights_ISRDown": 2896189974.113289,
   "nSumOfWeights_FSRUp": 3016259478.254019,
