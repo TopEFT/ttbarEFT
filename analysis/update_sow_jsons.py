@@ -248,6 +248,8 @@ if __name__ == '__main__':
         # The output of ddr_hists is separate for each channel 
         ddr_hists = ddr.compute()
 
+        hists = ddr_hists
+
         hists = {}
         # loop through the channels (items in processors from ddr)
         for ch in ddr_hists.keys():

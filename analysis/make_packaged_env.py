@@ -10,7 +10,7 @@ if __name__ == '__main__':
                 extra_pip_local = {"ttbarEFT": ["ttbarEFT", "setup.py"],
                                     "dynamic_data_reduction": ["src", "pyproject.toml"]},
                 # extra_pip=['mt2'],
-                extra_conda=["fsspec-xrootd"],
+                extra_conda=["fsspec-xrootd", "onnxruntime"],
                 # quick=True,
             )
 

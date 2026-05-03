@@ -813,6 +813,8 @@ def AttachElectronSF(electrons, year):
     electrons['SF_muonISO_up'] = ak.ones_like(reco_nom)
     electrons['SF_muonISO_down'] = ak.ones_like(reco_nom)
 
+    return electrons
+
 
 def AttachMuonSF(muons, year): 
     '''
@@ -913,6 +915,8 @@ def AttachMuonSF(muons, year):
     muons['SF_eleHEEP_up'] = ak.ones_like(pt)
     muons['SF_eleHEEP_down'] = ak.ones_like(pt)
 
+    return muons
+    
 
 def Get_ElecIDSF(events):
 
@@ -1375,6 +1379,14 @@ def AttachMuonTrigEff(muons, year):
     MCeff_down_flat = ceval_HLT["NUM_HLT_DEN_HighPtLooseRelIsoProbes_MCeff"].evaluate(abseta_flat, pt_flat, "systdown")
     DATAeff_down_flat = ceval_HLT["NUM_HLT_DEN_HighPtLooseRelIsoProbes_DATAeff"].evaluate(abseta_flat, pt_flat, "systdown")    
 
+    print(f"\n\n inside the AttachMuonTrigEff func: ")
+    print(f"trig_MCeff_mu_nom: {ak.unflatten(MCeff_nom_flat, ak.num(pt))}")
+    print(f"trig_DATAeff_mu_nom: {ak.unflatten(DATAeff_nom_flat, ak.num(pt))}")
+    print(f"trig_MCeff_mu_up: {ak.unflatten(MCeff_up_flat, ak.num(pt))}")
+    print(f"trig_DATAeff_mu_up: {ak.unflatten(DATAeff_up_flat, ak.num(pt))}")
+    print(f"trig_MCeff_mu_down: {ak.unflatten(MCeff_down_flat, ak.num(pt))}")
+    print(f"trig_DATAeff_mu_down: {ak.unflatten(DATAeff_down_flat, ak.num(pt))}")
+
     muons['trig_MCeff_mu_nom'] = ak.unflatten(MCeff_nom_flat, ak.num(pt))
     muons['trig_DATAeff_mu_nom'] = ak.unflatten(DATAeff_nom_flat, ak.num(pt))
     muons['trig_MCeff_mu_up'] = ak.unflatten(MCeff_up_flat, ak.num(pt))
@@ -1386,6 +1398,8 @@ def AttachMuonTrigEff(muons, year):
     muons['trig_eff_ele_nom'] = ak.ones_like(pt)
     muons['trig_eff_ele_up'] = ak.ones_like(pt)
     muons['trig_eff_ele_down'] = ak.ones_like(pt)
+
+    return muons
 
 
 def GetTrigSF(events, lep_cat):
@@ -1407,6 +1421,18 @@ def GetTrigSF(events, lep_cat):
         ed2 = getattr(m2, f"trig_DATAeff_mu_{var}") # eff data muon2
         em1 = getattr(m1, f"trig_MCeff_mu_{var}")   # eff MC muon1
         em2 = getattr(m2, f"trig_MCeff_mu_{var}")   # eff MC muon2
+
+        print(f"variation: {var}")
+        print(f"muon1 pt: {m1.pt[mask]}")
+        print(f"muon1 eta: {m1.eta[mask]}")
+        print(f"em1: {em1[mask]}")
+        print(f"ed1: {ed1[mask]}")
+        
+
+        print(f"muon2 pt: {m2.pt[mask]}")
+        print(f"muon2 eta: {m2.eta[mask]}")
+        print(f"em2: {em2[mask]}")
+        print(f"ed2: {ed2[mask]}")
 
         DATA_eff = 1-(1-ed1)*(1-ed2)
         MC_eff   = 1-(1-em1)*(1-em2)
@@ -1435,6 +1461,11 @@ def GetTrigSF(events, lep_cat):
         calc_nom = calculate_trigSF_mm(l0, l1, "nom")
         calc_up = calculate_trigSF_mm(l0, l1, "up")
         calc_down = calculate_trigSF_mm(l0, l1, "down")
+
+        print(f"\n\n inside GetTrigSF: ")
+        print(f"calc_nom: {calc_nom[mask]}")
+        print(f"calc_up: {calc_up[mask]}")
+        print(f"calc_down: {calc_down[mask]}")
 
     elif lep_cat == 'em': 
         calc_nom = calculate_trigSF_em(l0, l1, "nom")

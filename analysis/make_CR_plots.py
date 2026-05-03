@@ -58,6 +58,8 @@ mc_process_styles = {
 
 process_grouping = {
         "TT01j2l": ['TT01j2l_UL17_mtt_0to700', 'TT01j2l_UL17_mtt_700to900', 'TT01j2l_UL17_mtt_900toInf', 
+                    'TT01j2lmtt0to700_UL16APV', 'TT01j2lmtt700to900_UL16APV', 'TT01j2lmtt900toInf_UL16APV',
+                    'TT01j2lmtt0to700_UL16', 'TT01j2lmtt700to900_UL16', 'TT01j2lmtt900toInf_UL16',
                     'TT01j2lmtt0to700_UL17', 'TT01j2lmtt700to900_UL17', 'TT01j2lmtt900toInf_UL17',
                     'TT01j2lmtt0to700_UL18', 'TT01j2lmtt700to900_UL18', 'TT01j2lmtt900toInf_UL18'
                     ],
@@ -116,9 +118,13 @@ def get_shape_syst_arrs(base_histo, syst_var_lst, PDF_var_histo=None):
             p_arr_rel_lst.append(total_sigma_pdf**2)
             m_arr_rel_lst.append(total_sigma_pdf**2)
             continue
+            
         elif syst_name == "PDF": 
             print(f"NOT running PDF uncertainties")
             continue
+
+        # if ('2016' in syst_name) or ('2017' in syst_name) or ('2018' in syst_name): 
+        #     continue
 
         # Identify relevant samples for this systematic
         h_up = base_histo[{"systematic": syst_name + "Up"}]         # select the "Up" variation syst axis
@@ -351,7 +357,6 @@ def make_SR_MC_fig(year, h_mc, var, procs_to_group=None, err_p=None, err_m=None,
     if (err_p is not None) and (err_m is not None):
         plot_syst_err = True
 
-
     if procs_to_group:
         h_mc = group_hist_processes(h=h_mc, process_map=procs_to_group)
 
@@ -406,11 +411,15 @@ def make_SR_MC_fig(year, h_mc, var, procs_to_group=None, err_p=None, err_m=None,
             bin_edges, 
             np.append(m_err_arr, m_err_arr[-1]),
             np.append(p_err_arr, p_err_arr[-1]),
+            # step='post', 
+            # hatch='\\\\\\\\\\',
+            # alpha=0.5,
             step='post', 
-            hatch='\\\\\\\\\\',
-            # color='dimgrey',
-            alpha=0.1,
-            label=syst_label
+            label=syst_label,
+            hatch='////',
+            edgecolor= '#404040',# 'dimgray',  
+            facecolor='none',
+            linewidth=0,
         )
 
         ### add syst uncertainty band to ratio plot ###
@@ -422,9 +431,11 @@ def make_SR_MC_fig(year, h_mc, var, procs_to_group=None, err_p=None, err_m=None,
             np.append(m_err_arr_ratio, m_err_arr_ratio[-1]), 
             np.append(p_err_arr_ratio, p_err_arr_ratio[-1]), 
             step='post', 
-            hatch='\\\\\\\\\\',
-            # color='dimgrey',
-            alpha=0.1, 
+            hatch='////', # hatch='\\\\\\\\\\',
+            # alpha=0.1, 
+            edgecolor= '#404040',# 'dimgray',  
+            facecolor='none',
+            linewidth=0,
         )
 
 
@@ -446,7 +457,7 @@ def make_SR_MC_fig(year, h_mc, var, procs_to_group=None, err_p=None, err_m=None,
     ax.set_ylabel("Events")
     ax.set_xmargin(0)                                                       # makes 0 on x-axis start at left edge
     handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles[::-1], labels[::-1], loc='upper right', fontsize=12)  # Makes colors on plot appear top to bottom same order as plot 
+    ax.legend(handles[::-1], labels[::-1], loc='upper right', fontsize=16)  # Makes colors on plot appear top to bottom same order as plot 
 
     rax.set_ylim([0.5, 1.5])                    # rax.set_ylim([0.5, 1.5])
     rax.set_yticks([0.5, 1.0, 1.5])             # rax.set_yticks([0.8, 1.0, 1.2, 1.4]) 
@@ -1053,10 +1064,19 @@ def make_SR_MCplots_withsyst(year, hists_mc, var_list=[], syst_list=[], procs_to
         
         h_mc = hists_mc[var].as_hist({})
 
+
         # print(f"list(h_mc.axes['channel']): {list(h_mc.axes['channel'])}")
         for ch in list(h_mc.axes['channel']):
             h_slice = h_mc[{'channel':ch}]
-        
+
+            # remove data from MC plotting
+            all_procs = list(h_slice.axes['process'])
+            data_procs = [x for x in all_procs if 'data' in x]
+            MC_procs = [x for x in all_procs if x not in data_procs]
+            h_slice = h_slice[{'process': MC_procs}]
+
+            # print(f"processes: {h_slice.axes['process']}")
+
             if h_slice.sum() == 0:
                 print(f"Skipping {var}: MC is empty.")
                 continue
@@ -1114,14 +1134,24 @@ def make_SR_MCplots_withsyst(year, hists_mc, var_list=[], syst_list=[], procs_to
                 ylog=ylog,
                 syst_label=syst_label)
 
+            rax.set_ylim([0.95, 1.05])
+            rax.set_yticks([0.95, 1.0, 1.05])
+            rax.axhline(y=0.975, color='black', linestyle='--', alpha=0.5)
+            rax.axhline(y=1.025, color='black', linestyle='--', alpha=0.5)
+
+            if 'mm' in ch: 
+                rax.set_ylim([0.9999, 1.0001])
+                rax.set_yticks([0.9999, 1.0, 1.0001])
+
             plt.figtext(0.14, 0.84, fig_syst_label, fontsize=20, fontstyle='italic')  #0.72 
-            ax.set_title(plottitle)
+            # ax.set_title(plottitle)
+            ax.set_title(ch, fontsize=20, pad=40)
 
             # figname = f"{figtitle}_{ch}_{var}_{fig_syst_label}"
-            if figtitle:
-                 figname = f"{figtitle}_{ch}_{var}_{fig_syst_label}"
-            else:
-                figname = f"{ch}_{var}_{fig_syst_label}"
+            # if figtitle:
+                 # figname = f"{figtitle}_{ch}_{var}_{fig_syst_label}"
+            # else:
+            figname = f"{ch}_{var}_{fig_syst_label}"
             if ylog: 
                 figname += "_log"
 
@@ -1192,7 +1222,8 @@ def run_SR_MC_plots_variations(args, hist_dict_MC):
         # all_systs = ['PDF']
         # var_list = ['mllbb', 'l0eta']
         var_list = ['mllbb']
-        for syst in all_systs: 
+        for syst in ['trigSF']:
+        # for syst in all_systs: 
             make_SR_MCplots_withsyst(
                 year=args.year, 
                 hists_mc=ch_dict, 
@@ -1282,9 +1313,8 @@ if __name__ == "__main__":
     # hist_dict_num2 = pickle.load(gzip.open("SMEFTsim_toppt_noLOcorr_0423.pkl.gz"))
     # run_LOtoNLO_mllbb_plots_3MC(args, hist_dict_MC, hist_dict_num2, hist_dict_data)
 
-    # run_SR_MC_plots(args, hist_dict_MC)
-    run_SR_MC_plots(args, hist_dict_MC, mc_err=False)
-    # run_SR_MC_plots_variations(args, hist_dict_MC)
+    # run_SR_MC_plots(args, hist_dict_MC, mc_err=True)
+    run_SR_MC_plots_variations(args, hist_dict_MC)
 
 
     # for channel, ch_dict in hist_dict_MC.items():

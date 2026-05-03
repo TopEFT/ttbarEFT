@@ -170,7 +170,7 @@ def read_MGstandalone_txt(fname):
 
 
 def save_figure(fig, figname, outdir=''):
-    outname=os.path.join(outdir, f"{figname}.png")
-    fig.savefig(outname, bbox_inches='tight')
+    outname=os.path.join(outdir, f"{figname}.pdf")
+    fig.savefig(outname, bbox_inches='tight', format='pdf')
     print(f'plot saved to {outname}')
     plt.close(fig)

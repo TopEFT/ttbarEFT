@@ -313,7 +313,7 @@ if __name__ == '__main__':
     elif executor == 'iterative': 
 
         flist = preprocessing_for_taskvine(samplesdict)
-        proc_instance = processor_versions['em']
+        proc_instance = processor_versions['mm']
         # proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='em', wc_names_lst=wc_lst, hist_lst=['mllbb'], do_errors=do_err, doSR=True, doPDF=True, syst_list=[])
         # proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=False, syst_list=['METunclustUp', 'METunclustDown'], doPDF=False)
         # proc_instance = analysis_processor.AnalysisProcessor(samples=samplesdict, lep_cat='ee', wc_names_lst=wc_lst, hist_lst=hist_lst, do_errors=False, syst_list=[])

@@ -71,11 +71,17 @@ class AnalysisProcessor(processor.ProcessorABC):
         }
 
         self._histo_dict['sow_LHEPDFweights'] = hist.Hist(
-                proc_axis, 
-                weights_axis, 
-                hist.axis.Integer(0, 103, name="PDFindex", label="LHEPDFweight Index"),
-                storage=hist.storage.Double()
-            )
+            proc_axis, 
+            weights_axis, 
+            hist.axis.Integer(0, 103, name="PDFindex", label="LHEPDFweight Index"),
+            storage=hist.storage.Double()
+        )
+
+        self._histo_dict["event_quality"] = hist.Hist(
+            proc_axis,
+            hist.axis.StrCategory(["total", "bad_pdf"], name="type"),
+            storage=hist.storage.Double()
+        )
 
 
     @property
@@ -170,8 +176,8 @@ class AnalysisProcessor(processor.ProcessorABC):
         
         hout["SumOfWeights_hdampUp"].fill(process=dataset, SumOfWeights=counts, weight=wgts*hdampUp_weights, eft_coeff=eft_coeffs)
         hout["SumOfWeights_hdampDown"].fill(process=dataset, SumOfWeights=counts, weight=wgts*hdampDown_weights, eft_coeff=eft_coeffs)
-
         hout["SumOfWeights_toppt"].fill(process=dataset, SumOfWeights=counts, weight=wgts * LOtoNLO_weights * NLOtoNNLO_weights, eft_coeff=eft_coeffs)
+
 
         hout['sow_LHEPDFweights'].fill(
             SumOfWeights=ak.flatten(counts_stacked),
@@ -180,11 +186,27 @@ class AnalysisProcessor(processor.ProcessorABC):
             weight=ak.flatten(pdf_weights),
         )
 
+        # # version of toppt for just the NNLO reweighting
+        # hout["SumOfWeights_toppt"].fill(process=dataset, SumOfWeights=counts, weight=wgts * NLOtoNNLO_weights, eft_coeff=eft_coeffs)
+
+        # # count how many events don't have the correct 103 LHEPdfWeights
+        # bad_pdf_mask = (ak.num(events.LHEPdfWeight) != 103)
+        # n_bad_events = ak.sum(bad_pdf_mask)
+        # n_total_events = len(events)
+
+        # # Fill the quality tracker
+        # hout["event_quality"].fill(
+        #     process=dataset,
+        #     type="total",
+        #     weight=n_total_events
+        # )
+        # hout["event_quality"].fill(
+        #     process=dataset,
+        #     type="bad_pdf",
+        #     weight=n_bad_events
+        # )
 
         return hout
 
-
     def postprocess(self, accumulator):
         return accumulator
-
-

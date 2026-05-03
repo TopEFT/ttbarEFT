@@ -110,6 +110,7 @@ class AnalysisProcessor(processor.ProcessorABC):
             cat_dict=yaml.safe_load(f)
         if self._doSR:
             self._channels = cat_dict['SR_CHANNELS'][lep_cat]
+            # self._channels = cat_dict['SR_CHANNELS_mllbb'][lep_cat]
         else: 
             self._channels = cat_dict['CR_CHANNELS_allb'][lep_cat]
 
@@ -205,17 +206,6 @@ class AnalysisProcessor(processor.ProcessorABC):
         print(f"list of systematics to run over: \n\tevent_weight_variations = {event_weight_variations}, \n\tkinematic_variations = {kinematic_variations}")
         print(f"\n\n")
 
-        ######### Load Event Categories ##########
-        # cat_dict = None
-        # with open(ttbarEFT_path("params/channels.yaml"), "r") as f:
-        #     cat_dict=yaml.safe_load(f)
-        # if self._doSR:
-        #     # channels = cat_dict['SR_CHANNELS_mllbb'][lep_cat]
-        #     channels = cat_dict['SR_CHANNELS'][lep_cat]
-        # else: 
-        #     channels = cat_dict['CR_CHANNELS_allb'][lep_cat]
-
-        # channels = self._channels[lep_cat]
         channels = self._channels
 
         ######### Initialize Objects #########
@@ -242,13 +232,22 @@ class AnalysisProcessor(processor.ProcessorABC):
         ######### Lepton Selection ##########
         # add lepton scale factors and trigger efficiencies
         if not isData: 
-            tt_cor.AttachElectronSF(ele_good, year)    
-            tt_cor.AttachMuonSF(mu_good, year)    
-            tt_cor.AttachElecTrigEff(ele_good, year)
-            tt_cor.AttachMuonTrigEff(mu_good, year) 
+            ele_good = tt_cor.AttachElectronSF(ele_good, year)    
+            mu_good = tt_cor.AttachMuonSF(mu_good, year)    
+            ele_good = tt_cor.AttachElecTrigEff(ele_good, year)
+            mu_good = tt_cor.AttachMuonTrigEff(mu_good, year) 
 
         leps = ak.concatenate([ele_good, mu_good], axis=1)
         leps_sorted = leps[ak.argsort(leps.pt, axis=-1,ascending=False)] 
+
+        # print(f"\n\nleps_sorted muon trig eff: ")
+        # print(f"trig_MCeff_mu_nom: {leps_sorted.trig_MCeff_mu_nom}")
+        # print(f"trig_DATAeff_mu_nom: {leps_sorted.trig_DATAeff_mu_nom}")
+        # print(f"trig_MCeff_mu_up: {leps_sorted.trig_MCeff_mu_up}")
+        # print(f"trig_DATAeff_mu_up: {leps_sorted.trig_DATAeff_mu_up}")
+        # print(f"trig_MCeff_mu_down: {leps_sorted.trig_MCeff_mu_down}")
+        # print(f"trig_DATAeff_mu_down: {leps_sorted.trig_DATAeff_mu_down}")
+        # print(f"\n\n")
 
         ######### Jet Selections #########
         jets['isClean'] = tt_os.isClean(jets, ele_good, drmin=0.4)& tt_os.isClean(jets, mu_good, drmin=0.4)
@@ -584,6 +583,13 @@ class AnalysisProcessor(processor.ProcessorABC):
                             "eft_coeff"     : eft_coeffs_cut,
                         }
                         hout[dense_axis_name].fill(**axes_fill_info_dict)
+
+                        # trignom, trigup, trigdown = tt_cor.GetTrigSF(events, lep_cat)
+                        # print(f"\n\n")
+                        # print(f"trignom: {trignom[event_selection_mask]}")
+                        # print(f"trigup: {trigup[event_selection_mask]}")
+                        # print(f"trigdown: {trigdown[event_selection_mask]}")
+
 
                         if (dense_axis_name == 'mllbb') and (wgt_fluct == "nominal") and (self._doPDF) and (not isData):
                             # if "TW_NoFullyHadronicDecays" not in histAxisName:
