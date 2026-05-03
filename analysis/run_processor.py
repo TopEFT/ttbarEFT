@@ -301,7 +301,7 @@ if __name__ == '__main__':
     if executor in ["work_queue", "taskvine"]:
         print(f"Processed {nevts_total} events in {dt} seconds ({nevts_total/dt:.2f} events/sec)")
     elif executor == "futures":
-        print(f"Processing time: {dt.2f} seconds with {nworkers} workers ({dt*nworkers} cpu overall)")
+        print(f"Processing time: {dt:.2f} seconds with {nworkers} workers ({dt*nworkers} cpu overall)")
     
 
     # Save the output
