@@ -844,7 +844,10 @@ class DatacardMaker():
                     data_sm = decomposed_templates.pop("sm")
                     if self.use_real_data:
                         if len(data_sm) != 1:
-                            raise RuntimeError("obs data has unexpected number of sparse bins")
+                            data_sm = next((arr for key, arr in data_sm.items() if key.systematic == 'nominal'), None)
+                            print(data_sm)
+                            if len(data_sm) != 1: 
+                                raise RuntimeError("obs data has unexpected number of sparse bins")
                         elif sum(data_obs[0]) != 0:
                             raise RuntimeError("filling obs data more than once!")
                         for sp_key,arr in data_sm.items():

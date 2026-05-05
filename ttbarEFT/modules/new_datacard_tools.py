@@ -294,6 +294,7 @@ class DatacardMaker():
 
         # Since we're just going to generate Asimov data, this lets us drop the real data histograms for a minor speed-up
         if not self.use_real_data:
+            print(f"dropping real data histograms since we're making Asimov")
             self.ignore.append("data")
         extra_ignore = kwargs.pop("ignore",[])
         if extra_ignore:
@@ -1031,12 +1032,21 @@ class DatacardMaker():
                 if p == "data":
                     data_sm = decomposed_templates.pop("sm")
                     if self.use_real_data:
+                        print(f"getting real data!")
                         if len(data_sm) != 1:
+                            data_sm = next((arr[0] for key, arr in data_sm.items() if key.systematic == 'nominal'), None)
+                            print(data_sm)
+                        if data_sm is None:
+                            raise RuntimeError("Nominal data not found in templates")
+                        if len(data_sm) == 0:
                             raise RuntimeError("obs data has unexpected number of sparse bins")
+                            # if len(data_sm) != 1:
+                            #     raise RuntimeError("obs data has unexpected number of sparse bins")
                         elif sum(data_obs[0]) != 0:
                             raise RuntimeError("filling obs data more than once!")
-                        for sp_key,arr in data_sm.items():
-                            data_obs += arr
+                        data_obs += data_sm
+                        # for sp_key,arr in data_sm.items():
+                        #     data_obs += arr
                 if not self.use_AAC:
                     decomposed_templates = {k: v for k, v in decomposed_templates.items() if k == 'sm'}
                 for base,v in decomposed_templates.items():

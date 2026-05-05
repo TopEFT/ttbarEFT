@@ -112,7 +112,8 @@ class AnalysisProcessor(processor.ProcessorABC):
             self._channels = cat_dict['SR_CHANNELS'][lep_cat]
             # self._channels = cat_dict['SR_CHANNELS_mllbb'][lep_cat]
         else: 
-            self._channels = cat_dict['CR_CHANNELS_allb'][lep_cat]
+            # self._channels = cat_dict['CR_CHANNELS_allb'][lep_cat]
+            self._channels = cat_dict['CR_CHANNELS_0b'][lep_cat]
 
         print(f"\nProcessor Settings for {lep_cat}: ")
         print(f"\thist_lst: {hist_lst}")
@@ -308,11 +309,11 @@ class AnalysisProcessor(processor.ProcessorABC):
             weights_obj_base.add('ISR', events.nom, events.ISRUp*(sow/sow_ISRUp), events.ISRDown*(sow/sow_ISRDown))
             weights_obj_base.add('FSR', events.nom, events.FSRUp*(sow/sow_FSRUp), events.FSRDown*(sow/sow_FSRDown))
 
-            weights_obj_base.add('hdamp', events.nom, (tt_cor.GetHdampReweight(events, dataset, var='up')*(sow/sow_hdampUp)), (tt_cor.GetHdampReweight(events, dataset, var='down')*(sow/sow_hdampDown)))
+            # weights_obj_base.add('hdamp', events.nom, (tt_cor.GetHdampReweight(events, dataset, var='up')*(sow/sow_hdampUp)), (tt_cor.GetHdampReweight(events, dataset, var='down')*(sow/sow_hdampDown)))
             
-            LOtoNLO_weights = tt_cor.GetNLO_Weight(events, dataset)
-            NLOtoNNLO_weights = tt_cor.GetNNLO_EventWeight(events, dataset)
-            weights_obj_base.add('ttbar_toppt', LOtoNLO_weights*NLOtoNNLO_weights*(sow/sow_toppt))
+            # LOtoNLO_weights = tt_cor.GetNLO_Weight(events, dataset)
+            # NLOtoNNLO_weights = tt_cor.GetNNLO_EventWeight(events, dataset)
+            # weights_obj_base.add('ttbar_toppt', LOtoNLO_weights*NLOtoNNLO_weights*(sow/sow_toppt))
 
         # for Run2, Jet Corrections are applied to Data, only run this on MC
         if not isData:
@@ -584,11 +585,11 @@ class AnalysisProcessor(processor.ProcessorABC):
                         }
                         hout[dense_axis_name].fill(**axes_fill_info_dict)
 
-                        # trignom, trigup, trigdown = tt_cor.GetTrigSF(events, lep_cat)
-                        # print(f"\n\n")
-                        # print(f"trignom: {trignom[event_selection_mask]}")
-                        # print(f"trigup: {trigup[event_selection_mask]}")
-                        # print(f"trigdown: {trigdown[event_selection_mask]}")
+                        trignom, trigup, trigdown = tt_cor.GetTrigSF(events, lep_cat)
+                        print(f"\n\n")
+                        print(f"trignom: {trignom[event_selection_mask]}")
+                        print(f"trigup: {trigup[event_selection_mask]}")
+                        print(f"trigdown: {trigdown[event_selection_mask]}")
 
 
                         if (dense_axis_name == 'mllbb') and (wgt_fluct == "nominal") and (self._doPDF) and (not isData):

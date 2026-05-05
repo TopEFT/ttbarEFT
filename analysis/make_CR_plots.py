@@ -293,11 +293,17 @@ def make_CR_fig(year, h_data, h_mc, var, procs_to_group=None, err_p=None, err_m=
             bin_edges, 
             np.append(m_err_arr, m_err_arr[-1]),
             np.append(p_err_arr, p_err_arr[-1]),
+            # step='post', 
+            # hatch='\\\\\\\\\\',
+            # # color='dimgrey',
+            # alpha=0.1,
+            # label=syst_label
             step='post', 
-            hatch='\\\\\\\\\\',
-            # color='dimgrey',
-            alpha=0.1,
-            label=syst_label
+            label=syst_label,
+            hatch='////',
+            edgecolor= '#404040',# 'dimgray',  
+            facecolor='none',
+            linewidth=0,
         )
 
         ### add syst uncertainty band to ratio plot ###
@@ -308,10 +314,16 @@ def make_CR_fig(year, h_data, h_mc, var, procs_to_group=None, err_p=None, err_m=
             bin_edges, 
             np.append(m_err_arr_ratio, m_err_arr_ratio[-1]), 
             np.append(p_err_arr_ratio, p_err_arr_ratio[-1]), 
+            # step='post', 
+            # hatch='\\\\\\\\\\',
+            # # color='dimgrey',
+            # alpha=0.1, 
             step='post', 
-            hatch='\\\\\\\\\\',
-            # color='dimgrey',
-            alpha=0.1, 
+            hatch='////', # hatch='\\\\\\\\\\',
+            # alpha=0.1, 
+            edgecolor= '#404040',# 'dimgray',  
+            facecolor='none',
+            linewidth=0,
         )
 
     # General formatting
@@ -332,7 +344,7 @@ def make_CR_fig(year, h_data, h_mc, var, procs_to_group=None, err_p=None, err_m=
     ax.set_ylabel("Events")
     ax.set_xmargin(0)                                                       # makes 0 on x-axis start at left edge
     handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles[::-1], labels[::-1], loc='upper right', fontsize=12)  # Makes colors on plot appear top to bottom same order as plot 
+    ax.legend(handles[::-1], labels[::-1], loc='best', fontsize=20)  # Makes colors on plot appear top to bottom same order as plot 
 
     # Ratio plot formatting
     rax.set_xlabel(h_total_mc.axes[0].label if h_total_mc.axes[0].label else h_total_mc.axes[0].name)
@@ -990,14 +1002,15 @@ def make_CR_plots_withsyst(year, hists_mc, hists_data, var_list=[], syst_list=[]
 
     for var in var_list:
         if "sumw2" in var: continue
+        if 'LHEPDFweights' in var: continue
         
-        h_mc = hists_mc[var].as_hist({})
-        h_data = hists_data[var].as_hist({})
+        h_mc_allch = hists_mc[var].as_hist({})
+        h_data_allch = hists_data[var].as_hist({})
 
-        print(f"list(h_mc.axes['channel']): {list(h_mc.axes['channel'])}")
-        for ch in list(h_mc.axes['channel']):
+        print(f"list(h_mc.axes['channel']): {list(h_mc_allch.axes['channel'])}")
+        for ch in list(h_mc_allch.axes['channel']):
         # if "channel" in h_mc.axes.name:
-            h_mc = h_mc[{'channel':ch}]
+            h_mc = h_mc_allch[{'channel':ch}]
         
             if h_mc.sum() == 0:
                 print(f"Skipping {var}: MC is empty.")
@@ -1007,10 +1020,11 @@ def make_CR_plots_withsyst(year, hists_mc, hists_data, var_list=[], syst_list=[]
                 h_mc_nom = h_mc[{"systematic":"nominal"}]
             else:
                 h_mc_nom = h_mc
-            if "systematic" in h_data.axes.name:
-                h_data = h_data[{"systematic":"nominal"}]
-
-            h_data = h_data.project(var)
+            if "systematic" in h_data_allch.axes.name:
+                h_data = h_data_allch[{"systematic":"nominal"}]
+                h_data = h_data.project(var)
+            else: 
+                h_data = h_data_allch.project(var)
             
             if ('sumw2' in list(h_mc.axes['systematic'])) and do_mcerr: 
                 mc_err = h_mc[{'systematic':'sumw2'}][{'process': sum}].values()
@@ -1020,9 +1034,27 @@ def make_CR_plots_withsyst(year, hists_mc, hists_data, var_list=[], syst_list=[]
                 syst_label='Syst. unc.'
             
             if not syst_list:               # if no systematics to plot provided, plot all
-                syst_list = get_shape_syst_lst(h_mc)
+                syst_to_apply = get_shape_syst_lst(h_mc)
+            else: 
+                syst_to_apply = syst_list    
 
-            shape_systs_summed_arr_m , shape_systs_summed_arr_p = get_shape_syst_arrs(h_mc, syst_var_lst=syst_list)
+            # if (not syst_list) or ('PDF' in syst_list):             # only add PDF weights if all systs are being plotter or PDF in syst_list
+            #     # print(f"hists_mc.keys(): {hists_mc.keys()}")
+            #     if ('LHEPDFweights' in hists_mc.keys()):
+            #         h_PDFweights = hists_mc['LHEPDFweights'][{'channel':ch}]
+            #         if var in h_PDFweights.axes.name:
+            #             # print(f"LHEPDFweight available for variable {var}")
+            #             if 'PDF' not in syst_to_apply: 
+            #                 syst_to_apply.append('PDF')
+            #         else: 
+            #             h_PDFweights = None
+            #     else: 
+            #         h_PDFweights = None
+            # else:
+            #     h_PDFweights = None
+
+            h_PDFweights = None
+            shape_systs_summed_arr_m , shape_systs_summed_arr_p = get_shape_syst_arrs(h_mc, syst_var_lst=syst_to_apply, PDF_var_histo=h_PDFweights)
             nom_arr_all = h_mc_nom.project(var).values() 
             p_err_arr = nom_arr_all + np.sqrt(shape_systs_summed_arr_p + mc_err) # This is the upper variation for the main plot 
             m_err_arr = nom_arr_all - np.sqrt(shape_systs_summed_arr_m + mc_err) # the is the lower variation for the main plot
@@ -1038,8 +1070,14 @@ def make_CR_plots_withsyst(year, hists_mc, hists_data, var_list=[], syst_list=[]
                 ylog=ylog,
                 syst_label=syst_label)
 
-            plt.figtext(0.14, 0.84, fig_syst_label, fontsize=20, fontstyle='italic')  #0.72 
-            ax.set_title(plottitle)
+            plot_label = {
+                'ee_allj_0b': 'ee_0b',
+                'em_allj_0b': 'em_0b',
+                'mm_allj_0b': 'mm_0b',
+            }
+            plt.figtext(0.14, 0.84, plot_label[ch], fontsize=20, fontstyle='italic')  #0.72 
+            # ax.set_title(plottitle)
+            # ax.set_title(ch, fontsize=20, pad=40)
 
             # figname = f"{figtitle}_{ch}_{var}_{fig_syst_label}"
             figname = f"{ch}_{var}_{fig_syst_label}"
@@ -1159,6 +1197,33 @@ def make_SR_MCplots_withsyst(year, hists_mc, var_list=[], syst_list=[], procs_to
             plt.close(fig)
 
 
+def run_CR_plots(args, hist_dict_MC, hist_dict_data):
+    outdir = f"{args.outdir}"
+    if not os.path.exists(outdir):
+        os.makedirs(outdir, exist_ok=True)
+
+    for channel, ch_dict in hist_dict_MC.items():    
+        if channel != 'em':
+            continue
+        var_list = []
+        # if channel == 'em': 
+            # var_list = ['njets', 'nbjets', 'l0eta', 'l0phi', 'j0pt', 'j0eta', 'j0phi', 'MET', 'mll']
+        # else: 
+            # var_list = []
+        make_CR_plots_withsyst(
+            year=args.year,
+            hists_mc=hist_dict_MC[channel], 
+            hists_data=hist_dict_data[channel], 
+            var_list=var_list, 
+            syst_list=[], 
+            procs_to_group=process_grouping, 
+            ylog=False, 
+            do_mcerr=True, 
+            plottitle=args.title, 
+            figtitle=args.outtitle,
+            outdir=outdir,
+        )
+
 
 def run_CR_syst_variations_plots(args, hist_dict_MC, hist_dict_data):
     # make CR plots with indiviudal syst variations turned on - does not include mc stat error
@@ -1170,6 +1235,7 @@ def run_CR_syst_variations_plots(args, hist_dict_MC, hist_dict_data):
         hists_mc=hist_dict_MC[channel]
         hists_data=hist_dict_data[channel]
         all_systs = get_shape_syst_lst(hists_mc['mll'].as_hist({}))
+        # all_systs += ['PDF']
 
         if channel == 'em_chan': 
             var_list = ['j0pt', 'njets', 'l0eta']
@@ -1314,8 +1380,9 @@ if __name__ == "__main__":
     # run_LOtoNLO_mllbb_plots_3MC(args, hist_dict_MC, hist_dict_num2, hist_dict_data)
 
     # run_SR_MC_plots(args, hist_dict_MC, mc_err=True)
-    run_SR_MC_plots_variations(args, hist_dict_MC)
+    # run_SR_MC_plots_variations(args, hist_dict_MC)
 
+    run_CR_plots(args, hist_dict_MC, hist_dict_data)
 
     # for channel, ch_dict in hist_dict_MC.items():
         # plot all variables

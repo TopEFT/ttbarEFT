@@ -1339,8 +1339,8 @@ def AttachElecTrigEff(electrons, year):
 
     # Unflatten and attach to electrons
     electrons['trig_eff_ele_nom']  = ak.unflatten(sf_nom_flat, ak.num(eta))
-    electrons['trig_eff_ele_up']   = ak.unflatten(sf_nom_flat + sf_err_flat, ak.num(eta))
-    electrons['trig_eff_ele_down'] = ak.unflatten(sf_nom_flat - sf_err_flat, ak.num(eta))
+    electrons['trig_eff_ele_uncert']   = ak.unflatten(sf_err_flat, ak.num(eta))
+    # electrons['trig_eff_ele_down'] = ak.unflatten(sf_nom_flat - sf_err_flat, ak.num(eta))
 
     # Fill placeholder muon efficiencies
     electrons['trig_MCeff_mu_nom'] = ak.ones_like(electrons.pt)
@@ -1379,14 +1379,6 @@ def AttachMuonTrigEff(muons, year):
     MCeff_down_flat = ceval_HLT["NUM_HLT_DEN_HighPtLooseRelIsoProbes_MCeff"].evaluate(abseta_flat, pt_flat, "systdown")
     DATAeff_down_flat = ceval_HLT["NUM_HLT_DEN_HighPtLooseRelIsoProbes_DATAeff"].evaluate(abseta_flat, pt_flat, "systdown")    
 
-    print(f"\n\n inside the AttachMuonTrigEff func: ")
-    print(f"trig_MCeff_mu_nom: {ak.unflatten(MCeff_nom_flat, ak.num(pt))}")
-    print(f"trig_DATAeff_mu_nom: {ak.unflatten(DATAeff_nom_flat, ak.num(pt))}")
-    print(f"trig_MCeff_mu_up: {ak.unflatten(MCeff_up_flat, ak.num(pt))}")
-    print(f"trig_DATAeff_mu_up: {ak.unflatten(DATAeff_up_flat, ak.num(pt))}")
-    print(f"trig_MCeff_mu_down: {ak.unflatten(MCeff_down_flat, ak.num(pt))}")
-    print(f"trig_DATAeff_mu_down: {ak.unflatten(DATAeff_down_flat, ak.num(pt))}")
-
     muons['trig_MCeff_mu_nom'] = ak.unflatten(MCeff_nom_flat, ak.num(pt))
     muons['trig_DATAeff_mu_nom'] = ak.unflatten(DATAeff_nom_flat, ak.num(pt))
     muons['trig_MCeff_mu_up'] = ak.unflatten(MCeff_up_flat, ak.num(pt))
@@ -1396,13 +1388,151 @@ def AttachMuonTrigEff(muons, year):
 
     # fill ele trig eff with ones 
     muons['trig_eff_ele_nom'] = ak.ones_like(pt)
-    muons['trig_eff_ele_up'] = ak.ones_like(pt)
-    muons['trig_eff_ele_down'] = ak.ones_like(pt)
+    muons['trig_eff_ele_uncert'] = ak.ones_like(pt)
+    # muons['trig_eff_ele_down'] = ak.ones_like(pt)
 
     return muons
 
 
+### Functions to calculate pieces of trigger uncertainties ### 
+def calculate_muontrig_uncert(m1, vartype):
+    """
+    type: must be DATA or MC 
+    """
+    if vartype not in ['DATA', 'MC']:
+        raise ValueError(f'Variation type "{vartype}" should be DATA or MC.')
+    
+    nom = getattr(m1, f"trig_{vartype}eff_mu_nom") # eff nominal
+    up = getattr(m1, f"trig_{vartype}eff_mu_up") # eff data muon1
+    down = getattr(m1, f"trig_{vartype}eff_mu_down") # eff data muon1
+    
+    avg_variation = (np.abs(up-nom) + np.abs(down-nom))/2
+    return avg_variation
+
+def calculate_ratio_uncertainty(N, D, sigmaN, sigmaD):
+    # generally, f=x/y; sigma_f = abs(f)sqrt((sigma_x/x)^2+(sigma_y/y)^2)
+    return np.multiply(np.abs(N/D), np.sqrt(np.add(np.square(np.divide(sigmaN, N)), np.square(np.divide(sigmaD, D)))))
+
+
+def calculate_dimuon_eff_uncert(x, y, sigmaX, sigmaY): 
+    """
+    calculates the uncertainty for the equation f = 1-(1-x)(1-y)
+    with uncertaintites sigmaX, sigmaY which are fully correlated
+    
+    sigma_F = (1-y)sigmaX + (1-x)sigmaY
+    """
+    return np.multiply((1-y), sigmaX)+np.multiply((1-x), sigmaY)
+
+def calculate_dielec_eff_uncert(x, y, sigmaX, sigmaY):
+    """
+    calculates the uncertainty for f = x*y 
+    with uncertainties sigmaX, sigmaY, assuming they are fully correlated
+    sigma_f = x*sigmaY + y*sigmaX
+    """
+    return np.add(np.multiply(x, sigmaY), np.multiply(y, sigmaX))
+
+
+def calculate_trigSF_mm(m1, m2, var):
+    """
+    SF = eff_data / eff_mc = [1-(1-ed1)*(1-ed2)]/[1-(1-em1)*(1-em2)]
+    for num or denom, f=1-(1-x)(1-y) is uncert = (1-y)sigmaX + (1-x)sigmaY 
+    then uncert for SF in total, f=x/y, sigma_f = abs(f)sqrt((sigma_x/x)^2+(sigma_y/y)^2)
+    """
+    ed1 = getattr(m1, f"trig_DATAeff_mu_nom") # eff data muon1
+    ed2 = getattr(m2, f"trig_DATAeff_mu_nom") # eff data muon2
+    em1 = getattr(m1, f"trig_MCeff_mu_nom")   # eff MC muon1
+    em2 = getattr(m2, f"trig_MCeff_mu_nom")   # eff MC muon2
+    
+    # calculate the numerator and denominator of the SF, eff_data / eff_mc
+    DATA_eff = 1-(1-ed1)*(1-ed2)
+    MC_eff   = 1-(1-em1)*(1-em2)
+    nominalSF = DATA_eff / MC_eff
+        
+    if var == 'nom':
+        return nominalSF
+        
+    else: 
+        # get the uncertainties on each individual efficiency 
+        sigma_ed1 = calculate_muontrig_uncert(m1, "DATA")
+        sigma_ed2 = calculate_muontrig_uncert(m2, "DATA")
+        sigma_em1 = calculate_muontrig_uncert(m1, "MC")
+        sigma_em2 = calculate_muontrig_uncert(m2, "MC")
+        
+        # calc the uncertainty on the numerator as a whole and denominator as a whole
+        # this assumes data mc uncertainties are fully correlated to eachother, same for mc uncertainties 
+        sigmaN = calculate_dimuon_eff_uncert(x=ed1, y=ed2, sigmaX=sigma_ed1, sigmaY=sigma_ed2)
+        sigmaD = calculate_dimuon_eff_uncert(x=em1, y=em2, sigmaX=sigma_em1, sigmaY=sigma_em2)
+    
+        # calc the uncertainty of the SF = eff_data / eff_MC
+        # assumes data and mc are uncorrelated to eachother
+        SF_uncert = calculate_ratio_uncertainty(DATA_eff, MC_eff, sigmaN, sigmaD)
+        
+        if var == 'up':
+            return nominalSF + SF_uncert
+        elif var == 'down': 
+            return nominalSF - SF_uncert
+        else: 
+            raise ValueError(f'Unknown variation type "{var}"! Should be nom, up or down.')
+            
+
+def calculate_trigSF_em(l0, l1, var):
+        '''
+        l0 : ele or mu
+        l1 : ele or mu
+        var: nom, up, down
+        '''       
+        is_mu_l0 = (abs(l0.pdgId) == 13)
+        is_mu_l1 = (abs(l1.pdgId) == 13)
+        
+        DATA_eff = ak.where(is_mu_l0, l0.trig_DATAeff_mu_nom, l1.trig_DATAeff_mu_nom)
+        MC_eff = ak.where(is_mu_l0, l0.trig_MCeff_mu_nom, l1.trig_MCeff_mu_nom)
+        nominalSF = DATA_eff / MC_eff
+        
+        if var == 'nom': 
+            return nominalSF
+        
+        else: 
+            sigma_data = ak.where(is_mu_l0, 
+                              calculate_muontrig_uncert(l0, "DATA"), 
+                              calculate_muontrig_uncert(l1, "DATA"))
+            sigma_mc = ak.where(is_mu_l0, 
+                            calculate_muontrig_uncert(l0, "MC"), 
+                            calculate_muontrig_uncert(l1, "MC"))
+            SF_uncert = calculate_ratio_uncertainty(DATA_eff, MC_eff, sigma_data, sigma_mc)
+        
+            if var == 'up':
+                return nominalSF + SF_uncert
+            elif var == 'down':
+                return nominalSF - SF_uncert     
+            else: 
+                raise ValueError(f'Unknown variation type "{var}"! Should be nom, up or down.')
+
+
+def calculate_trigSF_ee(l0, l1, var): 
+
+    eff0 = l0.trig_eff_ele_nom
+    eff1 = l1.trig_eff_ele_nom
+    nominalSF = eff0*eff1
+
+    uncert0 = l0.trig_eff_ele_uncert
+    uncert1 = l1.trig_eff_ele_uncert
+    total_uncert = calculate_dielec_eff_uncert(x=eff0, y=eff1, sigmaX=uncert0, sigmaY=uncert1)
+
+    if var == 'nom': 
+        return nominalSF
+
+    else: 
+        total_uncert = calculate_dielec_eff_uncert(x=eff0, y=eff1, sigmaX=uncert0, sigmaY=uncert1)
+        if var == 'up': 
+            return nominalSF + total_uncert
+        elif var == 'down': 
+            return nominalSF - total_uncert
+        else: raise ValueError(f'Unknown variation type "{var}"! Should be nom, up or down.')
+
+
 def GetTrigSF(events, lep_cat):
+    # TODO: this function would be more efficient if calculate_trigSF_* returned the nominal and the variation 
+    # Then use the variation to make up/down at the same time instead of redoing that for both variations
 
     # Select events based on lepton category
     mask = events[f'is_{lep_cat}']
@@ -1410,67 +1540,30 @@ def GetTrigSF(events, lep_cat):
     leps = ak.pad_none(events.leps_pt_sorted, 2)
     l0 = leps[:,0]
     l1 = leps[:,1]
+    
+    l0_masked = ak.mask(l0, mask)
+    l1_masked = ak.mask(l1, mask)
+    
+    # Initialize output arrays with 1.0 (default SF) - matches the length of the unmasked events array
+    nom = ak.ones_like(events.event, dtype=float)
+    up = ak.ones_like(events.event, dtype=float)
+    down = ak.ones_like(events.event, dtype=float)
 
-    def calculate_trigSF_mm(m1, m2, var):
-        '''
-        m1 : muon1
-        m2 : muon2
-        var: nom, up, down
-        '''
-        ed1 = getattr(m1, f"trig_DATAeff_mu_{var}") # eff data muon1
-        ed2 = getattr(m2, f"trig_DATAeff_mu_{var}") # eff data muon2
-        em1 = getattr(m1, f"trig_MCeff_mu_{var}")   # eff MC muon1
-        em2 = getattr(m2, f"trig_MCeff_mu_{var}")   # eff MC muon2
-
-        print(f"variation: {var}")
-        print(f"muon1 pt: {m1.pt[mask]}")
-        print(f"muon1 eta: {m1.eta[mask]}")
-        print(f"em1: {em1[mask]}")
-        print(f"ed1: {ed1[mask]}")
-        
-
-        print(f"muon2 pt: {m2.pt[mask]}")
-        print(f"muon2 eta: {m2.eta[mask]}")
-        print(f"em2: {em2[mask]}")
-        print(f"ed2: {ed2[mask]}")
-
-        DATA_eff = 1-(1-ed1)*(1-ed2)
-        MC_eff   = 1-(1-em1)*(1-em2)
-
-        return DATA_eff / MC_eff
-
-
-    def calculate_trigSF_em(l0, l1, var):
-        '''
-        l0 : ele or mu
-        l1 : ele or mu
-        var: nom, up, down
-        '''        
-        DATA_eff = getattr(l0, f"trig_DATAeff_mu_{var}") * getattr(l1, f"trig_DATAeff_mu_{var}")
-        MC_eff = getattr(l0, f"trig_MCeff_mu_{var}") * getattr(l1, f"trig_MCeff_mu_{var}")
-
-        return DATA_eff / MC_eff
-
-    # calculate trigger SFs from already saved efficiencies
     if lep_cat == 'ee': 
-        calc_nom = l0.trig_eff_ele_nom * l1.trig_eff_ele_nom
-        calc_up = l0.trig_eff_ele_up * l1.trig_eff_ele_up
-        calc_down = l0.trig_eff_ele_down * l1.trig_eff_ele_down
+        # Assuming simple product for ee (check if you need the OR formula here too!)
+        calc_nom = calculate_trigSF_ee(l0_masked, l1_masked, "nom") #l0_masked.trig_eff_ele_nom * l1_masked.trig_eff_ele_nom
+        calc_up = calculate_trigSF_ee(l0_masked, l1_masked, "up") #l0_masked.trig_eff_ele_up * l1_masked.trig_eff_ele_up
+        calc_down = calculate_trigSF_ee(l0_masked, l1_masked, "down") #l0_masked.trig_eff_ele_down * l1_masked.trig_eff_ele_down
         
     elif lep_cat == 'mm': 
-        calc_nom = calculate_trigSF_mm(l0, l1, "nom")
-        calc_up = calculate_trigSF_mm(l0, l1, "up")
-        calc_down = calculate_trigSF_mm(l0, l1, "down")
-
-        print(f"\n\n inside GetTrigSF: ")
-        print(f"calc_nom: {calc_nom[mask]}")
-        print(f"calc_up: {calc_up[mask]}")
-        print(f"calc_down: {calc_down[mask]}")
+        calc_nom = calculate_trigSF_mm(l0_masked, l1_masked, "nom")
+        calc_up = calculate_trigSF_mm(l0_masked, l1_masked, "up")
+        calc_down = calculate_trigSF_mm(l0_masked, l1_masked, "down")
 
     elif lep_cat == 'em': 
-        calc_nom = calculate_trigSF_em(l0, l1, "nom")
-        calc_up = calculate_trigSF_em(l0, l1, "up")
-        calc_down = calculate_trigSF_em(l0, l1, "down")
+        calc_nom = calculate_trigSF_em(l0_masked, l1_masked, "nom")
+        calc_up = calculate_trigSF_em(l0_masked, l1_masked, "up")
+        calc_down = calculate_trigSF_em(l0_masked, l1_masked, "down")
 
     nom = ak.where(mask, calc_nom, 1.0)
     up = ak.where(mask, calc_up, 1.0)
