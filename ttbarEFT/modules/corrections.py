@@ -1423,13 +1423,15 @@ def calculate_dimuon_eff_uncert(x, y, sigmaX, sigmaY):
     """
     return np.multiply((1-y), sigmaX)+np.multiply((1-x), sigmaY)
 
+
 def calculate_dielec_eff_uncert(x, y, sigmaX, sigmaY):
     """
     calculates the uncertainty for f = x*y 
-    with uncertainties sigmaX, sigmaY, assuming they are fully correlated
-    sigma_f = x*sigmaY + y*sigmaX
+    with uncertainties sigmaX, sigmaY, assuming they are fully uncorrelated
+    sigma_f = sqrt(y^2*sigmaX^2 + x^2*sigmaY^2)
     """
-    return np.add(np.multiply(x, sigmaY), np.multiply(y, sigmaX))
+    # return np.add(np.multiply(x, sigmaY), np.multiply(y, sigmaX)) # fully correlated case, not correct for us
+    return np.sqrt(np.add(np.multiply(np.square(y), np.square(sigmaX)), np.multiply(np.square(x), np.square(sigmaY))))
 
 
 def calculate_trigSF_mm(m1, m2, var):

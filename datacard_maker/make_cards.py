@@ -7,7 +7,7 @@ import numpy as np
 import functools, operator
 
 from topcoffea.modules.utils import regex_match,clean_dir,dict_comp
-from ttbarEFT.modules.new_datacard_tools import *
+from ttbarEFT.modules.datacard_tools import *
 
 
 def combine_vineReduce_channels(pkl): 
@@ -44,8 +44,7 @@ def run_local(dc,km_dists,channels,selected_wcs, crop_negative_bins, wcs_dict):
         #     dc.add_pdf_shapes(km_dist)
         all_chs = dc.channels(km_dist)
         matched_chs = regex_match(all_chs,channels)
-        if channels:
-            print(f"Channels to process: {matched_chs}")
+        print(f"Channels to process: {matched_chs}")
         for ch in matched_chs:
             r = dc.analyze(km_dist,ch,selected_wcs, crop_negative_bins, wcs_dict)
 
@@ -57,8 +56,8 @@ def main():
     parser.add_argument("--miss-parton-file","-m",default="data/missing_parton/missing_parton.root",help="File for missing parton systematic, path relative to topeft_path()")
     parser.add_argument("--selected-wcs-ref",default="test/selectedWCs.json",help="Reference file for selected wcs")
     parser.add_argument("--out-dir","-d",default=".",help="Output directory to write root and text datacard files to")
-    parser.add_argument("--var-lst",default=['mllbb'],action="extend",nargs="+",help="Specify a list of variables to make cards for.")
-    parser.add_argument("--ch-lst","-c",default=[],action="extend",nargs="+",help="Specify a list of channels to process.")
+    parser.add_argument("--var-lst",default=[''],action="extend",nargs="+",help="Specify a list of variables to make cards for.")
+    parser.add_argument("--ch-lst","-c",default=['mllbb'],action="extend",nargs="+",help="Specify a list of channels to process.")
     parser.add_argument("--do-mc-stat",action="store_true",help="Add bin-by-bin statistical uncertainties with the autoMCstats option (for background)")
     parser.add_argument("--ignore","-i",default=[],action="extend",nargs="+",help="Specify a list of processes to exclude, must match name from 'sample' axis modulo UL year")
     parser.add_argument("--drop-syst",default=[],action="extend",nargs="+",help="Specify one or more template systematics to remove from the datacard")
@@ -105,6 +104,8 @@ def main():
     if isinstance(wcs,str):
         wcs = wcs.split(",")
 
+    print(f"unblind: {unblind}")
+
     kwargs = {
         "wcs": wcs,
         "rate_syst_path": rs_json,
@@ -123,6 +124,8 @@ def main():
         "wc_scalings": wc_scalings,
     }
 
+    var_lst = ['mllbb']
+
     prepared_pkl = flatten_vineReduce_hists(pkl_file)
 
     if out_dir != "." and not os.path.exists(out_dir):
@@ -132,6 +135,7 @@ def main():
     if use_condor and not os.path.samefile(os.getcwd(),out_dir):
         shutil.copy("make_cards.py",out_dir)
 
+
     tic = time.time()
     # dc = DatacardMaker(pkl_file,**kwargs)
     dc = DatacardMaker(
@@ -139,10 +143,12 @@ def main():
         year_lst=[],         # Processes all years found in pkl
         do_nuisance=True,    # Set to False if you want to skip systematics entirely for now
         do_mc_stat=True,
-        out_dir=out_dir
+        out_dir=out_dir,
+        unblind=False,
     )
 
     dists = var_lst if len(var_lst) else dc.hists.keys()
+    dists = ['mllbb']
 
     ch_lst = []
     selected_wcs = {}
@@ -173,6 +179,8 @@ def main():
     wcs_dict = eval("dict({})".format(wc_vals))
 
 
+    #ch_lst = ['ee_2b_2j', 'ee_2b_4j', 'e_2b_2j', 'e_2b_4j', 'mm_2b_2j', 'mm_2b_4j']
+    #print(ch_lst)
     run_local(dc,dists,ch_lst,selected_wcs, not args.keep_negative_bins, wcs_dict)
 
     # make pre-selection scalings.json

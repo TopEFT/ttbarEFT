@@ -14,10 +14,8 @@ from collections import defaultdict
 from topcoffea.modules.utils import regex_match
 from ttbarEFT.modules.paths import ttbarEFT_path
 
-
 PRECISION = 6   # Decimal point precision in the text datacard output
-with open(ttbarEFT_path("params/axes.json"), 'r') as axes_file:
-            axes_info = json.load(axes_file)['CR_axes']
+
 
 def to_hist(arr,name,zero_wgts=False):
     """
@@ -34,7 +32,11 @@ def to_hist(arr,name,zero_wgts=False):
     clipped = []
     for i in range(2):  # first entry is sum(weight), second entry is sum(weight^2)
         if arr[i] is not None:
-            clipped.append(np.array(arr[i][1:]))  # Strip off the underoverflow bin
+            if "PDF" in name:   # don't remove the 0th bin from PDF, since it's calculated separately it's already removed 
+                clipped.append(np.array(arr[i]))
+            else: 
+                clipped.append(np.array(arr[i][1:]))  # Strip off the underoverflow bin
+            # clipped.append(np.array(arr[i][1:]))  # Strip off the underoverflow bin
         else:
             clipped[i] = None
 
@@ -101,38 +103,8 @@ class RateSystematic():
             # This is the case for a systematic that doesn't apply to the specified process
             return '-'
 
-class JetScale(RateSystematic):
-    def __init__(self,name,**kwargs):
-        super().__init__(name,**kwargs)
-
-        self.symmeterize = True     # whether or not we attempt to make the up/down shifts equal in absolute terms
-        self.min_lo = 0.01          # For large kappa values, do not let the symmeterization go negative
-
-    # Override the base implementation to handle the different dict structure
-    # Note: The return value should be as a string
-    def get_process(self,p,j):
-        j = str(j)
-        if self.all:
-            unc_hi = self.all_unc[j]
-            if self.symmeterize:
-                unc_lo = max(self.min_lo,2 - unc_hi)
-                return f"{unc_lo:.{PRECISION}f}/{unc_hi:.{PRECISION}f}"
-            else:
-                return f"{unc_hi:.{PRECISION}f}"
-        if self.has_process(p):
-            unc_hi = self.corrs[p][j]
-            if self.symmeterize:
-                unc_lo = max(self.min_lo,2 - unc_hi)
-                return f"{unc_lo:.{PRECISION}f}/{unc_hi:.{PRECISION}f}"
-            else:
-                return f"{unc_hi:.{PRECISION}f}"
-        else:
-            return '-'
 
 class DatacardMaker():
-    # TODO:
-    #   We are abusing the grouping mechanism to also handle renaming processes, but might want to
-    #   separate into two distinct actions to make things easier to follow for the reader
     # Note:
     #   Care must be taken with regards to the underscores, due to 'nonprompt', 'data', and 'flips'
     GROUP = {
@@ -148,19 +120,11 @@ class DatacardMaker():
             'DY10to50_',
             'DY50_',
             ],
-        'Diboson': [
-            'WJetsToLNu_',      # not really diboson
+        'Others':[
+            'WJetsToLNu_',     
             'WWTo2L2Nu_',
             'WZTo3LNu_',
             'ZZTo4L_',
-            ],
-        'Triboson': [
-            'WWW_',
-            'WWZ_4F_',
-            'WZZ_',
-            'ZZZ_',
-            ],
-        'TTll':[
             'TTGJets_',
             'ttW_',
             'ttZ_',
@@ -170,18 +134,16 @@ class DatacardMaker():
 
     # Controls how we rebin the dense axis of the corresponding distribution
     # TODO update this to read the yaml correctly
-    BINNING = {}
-    for name, value in axes_info.items():
-        if "variable" in value:
-            BINNING[name] = value["variable"]
+    # BINNING = {}
+    # for name, value in axes_info.items():
+    #     if "variable" in value:
+    #         BINNING[name] = value["variable"]
 
     YEARS = ["UL16","UL16APV","UL17","UL18"]
     SYST_YEARS = ["2016","2016APV","2017","2018"]
 
     # TODO update this to my namign 
     FNAME_TEMPLATE = "TESTING-ttbar-{cat}_{kmvar}.{ext}"
-    # FNAME_TEMPLATE = "TESTING_ttx_multileptons-{cat}.{ext}"
-
     # SIGNALS = set(["ttH","tllq","ttll","ttlnu","tHq","tttt"])
     SIGNALS = set(["tt"])
 
@@ -199,7 +161,12 @@ class DatacardMaker():
 
     @classmethod
     def strip_fluctuation(cls,s):
-        return s.replace("Down","").replace("Up","")
+        if s.endswith("Down"):
+            return s[:-4]
+        elif s.endswith("Up"):
+            return s[:-2]
+        else: 
+            return s
 
     @classmethod
     def strip_year(cls,s):
@@ -242,7 +209,6 @@ class DatacardMaker():
             s = s.rsplit("_",1)[0]
         return s
 
-    # TODO: I don't like the naming
     # works for ttbarEFT
     @classmethod
     def get_jet_mults(cls,s):
@@ -274,16 +240,8 @@ class DatacardMaker():
 
     @classmethod
     def get_lep_mult(cls,s):
-        return 2
         """ Returns the lepton multiplicity based on the string passed to it."""
-        # if s.startswith("2l"):
-        #     return 2
-        # elif s.startswith("3l_"):
-        #     return 3
-        # elif s.startswith("4l_"):
-        #     return 4
-        # else:
-        #     raise ValueError(f"Unable to determine lepton multiplicity from string {s}")
+        return 2
 
     @classmethod
     def get_processes_by_years(cls,h):
@@ -308,110 +266,109 @@ class DatacardMaker():
         self.coeffs          = kwargs.pop("wcs",[])
         self.use_real_data   = kwargs.pop("unblind",False)
         self.verbose         = kwargs.pop("verbose",True)
-        self.use_AAC          = kwargs.pop("use_AAC",False)
+        self.use_AAC         = kwargs.pop("use_AAC",False)
         self.wc_scalings     = kwargs.pop("wc_scalings",[])
         self.scalings        = []
 
-        # get wc ranges from json
-        with open(ttbarEFT_path("params/wc_ranges.json"), "r") as wc_ranges_json:
-            self.wc_ranges = json.load(wc_ranges_json)
-       
+        # we don't need the rotations for ttbar SMFEFTsim
         self.rotate = {}
-
+        
+        ### Initial Settings ###
         if self.year_lst:
             for yr in self.year_lst:
                 if not yr in self.YEARS:
                     raise ValueError(f"Invalid year choice '{yr}', should be empty if running over all years or one of: {self.YEARS}")
 
-        rate_syst_path = kwargs.pop("rate_systs_path","params/rate_systs.json")
+        # get wc ranges from json
+        with open(ttbarEFT_path("params/wc_ranges.json"), "r") as wc_ranges_json:
+            self.wc_ranges = json.load(wc_ranges_json)
 
-        # TODO: Need to find a better name for this variable
+        rate_syst_path = kwargs.pop("rate_systs_path", "params/rate_systs.json")
         self.rate_systs = self.load_systematics(rate_syst_path)
 
         # Samples to be excluded from the datacard, should correspond to names before group_processes is run
         self.ignore = [
             # "DYJetsToLL", "DY10to50", "DY50",
-            # "ST_antitop_t-channel", "ST_top_s-channel", "ST_top_t-channel", "tbarW", "tW",
-            # "TTJets",
-            # "WJetsToLNu",
-            # "TTGJets",  # This is the old low stats convs process, new one should be TTGamma
-            # "TTGamma",
-            # "WWTo2L2Nu","ZZTo4L",#"WZTo3LNu",
-            # "WWW","WWW_4F","WWZ_4F","WWZ","WZZ","ZZZ",
-            # "flips","nonprompt",
-            # "tttt","ttlnuJet","tllq","tHq","ttHJet",
-            # "TTTo2L2Nu", "TTToSemiLeptonic",
-            # "data",
+            # data,
         ]
 
+        # Since we're just going to generate Asimov data, this lets us drop the real data histograms for a minor speed-up
         if not self.use_real_data:
-            # Since we're just going to generate Asimov data, this lets us drop the real data histograms
-            #   from the histograms for a minor speed-up
+            print(f"dropping real data histograms since we're making Asimov")
             self.ignore.append("data")
-
         extra_ignore = kwargs.pop("ignore",[])
+        if extra_ignore:
+            print(f"Adding processes to ignore: {extra_ignore}")
+        self.ignore.extend(extra_ignore)
 
-        # For now, we leave this as a hardcoded thing, a bit tedious but it works
-        # Note: If not explicitly listed, it is assumed that all years should be uncorrelated
-        # Note: It is important to list the correlations for ALL years in which it is relevant, so
-        #       for example, if a systematic is correlated in 2016, 2016APV, and 2017, there needs
-        #       to be an entry for all three years and the list corresponding to each entry needs to
-        #       be consistent (i.e. contain the other correlated years) across all three entries
-        # Note: As a final note, the actual systematic that appears in the datacards will be just one
-        #       of the set to be correlated. So for example, if a systematic is correlated over 2016
-        #       and 2016APV, then either the 2016 or 2016APV version will appear in the datacard, but
-        #       not both. Typically, the one that remains will be the 2016 version as that's the one
-        #       that gets handled first in the loop, but it would be different if we processed things
-        #       in a different order
+        # the processes in this dictionary should match the naming AFTER grouping
+        self.syst_skip = {
+            "PDF": ["tW", "DY", "Others"],
+            "hdamp": ["tW", "DY", "Others"],
+        }
+
+        """
+        For now, we leave this as a hardcoded thing, a bit tedious but it works
+        Note: If not explicitly listed, it is assumed that all years should be uncorrelated
+        Note: It is important to list the correlations for ALL years in which it is relevant, so
+              for example, if a systematic is correlated in 2016, 2016APV, and 2017, there needs
+              to be an entry for all three years and the list corresponding to each entry needs to
+              be consistent (i.e. contain the other correlated years) across all three entries
+        Note: As a final note, the actual systematic that appears in the datacards will be just one
+              of the set to be correlated. So for example, if a systematic is correlated over 2016
+              and 2016APV, then either the 2016 or 2016APV version will appear in the datacard, but
+              not both. Typically, the one that remains will be the 2016 version as that's the one
+              that gets handled first in the loop, but it would be different if we processed things
+              in a different order
+        """
         self.syst_year_corr = {
             # Example of correlated for only 2016 and 2016APV
             # "FFcloseEl": {"2016": ["2016APV"], "2016APV": ["2016"]},
-            # "FFcloseMu": {"2016": ["2016APV"], "2016APV": ["2016"]},
 
             # Example of correlated over 2016, 2016APV, 2017, and 2018
-            # Note: This is not correct for the analysis, but just serves as an example
             # "FFcloseEl": {"2016": ["2016APV","2017","2018"], "2016APV": ["2016","2017","2018"], "2017": ["2016","2016APV","2018"], "2018": ["2016","2016APV","2017"]},
-            # "FFcloseMu": {"2016": ["2016APV","2017","2018"], "2016APV": ["2016","2017","2018"], "2017": ["2016","2016APV","2018"], "2018": ["2016","2016APV","2017"]},
         }
 
-        # Defines which systematics should be decorrelated in the self.analysis() step. Each key
-        #   should match (exactly) a particular systematic. The list for each systematic specifies
-        #   which processes should remain remain correlated or not.
-        # Note: A given process should appear AT MOST once in the "matches" list for a given systematic
-        #       grouping. If a process has an associated systematic, but doesn't match any of the
-        #       groups, then it will retain its original systematic name (i.e. all unmatched
-        #       processes will remain correlated).
-        # Note: For the special case where the group name is an empty string the systematic will
-        #       instead have the matched process' name appended to it, meaning that all matched
-        #       processes will be decorrelated!
-        # Note: Since the decorrelation happens during the self.analysis() step, the matched names
-        #       should correspond to the renamed/re-grouped processes, e.g. use "Diboson" instead of
-        #       "ZZ","WZ","WW".
+        """
+        Defines which systematics should be decorrelated in the self.analysis() step. 
+            Each key should match (exactly) a particular systematic. 
+            The list for each systematic specifies which processes should remain remain correlated or not.
+        Note: A given process should appear AT MOST once in the "matches" list for a given systematic
+            grouping. If a process has an associated systematic, but doesn't match any of the
+            groups, then it will retain its original systematic name (i.e. all unmatched
+            processes will remain correlated).
+        Note: For the special case where the group name is an empty string the systematic will
+            instead have the matched process' name appended to it, meaning that all matched
+            processes will be decorrelated!
+        Note: Since the decorrelation happens during the self.analysis() step, the matched names
+            should correspond to the renamed/re-grouped processes, e.g. use "Diboson" instead of
+            "ZZ","WZ","WW". 
+        """
         self.syst_shape_decorrelate = {
-            # "ISR": [
-            #     {
-            #         "matches": ["ttH","ttll","tttt","convs"],
-            #         "group": "gg",
-            #     },
-            #     {
-            #         "matches": ["ttlnu","tllq","Diboson","Triboson"],
-            #         "group": "qq",
-            #     },
-            #     {
-            #         "matches": ["tHq"],
-            #         "group": "qg"
-            #     }
-            # ],
             "renorm": [{
-                "matches": [".*"],
+                "matches": ["tt", "tW", "DY", "Others"],
                 "group": "",
             }],
             "fact": [{
-                "matches": [".*"],
+                "matches": ["tt", "tW", "DY", "Others"],
                 "group": "",
-            }]
+            }],
+            "ISR": [
+                {
+                    "matches": ["tt"], 
+                    "group": "tt",
+                },
+                {
+                    "matches": ["tW"],
+                    "group": "tW",
+                },
+                {
+                    "matches": ["DY", "Others"],
+                    "group": "Others"
+                },
+            ]
         }
-
+        
         if extra_ignore:
             print(f"Adding processes to ignore: {extra_ignore}")
         self.ignore.extend(extra_ignore)
@@ -423,100 +380,9 @@ class DatacardMaker():
         self.read(pkl_path)
         dt = time.time() - tic
         print(f"Total Read+Prune Time: {dt:.2f} s")
-
         print (f"Saving output to {os.path.realpath(self.out_dir)}")
-
-    def read(self,fpath):
-        """
-            Input should be a file path to a pkl file containing histograms produced by the topeft.py
-            processor. The histograms are extracted and then pre-processed to remove / group / scale
-            various sparse axes categories.
-        """
-        print(f"Opening: {fpath}")
-        tic = time.time()
-        self.hists = pickle.load(gzip.open(fpath))
-        dt = time.time() - tic
-        print(f"Pkl Open Time: {dt:.2f} s")
-
-        for km_dist, h in self.hists.items():
-            if h.empty():
-                continue
-            km_dist_missing = km_dist not in self.var_lst
-            km_base_dist_missing = km_dist.replace('_sumw2','') not in self.var_lst
-            if self.var_lst and km_dist_missing and km_base_dist_missing:
-                continue
-            print(f"Loading: {km_dist}")
-            # Remove processes that we don't include in the datacard
-            to_remove = []
-            for x in h.axes["process"]:
-                p = self.get_process(x)
-                if p in self.ignore:
-                    if self.verbose:
-                        print(f"Skipping (ignored): {x}")
-                    to_remove.append(x)
-                    continue
-                if self.year_lst:
-                    yr = self.get_year(x)
-                    if yr not in self.year_lst:
-                        if self.verbose:
-                            print(f"Skipping (year): {x}")
-                        to_remove.append(x)
-                        continue
-            h = h.remove("process", to_remove)
-
-            if not self.do_nuisance:
-                # Remove all shape systematics
-                h.prune("systematic", ["nominal"])
-
-            if self.drop_syst:
-                to_drop = set()
-                for syst in self.drop_syst:
-                    if syst.endswith("Up"):
-                        to_drop.add(syst)
-                    elif syst.endswith("Down"):
-                        to_drop.add(syst)
-                    else:
-                        to_drop.add(f"{syst}Up")
-                        to_drop.add(f"{syst}Down")
-                for x in to_drop:
-                    print(f"Removing systematic: {x}")
-                h = h.remove("systematic", list(to_drop))
-
-            if h.should_rebin() and km_dist != "njets":
-                edge_arr = self.BINNING[km_dist] + [list(h.axes[km_dist].edges())[-1]]
-                h = h.rebin(km_dist, hist.axis.Variable(edge_arr, km_dist, h.axes[km_dist].label))
-            else:
-                # TODO: Still need to handle njets case properly
-                pass
-
-            # Remove 'central', 'private', '_4F' text from process names
-            print(f"histogram before grouping: {h}")
-            grp_map = {}
-            for x in h.axes["process"]:
-                new_name = (
-                    x.replace("private", "").replace("central", "").replace("_4F", "")
-                )
-                grp_map[new_name] = x
-
-            print(f"group map: {grp_map}")
-            h = h.group("process", grp_map)
-
-            h = self.group_processes(h)
-            # h = self.correlate_years(h)
-            print(f"histogram after grouping: {h}")
-
-            num_systs = len(h.axes["systematic"])
-            print(f"Num. Systematics: {num_systs}")
-
-            self.hists[km_dist] = h
-
-    def channels(self, km_dist):
-        return list(self.hists[km_dist].axes["channel"])
-
-    def processes(self, km_dist):
-        return list(self.hists[km_dist].axes["process"])
-
-    # TODO: Can be a static member function
+        
+        
     def load_systematics(self,rs_fpath):
         """
             Parse out the correlated and decorrelated systematics from rate_systs.json and
@@ -550,7 +416,7 @@ class DatacardMaker():
         to_remove = set()
         for p,corr_systs in rates_json["correlations"].items():
             # 'p' is the name of a process and 'corr_systs' is a dictionary defining which rate systematic
-            #   needs to be decorrelated into a specific sub-group, e.g. for ttH: pdf_scale -> pdf_scale_gg
+            #  needs to be decorrelated into a specific sub-group, e.g. for ttH: pdf_scale -> pdf_scale_gg
             for syst,grp in corr_systs.items():
                 # 'syst' should be the name of a systematic already defined in the 'rate_systs' dictionary
                 #   and 'grp' is the string we are going to differentiate it from the other variants of 'syst'
@@ -568,15 +434,114 @@ class DatacardMaker():
             rate_systs.pop(syst)
 
         return rate_systs
+    
+    def read(self,fpath):
+        """
+            Input should be a file path to a pkl file containing histograms produced by the topeft.py
+            processor. The histograms are extracted and then pre-processed to remove / group / scale
+            various sparse axes categories.
+        """
+        print(f"Opening: {fpath}")
+        tic = time.time()
+        self.hists = pickle.load(gzip.open(fpath))
+        dt = time.time() - tic
+        print(f"Pkl Open Time: {dt:.2f} s")
 
-    # TODO: Can be a static member function
+        print(f"km_dists in read function: {self.hists.keys()}")
+        for km_dist, h in self.hists.items():
+            if h.empty():
+                continue
+            if self.var_lst and (km_dist not in self.var_lst): 
+                continue
+                
+            print(f"Loading: {km_dist}")
+            # Remove processes that we don't include in the datacard
+            to_remove = []
+            for x in h.axes["process"]:
+                p = self.get_process(x)
+                if p in self.ignore:
+                    if self.verbose:
+                        print(f"Skipping (ignored): {x}")
+                    to_remove.append(x)
+                    continue
+                if self.year_lst:
+                    yr = self.get_year(x)
+                    if yr not in self.year_lst:
+                        if self.verbose:
+                            print(f"Skipping (year): {x}")
+                        to_remove.append(x)
+                        continue
+            to_keep = [x for x in h.axes["process"] if x not in to_remove]
+            if to_keep:
+                h = h[{"process": to_keep}]
+            else:
+                continue
+
+            if not self.do_nuisance:
+                # Remove all shape systematics
+                h = h[{"systematic": "nominal"}]
+
+            if self.drop_syst:
+                to_drop = set()
+                for syst in self.drop_syst:
+                    # If you pass "JEC", it drops "JECUp" and "JECDown"
+                    # If you pass "JECUp", it only drops that one
+                    if syst.endswith("Up") or syst.endswith("Down"):
+                        to_drop.add(syst)
+                    else:
+                        to_drop.add(f"{syst}Up")
+                        to_drop.add(f"{syst}Down")
+                
+                to_keep = [s for s in h.axes["systematic"] if s not in to_drop]
+                h = h[{"systematic": to_keep}]
+    
+            if km_dist == "LHEPDFweights":
+                print("LHEPDFweights is the km_dist before grouping...")
+            # Remove 'central', 'private', '_4F' text from process names
+            grp_map_clean = {}
+            for x in h.axes["process"]:
+                new_name = x.replace("private", "").replace("central", "").replace("_4F", "")
+                # Note: The group method expects a list of old names for each new name
+                if new_name not in grp_map_clean:
+                    grp_map_clean[new_name] = []
+                grp_map_clean[new_name].append(x)
+
+            # Group based on histogram type
+            if hasattr(h, "group"):         #histEFT has .group
+                h = h.group("process", grp_map_clean)
+            else:                           # LHEPdfWeights (regular Hist) path
+                h = self.group_regular_hist(h, grp_map_clean)
+
+            h = self.group_processes(h)
+            
+            if km_dist == "LHEPDFweights":
+                LHEPDFweights_yr_grp_map = {}
+                all_procs = list(h.axes["process"])
+                group_names = self.GROUP.keys()
+                for g in group_names:
+                    LHEPDFweights_yr_grp_map[g]=[x for x in all_procs if x.startswith(g)]
+                # print(f"LHEPDFweights_yr_grp_map:{LHEPDFweights_yr_grp_map}")
+
+                # Group years for the regular histogram
+                h =self.group_regular_hist(h, LHEPDFweights_yr_grp_map)
+                self.hists[km_dist] = h
+                continue
+
+            else:
+                h = self.correlate_years(h)
+            
+            if 'systematic' in h.axes.name:
+                num_systs = len(h.axes["systematic"])
+                print(f"Num. Systematics: {num_systs}")
+                
+            self.hists[km_dist] = h
+            
     def group_processes(self,h):
         """
             Groups together certain processes from the 'process' axis. We also abuse this method to
             rename specific process categories. Both of which are determined by the GROUP static data
             member.
         """
-        # TODO: This needs work to be less convoluted...
         all_procs = set(h.axes["process"])
         grp_map = {}
         for grp_name,to_grp in self.GROUP.items():
@@ -595,10 +560,29 @@ class DatacardMaker():
         # Include back in everything that wasn't specified by the initial groupings
         for x in all_procs:
             grp_map[x] = [x]
-        h = h.group("process", grp_map)
-        return h
+            
+        if hasattr(h, "group"):
+            # Use the topcoffea SparseHist logic (safe for EFT hists)
+            return h.group("process", grp_map)
+        else:
+            # Manual logic for regular Hist (safe for LHEPdfWeights floats)
+            return self.group_regular_hist(h, grp_map)
+                    
+    def group_regular_hist(self, h, grp_map):
+        """Handle grouping for standard hist.Hist objects."""
+        # Create a new histogram with the same axes but the new process category
+        new_proc_axis = hist.axis.StrCategory(grp_map.keys(), name="process", growth=True)
+        other_axes = [ax for ax in h.axes if ax.name != "process"]
+        h_grouped = hist.Hist(new_proc_axis, *other_axes, storage=h.storage_type())
 
-    # TODO: Can be a static member function
+        for new_name, existing_olds in grp_map.items():
+            
+            summed_h = h[{"process": existing_olds}][{"process": sum}]
+            idx = h_grouped.axes["process"].index(new_name)
+            h_grouped.view(flow=True)[idx] = summed_h.view(flow=True)
+            
+        return h_grouped
+
     def correlate_years(self,h):
         """
             Merges together different run years, taking care to treat year-specific systematics as
@@ -634,6 +618,7 @@ class DatacardMaker():
                 if self.verbose:
                     print(f"Skipping {syst} as it was already correlated in a previous year")
                 continue
+            print(f"*** syst_base before stripping: {syst}")
             syst_base = self.strip_fluctuation(syst)
             syst_base = self.strip_year(syst_base)
             corr_keys = []
@@ -685,6 +670,157 @@ class DatacardMaker():
 
         return h
 
+    def correlate_years_regular(self, h):
+        """Sums up years for a regular hist.Hist object (like LHEPDFweights)."""
+        # Identify common process names
+        all_procs = list(h.axes["process"])
+        unique_procs = set([re.sub(r'UL\d+(APV)?$', '', p) for p in all_procs])
+        
+        new_proc_axis = hist.axis.StrCategory(unique_procs, name="process", growth=True)
+        other_axes = [ax for ax in h.axes if ax.name != "process"]
+        h_corr = hist.Hist(new_proc_axis, *other_axes, storage=h.storage_type())
+        
+        for p_base in unique_procs:
+            # Match all years for this process
+            matching_olds = [p for p in all_procs if re.match(rf"^{p_base}_UL\d+(APV)?$", p)]
+            if not matching_olds: continue
+            
+            summed = h[{"process": matching_olds}][{"process": sum}]
+            h_corr[{"process": p_base}] = summed.view(flow=True)
+            
+        return h_corr
+    
+    # def add_pdf_shapes(self, km_dist):
+    #     """Calculates PDF scaling by re-mapping the histogram to include new categories."""
+    #     if "LHEPDFweights" not in self.hists:
+    #         return
+
+    #     h_main = self.hists[km_dist]
+    #     h_pdf = self.hists["LHEPDFweights"]
+
+    #     # 1. Create a new axis that includes the original categories plus the PDF ones
+    #     old_syst_axis = h_main.axes["systematic"]
+    #     new_syst_list = list(old_syst_axis) + ["PDFUp", "PDFDown"]
+    #     new_syst_axis = hist.axis.StrCategory(new_syst_list, name="systematic", growth=True)
+
+    #     # 2. Create a new histogram with the expanded axis
+    #     # We keep all other axes the same as h_main
+    #     other_axes = [ax for ax in h_main.axes if ax.name != "systematic"]
+    #     h_new = hist.Hist(new_syst_axis, *other_axes, storage=h_main.storage_type())
+
+    #     # 3. Copy existing data from h_main to h_new
+    #     for syst in old_syst_axis:
+    #         h_new[{"systematic": syst}] = h_main[{"systematic": syst}].view(flow=True)
+
+    #     # Replace the old histogram in the dictionary
+    #     self.hists[km_dist] = h_new
+    #     h_main = self.hists[km_dist] # Point h_main to the new expanded object
+
+    #     # Now define the indices for the loop
+    #     idx_nom = h_main.axes["systematic"].index("nominal")
+    #     idx_up  = h_main.axes["systematic"].index("PDFUp")
+    #     idx_dn  = h_main.axes["systematic"].index("PDFDown")
+
+    #     view = h_main.view(flow=True)
+
+    #     for ch in h_main.axes["channel"]:
+    #         ch_idx = h_main.axes["channel"].index(ch)
+    #         for p in h_main.axes["process"]:
+    #             p_idx = h_main.axes["process"].index(p)
+    #             if p not in h_pdf.axes["process"]:
+    #                 continue
+
+    #             # PDF calculation logic (Standard Hessian/MC replicas)
+    #             pdf_vals = h_pdf[{"channel": ch, "process": p}].values()
+    #             nom_pdf = pdf_vals[..., 0]
+    #             replicas = pdf_vals[..., 1:]
+    #             sigma_pdf = np.sqrt(np.sum(np.square(replicas - nom_pdf[..., np.newaxis]), axis=-1))
+
+    #             # Scaling Factors
+    #             rel_sigma = np.divide(sigma_pdf, nom_pdf, out=np.zeros_like(sigma_pdf), where=nom_pdf!=0)
+    #             scale_up = 1.0 + rel_sigma
+    #             scale_dn = np.maximum(1.0 - rel_sigma, 0.0)
+
+    #             # Apply to all EFT coefficients in the HistEFT storage
+    #             for wc_key, coeff_array in view.items():
+    #                 nom_vals = coeff_array[ch_idx, p_idx, idx_nom]['value']
+    #                 nom_vars = coeff_array[ch_idx, p_idx, idx_nom]['variance']
+
+    #                 # Fill the new PDF slots (1:-1 excludes under/overflow)
+    #                 coeff_array[ch_idx, p_idx, idx_up, 1:-1]['value'] = nom_vals[1:-1] * scale_up
+    #                 coeff_array[ch_idx, p_idx, idx_up, 1:-1]['variance'] = nom_vars[1:-1]
+                    
+    #                 coeff_array[ch_idx, p_idx, idx_dn, 1:-1]['value'] = nom_vals[1:-1] * scale_dn
+    #                 coeff_array[ch_idx, p_idx, idx_dn, 1:-1]['variance'] = nom_vars[1:-1]
+
+
+    # def add_pdf_shapes(self, km_dist):
+    #     """Calculates PDF and injects into growth-enabled systematic axis."""
+    #     h_main = self.hists[km_dist]
+    #     h_pdf = self.hists["LHEPDFweights"]
+
+    #     # Note: h_main is grouped/year-correlated, h_pdf is now grouped/year-correlated
+    #     for ch in h_main.axes["channel"]:
+    #         for p in h_main.axes["process"]:
+    #             if p not in h_pdf.axes["process"]:
+    #                 print(f"DEBUG: Process {p} not found in PDF histogram!")
+    #                 continue
+    #             print(f"DEBUG: Adding PDF shapes for {p}")
+
+    #             # Get PDF info from LHEPDFweights
+    #             # PDFindex 0 = nominal, 1-103 = replicas
+    #             pdf_vals = h_pdf[{"channel": ch, "process": p}].values()
+    #             nom_pdf = pdf_vals[..., 0]
+    #             PDFvariations = pdf_vals[..., 1:]
+
+    #             # Calculate standard deviation (Hessian/MC replicas)
+    #             diff_sq = np.square(PDFvariations - nom_pdf[..., np.newaxis])
+    #             sigma_pdf = np.sqrt(np.sum(diff_sq, axis=-1))
+
+    #             # Get the nominal yield from the kinematic distribution (mllbb)
+    #             h_nom_main = h_main[{"channel": ch, "process": p, "systematic": "nominal"}]
+    #             nom_main_vals = h_nom_main.values()
+    #             nom_main_vars = h_nom_main.variances()
+
+    #             # Calculate Up/Down: nom +/- sigma
+    #             # Because it's correlated, we apply the absolute sigma 
+    #             # calculated from the PDF-dedicated histogram
+    #             up_vals = nom_main_vals + sigma_pdf
+    #             down_vals = np.maximum(nom_main_vals - sigma_pdf, 0)
+
+    #             # Inject into main histogram (Growth axis handles the new strings)
+    #             h_main.view(flow=True)[{"channel": ch, "process": p, "systematic": "PDFUp"}] = np.stack([up_vals, nom_main_vars], axis=-1)
+    #             h_main.view(flow=True)[{"channel": ch, "process": p, "systematic": "PDFDown"}] = np.stack([down_vals, nom_main_vars], axis=-1)
+
+
+    def channels(self, km_dist):
+        return list(self.hists[km_dist].axes["channel"])
+
+    def processes(self, km_dist):
+        return list(self.hists[km_dist].axes["process"])
+    
+    def make_scalings_json(self,scalings_json,ch,km_dist,p,wc_names,scalings):
+        print(f"making scalings json for {km_dist}, {p}")
+        scalings = scalings.tolist()
+        scalings_json.append(
+            {
+                "channel": ch + "_" + str(km_dist),
+                "process": p + "_sm",  # NOTE: needs to be in the datacard
+                "parameters": ["cSM[1]"] + [
+                    self.format_wc(wcname) for wcname in wc_names
+                ],
+                "scaling":
+                    scalings[1:], # exclude underflow bin
+            }
+        )
+        return scalings_json
+
+    def format_wc(self,wcname):
+        if wcname in self.rotate:
+            return self.rotate[wcname]
+        lo, hi = self.wc_ranges[wcname]
+        return "%s[0,%.1f,%.1f]" % (wcname, lo, hi)
+    
     def get_selected_wcs(self,km_dist,ch_lst=[]):
         """
             For each process, iterates over every channel and every bin checking the EFT parameterization
@@ -754,28 +890,7 @@ class DatacardMaker():
             dt = time.time() - tic
             print(f"WC Selection Time: {dt:.2f} s")
         return selected_wcs
-
-    def make_scalings_json(self,scalings_json,ch,km_dist,p,wc_names,scalings):
-        scalings = scalings.tolist()
-        scalings_json.append(
-            {
-                "channel": ch + "_" + str(km_dist),
-                "process": p + "_sm",  # NOTE: needs to be in the datacard
-                "parameters": ["cSM[1]"] + [
-                    self.format_wc(wcname) for wcname in wc_names
-                ],
-                "scaling":
-                    scalings[1:], # exclude underflow bin
-            }
-        )
-        return scalings_json
-
-    def format_wc(self,wcname):
-        if wcname in self.rotate:
-            return self.rotate[wcname]
-        lo, hi = self.wc_ranges[wcname]
-        return "%s[0,%.1f,%.1f]" % (wcname, lo, hi)
-
+    
     def analyze(self,km_dist,ch,selected_wcs, crop_negative_bins, wcs_dict):
         """ Handles the EFT decomposition and the actual writing of the ROOT and text datacard files."""
         if not km_dist in self.hists:
@@ -796,26 +911,25 @@ class DatacardMaker():
         else:
             num_j,num_b = 0,0
         num_l = self.get_lep_mult(ch)
-        # if num_l == 2 or num_l == 4:
-        #     num_b = 2
 
         outf_root_name = self.FNAME_TEMPLATE.format(cat=ch,kmvar=km_dist,ext="root")
 
         h = self.hists[km_dist]
         h_sumw2 = None
+
         if f"{km_dist}_sumw2" in self.hists:
             h_sumw2 = self.hists[km_dist+"_sumw2"]
-        elif "systematic" in h.axes.name and "sumw2" in h.axes["systematic"]:
-            h_sumw2 = h.integrate("systematic", "sumw2")
+        elif ("systematic" in h.axes.name) and ("sumw2" in h.axes["systematic"]):
+            h_sumw2 = h[{"systematic": "sumw2"}]
+            print(f"sumw2 found in systematic axis")
         else:
-            msg = "No sumw2 histogram found! Setting errors to 0"
-            print(msg)
+            print("No sumw2 histogram found! Setting errors to 0")
 
         ch_hist = h.integrate("channel",[ch])
         print(f"ch_hist:{ch_hist}")
-        ch_sumw2 = h_sumw2 if h_sumw2 is None else h_sumw2.integrate("channel",[ch])
+        ch_sumw2 = h_sumw2.integrate("channel", [ch]) if h_sumw2 is not None else None
         data_obs = np.zeros((2, ch_hist.dense_axis.extent))
-
+            
         print(f"Generating root file: {outf_root_name}")
         tic = time.time()
         num_h = 0
@@ -824,17 +938,110 @@ class DatacardMaker():
         outf_root_name = os.path.join(self.out_dir,outf_root_name)
         with uproot.recreate(outf_root_name) as f:
             for p,wcs in selected_wcs.items():
-                # TODO This is a hack for now, track this upstream
-                if 'charge_flip' in p and '2l' not in ch:
-                    continue
-                # TODO This is a hack for now, track this upstream
-                if 'fakes' in p and '4l' in ch:
-                    continue
-                if 'charge_flip' in p and ('2los' in ch and 'tau' in ch):
-                    continue
+
+                # --- START OF PDF BLOCK ---
+                # Check if we should calculate PDF shapes for this process
+                is_pdf_skipped = p in self.syst_skip.get("PDF", [])
+                if not is_pdf_skipped and "LHEPDFweights" in self.hists:
+                # if "PDF" not in self.syst_skip.get("PDF", []) or p not in self.syst_skip.get("PDF", []):
+                    # if "LHEPDFweights" in self.hists and p in self.hists["LHEPDFweights"].axes["process"]:
+                    if (km_dist in self.hists["LHEPDFweights"].axes) and (p in self.hists["LHEPDFweights"].axes["process"]):
+                        print(f"LHEPDFWeights found with dense axis {km_dist}, implementing up/down variation. ")
+
+                        ### this version worked but didn't include overflow ### 
+                        # nom_hist_vals = (ch_hist[{'process':p, 'systematic':'nominal'}].as_hist({}).values(flow=True))[0]
+                        # nom_hist_vals = (ch_hist[{'process':p, 'systematic':'nominal'}].as_hist({}).values())
+
+                        # h_pdf = self.hists["LHEPDFweights"]
+                        # h_pdf = h_pdf[{"channel": ch, "process": p}]
+
+                        # # print(f"nominal hist: { ch_hist[{'process':p, 'systematic':'nominal'}]}")
+                        # print(f"nominal hist vals: {nom_hist_vals}")
+                        # # print(f"h_pdf: {h_pdf}")
+
+                        # nominal = h_pdf[{'PDFindex':0}].values() #flow=True
+                        # variations = h_pdf[{"PDFindex": slice(1, None)}].values() #flow=True
+
+                        # diff_sq = np.square(variations - nominal[..., np.newaxis])
+                        # sigma_pdf = np.sqrt(np.sum(diff_sq, axis=-1)) # [1:]
+
+                        # print(f"sigma_PDF: {sigma_pdf}")
+
+                        # pdf_up = nom_hist_vals + sigma_pdf
+                        # pdf_down = np.maximum(nom_hist_vals - sigma_pdf, 0)
+
+                        # # pdf_var = h_pdf[{"channel": ch, "process": p}].variances()[..., 0]
+                        # pdf_var = h_pdf.variances()[..., 0]
+
+                        # # np.append(pdf_up, (nom_hist_vals[-1]*1.015))
+                        # # np.append(pdf_down, (nom_hist_vals[-1] - (nom_hist_vals[-1]*0.015)))
+                        # print(f"pdf_up: {pdf_up}")
+                        # print(f"pdf_down: {pdf_down}")
+                        # print(f"pdf_var: {pdf_var}")
+
+                        ### trying to get the overflow bin
+                        nom_hist_vals = ch_hist[{'process':p, 'systematic':'nominal'}].as_hist({}).values()[0]
+
+                        print(f"\n\n nom_hist: {ch_hist[{'process':p, 'systematic':'nominal'}].as_hist({})}")
+
+                        h_pdf = self.hists["LHEPDFweights"]
+                        h_pdf = h_pdf[{"channel": ch, "process": p}]
+                        print(f"\n\n pdf hist: {h_pdf}")
+
+                        nominal = h_pdf[{'PDFindex':0}].values() #flow=True
+                        variations = h_pdf[{"PDFindex": slice(1, None)}].values() #flow=True
+                        diff_sq = np.square(variations - nominal[..., np.newaxis])
+                        sigma_pdf = np.sqrt(np.sum(diff_sq, axis=-1))
+
+                        nom_overflow = ch_hist[{'process':p, 'systematic':'nominal'}].as_hist({}).values(flow=True)[0][-1]
+                        pdf_nom_overflow = h_pdf[{'PDFindex': 0}].values(flow=True)[-1]
+                        pdf_vars_overflow = h_pdf[{"PDFindex": slice(1, None)}].values(flow=True)[:, -1]
+                        sigma_overflow = np.sqrt(np.sum(np.square(pdf_vars_overflow - pdf_nom_overflow)))
+
+                        nom_full = np.append(nom_hist_vals, nom_overflow)
+                        sigma_full = np.append(sigma_pdf, sigma_overflow)
+                        # pdf_var_full = h_pdf.variances(flow=True)[..., 0][1:]
+                        pdf_var_full = h_pdf[{"PDFindex": 0}].variances(flow=True)[1:]
+
+                        rel_sigma = sigma_full / nom_full
+                        # If the overflow relative uncertainty is > 50%, cap it at the last interior bin's uncertainty
+                        if rel_sigma[-1] > 0.5: 
+                            print(f"Warning: Overflow PDF uncertainty ({rel_sigma[-1]:.2%}) is suspicious. Capping.")
+                            sigma_full[-1] = nom_full[-1] * rel_sigma[-2]
+
+                        print(f"nom_full: {nom_full}")
+                        print(f"sigma_PDF: {sigma_full}")
+                        pdf_up = nom_full + sigma_full
+                        pdf_down = np.maximum(nom_full - sigma_full, 0)
+                        print(f"pdf_up: {pdf_up}")
+                        print(f"pdf_down: {pdf_down}")
+                        print(f"pdf_var: {pdf_var_full}")
+
+                        for syst_name, vals in [("PDFUp", pdf_up), ("PDFDown", pdf_down)]:
+                            hist_name = f"{p}_sm_{syst_name}"
+                            arr = [vals, pdf_var_full] 
+                            # f[hist_name] = to_hist(arr, hist_name, zero_wgts=(p != "fakes"))
+                            f[hist_name] = to_hist(arr, hist_name, zero_wgts=None)
+                            
+                            # Ensure the process entry exists in the dictionary
+                            if f"{p}_sm" not in text_card_info:
+                                text_card_info[f"{p}_sm"] = {"shapes": set(), "rate": -1}
+                            
+                            text_card_info[f"{p}_sm"]["shapes"].add("PDF")
+                            all_shapes.add("PDF")
+
+                # --- END OF PDF BLOCK ---
 
                 proc_hist = ch_hist.integrate("process",[p])
-                proc_sumw2 = ch_sumw2 if ch_sumw2 is None else ch_sumw2.integrate("process",[p])
+                if ch_sumw2 is not None and p in ch_sumw2.axes["process"]:
+                    proc_sumw2 = ch_sumw2.integrate("process", [p])
+                else:
+                    # If the process isn't in sumw2, it has no statistical variance entries
+                    proc_sumw2 = None
+                    if self.verbose:
+                        print(f"Note: Process {p} has no sumw2 entries (likely zero yield).")
+
+                # proc_sumw2 = ch_sumw2 if ch_sumw2 is None else ch_sumw2.integrate("process",[p])
                 if self.verbose:
                     print(f"Decomposing {ch}-{p}")
                 decomposed_templates = self.decompose(proc_hist,proc_sumw2,wcs)
@@ -843,31 +1050,47 @@ class DatacardMaker():
                 if p == "data":
                     data_sm = decomposed_templates.pop("sm")
                     if self.use_real_data:
+                        print(f"getting real data!")
                         if len(data_sm) != 1:
-                            data_sm = next((arr for key, arr in data_sm.items() if key.systematic == 'nominal'), None)
+                            data_sm = next((arr[0] for key, arr in data_sm.items() if key.systematic == 'nominal'), None)
                             print(data_sm)
-                            if len(data_sm) != 1: 
-                                raise RuntimeError("obs data has unexpected number of sparse bins")
+                        if data_sm is None:
+                            raise RuntimeError("Nominal data not found in templates")
+                        if len(data_sm) == 0:
+                            raise RuntimeError("obs data has unexpected number of sparse bins")
+                            # if len(data_sm) != 1:
+                            #     raise RuntimeError("obs data has unexpected number of sparse bins")
                         elif sum(data_obs[0]) != 0:
                             raise RuntimeError("filling obs data more than once!")
-                        for sp_key,arr in data_sm.items():
-                            data_obs += arr
+                        data_obs += data_sm
+                        # for sp_key,arr in data_sm.items():
+                        #     data_obs += arr
                 if not self.use_AAC:
                     decomposed_templates = {k: v for k, v in decomposed_templates.items() if k == 'sm'}
                 for base,v in decomposed_templates.items():
                     proc_name = f"{p}_{base}"
                     col_width = max(len(proc_name),col_width)
-                    text_card_info[proc_name] = {
-                        "shapes": set(),
-                        "rate": -1
-                    }
+                    if proc_name not in text_card_info:
+                        text_card_info[proc_name] = {
+                            "shapes": set(),
+                            "rate": -1
+                        }
                     # There should be only 1 sparse axis at this point, the systematics axis
                     check_zero_arr0 = False
                     check_zero_arr1 = False
+
                     for sp_key,arr in v.items():
                         syst = sp_key.systematic
 
                         if syst == "sumw2": continue
+
+                        syst_base = self.strip_fluctuation(syst)
+                        if syst_base in self.syst_skip:
+                            if p in self.syst_skip[syst_base]:
+                                if self.verbose:
+                                    print(f"\tSkipping shape systematic {syst_base} for process {p}")
+                                continue
+
                         if crop_negative_bins:
                             negative_bin_mask = np.where( arr[0] < 0) # see where bins are negative
                             arr[0][negative_bin_mask] = np.zeros_like( arr[0][negative_bin_mask] )  # set those to zero
@@ -901,8 +1124,9 @@ class DatacardMaker():
                             text_card_info[proc_name]["rate"] = sum_arr
                         else:
                             hist_name = f"{proc_name}_{syst}"
+                            
                             # Systematics in the text datacard don't have the Up/Down postfix
-                            syst_base = syst.replace("Up","").replace("Down","")
+                            syst_base = self.strip_fluctuation(syst) #replace("Up","").replace("Down","")
                             if syst_base in self.syst_shape_decorrelate:
                                 # We want to split this systematic to be uncorrelated between certain
                                 #   processes, so we modify the systematic name to make combine treat
@@ -937,7 +1161,7 @@ class DatacardMaker():
                                 all_shapes.add(syst_base)
                                 text_card_info[proc_name]["shapes"].add(syst_base)
                             syst_width = max(len(syst),syst_width)
-                        zero_out_sumw2 = p != "fakes" and "close" not in p # Zero out sumw2 for all proc but fakes, so that we only do auto stats for fakes
+                        zero_out_sumw2 = False # p != "fakes" and "close" not in p # Zero out sumw2 for all proc but fakes, so that we only do auto stats for fakes
                         f[hist_name] = to_hist(arr,hist_name,zero_wgts=zero_out_sumw2)
 
                         num_h += 1
@@ -1034,54 +1258,6 @@ class DatacardMaker():
                 row = [f"{left_text:<{left_width}}"]
                 for p in proc_order:
                     proc_name = self.get_process(p) # Strips off any "_sm" or "_lin_*" junk
-                    # Need to handle certain systematics in a special way
-                    # if syst_name == "diboson_njets":
-                    #     v = rate_syst.get_process(proc_name,min(num_j + (1 if 'fwd' in outf_root_name else 0), 7)) # fwd jet is an extra jet
-                        # v = rate_syst.get_process(proc_name)
-                        # if isinstance(v,dict):
-                        #     v = v[str(num_j)]
-                    # elif syst_name == "missing_parton":
-                    #     v = rate_syst.get_process(proc_name)
-                    #     if "2los" in ch:
-                    #         ch_key = ch.replace("2los", "2lss").replace("_onZ", "_p")
-                    #     else:
-                    #         ch_key = ch
-                    #     # First strip off any njet and/or bjet labels
-                    #     ch_key = ch.replace(f"_{num_j}j","").replace(f"_{num_b}b","").replace("_1tau", "")
-                    #     # Now construct the category key, matching names in the missing_parton file to the current category
-                    #     if num_l == 2:
-                    #         njet_offset = 4
-                    #         ch_key = ch_key.replace("_onZ", "")
-                    #         ch_key = ch_key.replace("_offZ", "")
-                    #         ch_key = f"{ch_key}_{num_b}b"
-                    #     elif num_l == 3:
-                    #         njet_offset = 2
-                    #         if "_onZ" in ch or "tau" in ch:
-                    #             ch_key = f"{num_l}l_sfz_{num_b}b"
-                    #         elif "_p_offZ" in ch:
-                    #             ch_key = f"{num_l}l{num_b}b_p"
-                    #         elif "_m_offZ" in ch:
-                    #             ch_key = f"{num_l}l{num_b}b_m"
-                    #         elif "tau" in ch:
-                    #             ch_key = f"{num_l}l_sfz_{num_b}b"
-                    #         else:
-                    #             raise ValueError(f"Unable to match {ch} for {syst_name} rate systematic")
-                    #     elif num_l == 4:
-                    #         njet_offset = 2
-                    #         ch_key = f"{ch_key}_{num_b}b"
-                    #     else:
-                    #         raise ValueError(f"Unable to match {ch} for {syst_name} rate systematic")
-                    #     # The bins in the missing_parton root files start indexing from 0
-                    #     bin_idx = num_j - njet_offset
-                    #     if isinstance(v,dict):
-                    #         unc_hi = v[ch_key][bin_idx]     # Attempt to symmeterize
-                    #         unc_lo = max(0.01,2 - unc_hi)   # Clip unc_lo to not go negative
-                    #         # v = f"{v:.{PRECISION}f}"
-                    #         v = f"{unc_lo:.{PRECISION}f}/{unc_hi:.{PRECISION}f}"
-                    #     elif v != "-":
-                    #         raise ValueError(f"The missing_parton systematic isn't a dictionary (ch={ch}): {v}")
-                    # else:
-                        # v = rate_syst.get_process(proc_name)
                     v = rate_syst.get_process(proc_name)
                     row.append(f"{v:>{col_width}}")
                 row = " ".join(row) + "\n"
@@ -1100,9 +1276,7 @@ class DatacardMaker():
         dt = time.time() - tic
         print(f"File Write Time: {dt:.2f} s")
         print(f"Total Hists Written: {num_h}")
-
-    # TODO: Can be a static member function
-
+                        
     def decompose(self,h,sumw2,wcs,vals={}):
         """
             Decomposes the EFT quadratic parameterization coefficients into combinations that result
@@ -1121,12 +1295,13 @@ class DatacardMaker():
         if vals:
             # If we are evaluating at an EFT point, but sumw2 has no EFT info
             try:
-                sm_w2 = sumw2.eval(vals)
+                sm_w2 = sumw2.eval(vals) if sumw2 is not None else None
             except (LookupError, KeyError): #
                 sm_w2 = sumw2.eval({}) 
             
         else:
-            sm_w2 = sumw2.eval({})
+            # sm_w2 = sumw2.eval({})
+            sm_w2 = sumw2.eval({}) if sumw2 is not None else None
 
         sm = add_sumw2_stub(sm,sm_w2)
 
@@ -1173,65 +1348,3 @@ class DatacardMaker():
             print(f"\tTotal terms: {terms}")
 
         return r
-
-# if __name__ == '__main__':
-    # fpath = topeft_path("../analysis/topEFT/histos/may18_fullRun2_withSys_anatest08_np.pkl.gz")
-
-    # tic = time.time()
-    # dc = DatacardMaker(fpath)
-
-    # km_dist = "lj0pt"
-    # chans = ["2lss_m_4j","2lss_4t_m_4j"]
-    # # km_dist = "njets"
-    # # chans = ["2lss_m","2lss_4t_m"]
-
-    # target_selected = {
-    #     "tHq": ["ctp", "cptb", "cQq13", "cbW", "cpQ3", "ctW", "cQq83", "ctG"],
-    #     "tllq": ["cpt", "cptb", "cQlMi", "cQl3i", "ctlTi", "ctli", "cQq13", "cbW", "cpQM", "cpQ3", "ctei", "cQei", "ctW", "ctlSi", "cQq83", "ctZ", "ctG"],
-    #     "ttH": ["cpt", "ctp", "cptb", "cQq81", "cQq11", "ctq8", "ctq1", "cQq13", "cbW", "cpQM", "cpQ3", "ctW", "cQq83", "ctZ", "ctG"],
-    #     "ttll": ["cpt", "cptb", "cQlMi", "cQq81", "cQq11", "cQl3i", "ctq8", "ctlTi", "ctq1", "ctli", "cQq13", "cbW", "cpQM", "cpQ3", "ctei", "cQei", "ctW", "ctlSi", "cQq83", "ctZ", "ctG"],
-    #     "ttlnu": ["cpt", "ctp", "cQlMi", "cQq81", "cQq11", "cQl3i", "ctq8", "ctlTi", "ctq1", "ctli", "cQq13", "cpQM", "cpQ3", "ctW", "ctlSi", "cQq83", "ctZ", "ctG"],
-    #     "tttt": ["cpt", "ctp", "cptb", "cQq81", "cQq11", "ctq8", "ctq1", "cQq13", "cbW", "cpQM", "cpQ3", "ctW", "cQq83", "ctZ", "ctG", "ctt1", "cQt1", "cQt8", "cQQ1"]
-    # }
-
-    # selected_wcs = dc.get_selected_wcs(km_dist)
-    # for p,tar_wcs in target_selected.items():
-    #     if p not in selected_wcs:
-    #         print(f"Skipping {p} for selected WC comparison")
-    #         continue
-    #     sel_wcs = selected_wcs[p]
-    #     print(f"old {p:>5}: {sorted(tar_wcs)}")
-    #     print(f"new {p:>5}: {sorted(sel_wcs)}")
-    #     miss_old = set(tar_wcs).difference(sel_wcs)
-    #     miss_new = sel_wcs.difference(set(tar_wcs))
-
-    #     print(f"Missing from old: {sorted(miss_old)}")
-    #     print(f"Missing from new: {sorted(miss_new)}")
-    #     print("-"*50)
-
-    # for cat in dc.channels(km_dist):
-    #     if not cat in chans:
-    #         continue
-    #     r = dc.analyze(km_dist,cat,selected_wcs, True)
-    # dt = time.time() - tic
-    # print(f"Total Time: {dt:.2f} s")
-
-    # wc_to_terms = {}
-    # h = dc.hists[km_dist]
-    # wcs = ["sm"] + h._wcnames
-
-    # index = 0
-    # for i in range(len(wcs)):
-    #     wc1 = wcs[i]
-    #     wc_to_terms[wc1] = set()
-    #     for j in range(i+1):
-    #         wc2 = wcs[j]
-    #         wc_to_terms[wc1].add(index)
-    #         wc_to_terms[wc2].add(index)
-    #         index += 1
-
-    # for wc in wcs:
-    #     terms = sorted(wc_to_terms[wc])
-    #     s1 = ", ".join([f"{x:>3d}" for x in terms[:6]])
-    #     s2 = terms[-1]
-    #     print(f"{wc:>5}: [{s1}, ... , {s2:>3d} ]")
