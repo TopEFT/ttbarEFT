@@ -145,6 +145,7 @@ def main():
         do_mc_stat=True,
         out_dir=out_dir,
         unblind=False,
+        var_lst=var_lst+['LHEPDFweights']
     )
 
     dists = var_lst if len(var_lst) else dc.hists.keys()

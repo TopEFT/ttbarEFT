@@ -689,109 +689,6 @@ class DatacardMaker():
             h_corr[{"process": p_base}] = summed.view(flow=True)
             
         return h_corr
-    
-    # def add_pdf_shapes(self, km_dist):
-    #     """Calculates PDF scaling by re-mapping the histogram to include new categories."""
-    #     if "LHEPDFweights" not in self.hists:
-    #         return
-
-    #     h_main = self.hists[km_dist]
-    #     h_pdf = self.hists["LHEPDFweights"]
-
-    #     # 1. Create a new axis that includes the original categories plus the PDF ones
-    #     old_syst_axis = h_main.axes["systematic"]
-    #     new_syst_list = list(old_syst_axis) + ["PDFUp", "PDFDown"]
-    #     new_syst_axis = hist.axis.StrCategory(new_syst_list, name="systematic", growth=True)
-
-    #     # 2. Create a new histogram with the expanded axis
-    #     # We keep all other axes the same as h_main
-    #     other_axes = [ax for ax in h_main.axes if ax.name != "systematic"]
-    #     h_new = hist.Hist(new_syst_axis, *other_axes, storage=h_main.storage_type())
-
-    #     # 3. Copy existing data from h_main to h_new
-    #     for syst in old_syst_axis:
-    #         h_new[{"systematic": syst}] = h_main[{"systematic": syst}].view(flow=True)
-
-    #     # Replace the old histogram in the dictionary
-    #     self.hists[km_dist] = h_new
-    #     h_main = self.hists[km_dist] # Point h_main to the new expanded object
-
-    #     # Now define the indices for the loop
-    #     idx_nom = h_main.axes["systematic"].index("nominal")
-    #     idx_up  = h_main.axes["systematic"].index("PDFUp")
-    #     idx_dn  = h_main.axes["systematic"].index("PDFDown")
-
-    #     view = h_main.view(flow=True)
-
-    #     for ch in h_main.axes["channel"]:
-    #         ch_idx = h_main.axes["channel"].index(ch)
-    #         for p in h_main.axes["process"]:
-    #             p_idx = h_main.axes["process"].index(p)
-    #             if p not in h_pdf.axes["process"]:
-    #                 continue
-
-    #             # PDF calculation logic (Standard Hessian/MC replicas)
-    #             pdf_vals = h_pdf[{"channel": ch, "process": p}].values()
-    #             nom_pdf = pdf_vals[..., 0]
-    #             replicas = pdf_vals[..., 1:]
-    #             sigma_pdf = np.sqrt(np.sum(np.square(replicas - nom_pdf[..., np.newaxis]), axis=-1))
-
-    #             # Scaling Factors
-    #             rel_sigma = np.divide(sigma_pdf, nom_pdf, out=np.zeros_like(sigma_pdf), where=nom_pdf!=0)
-    #             scale_up = 1.0 + rel_sigma
-    #             scale_dn = np.maximum(1.0 - rel_sigma, 0.0)
-
-    #             # Apply to all EFT coefficients in the HistEFT storage
-    #             for wc_key, coeff_array in view.items():
-    #                 nom_vals = coeff_array[ch_idx, p_idx, idx_nom]['value']
-    #                 nom_vars = coeff_array[ch_idx, p_idx, idx_nom]['variance']
-
-    #                 # Fill the new PDF slots (1:-1 excludes under/overflow)
-    #                 coeff_array[ch_idx, p_idx, idx_up, 1:-1]['value'] = nom_vals[1:-1] * scale_up
-    #                 coeff_array[ch_idx, p_idx, idx_up, 1:-1]['variance'] = nom_vars[1:-1]
-                    
-    #                 coeff_array[ch_idx, p_idx, idx_dn, 1:-1]['value'] = nom_vals[1:-1] * scale_dn
-    #                 coeff_array[ch_idx, p_idx, idx_dn, 1:-1]['variance'] = nom_vars[1:-1]
-
-
-    # def add_pdf_shapes(self, km_dist):
-    #     """Calculates PDF and injects into growth-enabled systematic axis."""
-    #     h_main = self.hists[km_dist]
-    #     h_pdf = self.hists["LHEPDFweights"]
-
-    #     # Note: h_main is grouped/year-correlated, h_pdf is now grouped/year-correlated
-    #     for ch in h_main.axes["channel"]:
-    #         for p in h_main.axes["process"]:
-    #             if p not in h_pdf.axes["process"]:
-    #                 print(f"DEBUG: Process {p} not found in PDF histogram!")
-    #                 continue
-    #             print(f"DEBUG: Adding PDF shapes for {p}")
-
-    #             # Get PDF info from LHEPDFweights
-    #             # PDFindex 0 = nominal, 1-103 = replicas
-    #             pdf_vals = h_pdf[{"channel": ch, "process": p}].values()
-    #             nom_pdf = pdf_vals[..., 0]
-    #             PDFvariations = pdf_vals[..., 1:]
-
-    #             # Calculate standard deviation (Hessian/MC replicas)
-    #             diff_sq = np.square(PDFvariations - nom_pdf[..., np.newaxis])
-    #             sigma_pdf = np.sqrt(np.sum(diff_sq, axis=-1))
-
-    #             # Get the nominal yield from the kinematic distribution (mllbb)
-    #             h_nom_main = h_main[{"channel": ch, "process": p, "systematic": "nominal"}]
-    #             nom_main_vals = h_nom_main.values()
-    #             nom_main_vars = h_nom_main.variances()
-
-    #             # Calculate Up/Down: nom +/- sigma
-    #             # Because it's correlated, we apply the absolute sigma 
-    #             # calculated from the PDF-dedicated histogram
-    #             up_vals = nom_main_vals + sigma_pdf
-    #             down_vals = np.maximum(nom_main_vals - sigma_pdf, 0)
-
-    #             # Inject into main histogram (Growth axis handles the new strings)
-    #             h_main.view(flow=True)[{"channel": ch, "process": p, "systematic": "PDFUp"}] = np.stack([up_vals, nom_main_vars], axis=-1)
-    #             h_main.view(flow=True)[{"channel": ch, "process": p, "systematic": "PDFDown"}] = np.stack([down_vals, nom_main_vars], axis=-1)
-
 
     def channels(self, km_dist):
         return list(self.hists[km_dist].axes["channel"])
@@ -941,11 +838,17 @@ class DatacardMaker():
 
                 # --- START OF PDF BLOCK ---
                 # Check if we should calculate PDF shapes for this process
+                print(f"DEBUG: Checking PDF for {p} in {km_dist}")
+                print(f"DEBUG: {km_dist} in axes.name? {km_dist in self.hists['LHEPDFweights'].axes.name}")
+                print(f"DEBUG: {p} in PDF processes? {p in self.hists['LHEPDFweights'].axes['process']}")
+
                 is_pdf_skipped = p in self.syst_skip.get("PDF", [])
+                print(f"DEBUG:is_pdf_skipped?: {is_pdf_skipped}")
+                print(f"DEBUG:is LHEPDFweights in self.hists?: {"LHEPDFweights" in self.hists}")
                 if not is_pdf_skipped and "LHEPDFweights" in self.hists:
                 # if "PDF" not in self.syst_skip.get("PDF", []) or p not in self.syst_skip.get("PDF", []):
                     # if "LHEPDFweights" in self.hists and p in self.hists["LHEPDFweights"].axes["process"]:
-                    if (km_dist in self.hists["LHEPDFweights"].axes) and (p in self.hists["LHEPDFweights"].axes["process"]):
+                    if (km_dist in self.hists["LHEPDFweights"].axes.name) and (p in self.hists["LHEPDFweights"].axes["process"]):
                         print(f"LHEPDFWeights found with dense axis {km_dist}, implementing up/down variation. ")
 
                         ### this version worked but didn't include overflow ### 
