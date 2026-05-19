@@ -286,6 +286,10 @@ class DatacardMaker():
         rate_syst_path = kwargs.pop("rate_systs_path", "params/rate_systs.json")
         self.rate_systs = self.load_systematics(rate_syst_path)
 
+
+        with open(ttbarEFT_path("params/ttLOuncert.json") , "r") as f:
+            self.ttLOuncert = json.load(f)
+
         # Samples to be excluded from the datacard, should correspond to names before group_processes is run
         self.ignore = [
             # "DYJetsToLL", "DY10to50", "DY50",
@@ -934,6 +938,42 @@ class DatacardMaker():
                             all_shapes.add("PDF")
 
                 # --- END OF PDF BLOCK ---
+                print(f'DEBUG: right before LO block. p = {p}')
+                if p == "tt":
+                    print(f"DEBUG: pp==tt")
+                    ttLO_uncert = {}
+                    if km_dist in self.ttLOuncert:
+                        print(f"DEBUG: km_dist in self.ttLOuncert")
+                        print(f"DEBUG: channels available: {self.ttLOuncert[km_dist]}")
+                        if ch in self.ttLOuncert[km_dist]:
+                            print(f"DEBUG: ch in self.ttLOuncert[km_dist]")
+
+                            unc_info = self.ttLOuncert[km_dist][ch]
+                            unc_up = np.array(unc_info["up"])
+                            unc_down = np.array(unc_info["down"])
+
+                            nominal_hist = ch_hist[
+                                {'process': p, 'systematic': 'nominal'}
+                            ].as_hist({})
+
+                            for syst_name, vals in [
+                                ("LOtoNLOUp", unc_up),
+                                ("LOtoNLODown", unc_down)
+                            ]:
+                                hist_name = f"{p}_sm_{syst_name}"
+                                arr = [vals, np.zeros_like(vals)]
+                                f[hist_name] = to_hist(
+                                    arr,
+                                    hist_name,
+                                    zero_wgts=None
+                                )
+
+                                if f"{p}_sm" not in text_card_info:
+                                    text_card_info[f"{p}_sm"] = {"shapes": set(),"rate": -1}
+
+                                text_card_info[f"{p}_sm"]["shapes"].add("LOtoNLO")
+                                all_shapes.add("LOtoNLO")
+
 
                 proc_hist = ch_hist.integrate("process",[p])
                 if ch_sumw2 is not None and p in ch_sumw2.axes["process"]:

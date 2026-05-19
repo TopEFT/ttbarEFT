@@ -144,7 +144,7 @@ def main():
         do_nuisance=True,    # Set to False if you want to skip systematics entirely for now
         do_mc_stat=True,
         out_dir=out_dir,
-        unblind=False,
+        unblind=unblind,
         var_lst=var_lst+['LHEPDFweights']
     )
 

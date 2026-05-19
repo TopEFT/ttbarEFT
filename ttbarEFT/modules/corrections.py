@@ -593,13 +593,19 @@ def ApplyJetSystematics(year, corr_type, original_obj, syst_var):
         return getattr(original_obj[base_field], suffix)
 
 
-def GetMETunclust(year, original_obj, syst_var):
+def GetMETunclust(events, year, original_obj, syst_var):
 
     met_x = original_obj.pt * np.cos(original_obj.phi) 
     met_y = original_obj.pt * np.sin(original_obj.phi) 
+    # met_dx = original_obj.MetUnclustEnUpDeltaX 
+    # met_dy = original_obj.MetUnclustEnUpDeltaY 
 
-    met_dx = original_obj.MetUnclustEnUpDeltaX 
-    met_dy = original_obj.MetUnclustEnUpDeltaY 
+    raw_MET = events.MET
+    rawMET_x = raw_MET.pt * np.cos(raw_MET.phi) 
+    rawMET_y = raw_MET.pt * np.sin(raw_MET.phi) 
+
+    met_dx = np.abs(met_x-rawMET_x)
+    met_dy = np.abs(met_y-rawMET_y)
 
     if "Up" in syst_var: 
         new_met_x = met_x + met_dx

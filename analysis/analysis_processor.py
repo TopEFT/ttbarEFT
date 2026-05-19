@@ -109,11 +109,13 @@ class AnalysisProcessor(processor.ProcessorABC):
         with open(ttbarEFT_path("params/channels.yaml"), "r") as f:
             cat_dict=yaml.safe_load(f)
         if self._doSR:
-            self._channels = cat_dict['SR_CHANNELS'][lep_cat]
+            # self._channels = cat_dict['SR_CHANNELS'][lep_cat]
+            self._channels = cat_dict['SR_CHANNELS_2j3j'][lep_cat]
             # self._channels = cat_dict['SR_CHANNELS_mllbb'][lep_cat]
         else: 
             # self._channels = cat_dict['CR_CHANNELS_allb'][lep_cat]
-            self._channels = cat_dict['CR_CHANNELS_0b'][lep_cat]
+            # self._channels = cat_dict['CR_CHANNELS_0b'][lep_cat]
+            self._channels = cat_dict['CR_CHANNELS_1b'][lep_cat]
 
         # print(f"\nProcessor Settings for {lep_cat}: ")
         # print(f"\thist_lst: {hist_lst}")
@@ -351,7 +353,7 @@ class AnalysisProcessor(processor.ProcessorABC):
                     print(f"\n doing METunclust systmatic")
                     cleanedJets['isGood'] = tt_os.is_pres_jet(cleanedJets)
                     goodJets =  cleanedJets[cleanedJets.isGood]
-                    met = tt_cor.GetMETunclust(year, original_obj=corrected_met, syst_var=kinematic_var)
+                    met = tt_cor.GetMETunclust(events, year, original_obj=corrected_met, syst_var=kinematic_var)
 
                 else: 
                     correctedJets = tt_cor.ApplyJetSystematics(year=year, corr_type='jets', original_obj=cleanedJets, syst_var=kinematic_var)
@@ -492,6 +494,7 @@ class AnalysisProcessor(processor.ProcessorABC):
 
             selections.add("atleast_1j", (njets>=1))
             selections.add("atleast_2j", (njets>=2))
+            selections.add("atleast_3j", (njets>=3))
             selections.add("atleast_4j", (njets>=4))
 
             ######### Fill dense axes variables ##########
