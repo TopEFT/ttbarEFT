@@ -7,6 +7,8 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     package_data={
         "ttbarEFT": [
+            "data/LOtoNLO/*.pkl.gz",
+            "data/POG/TOP/*.onnx",
             "params/*.json",
             "params/*.yaml",
             "data/POG/*/*.json.gz",

@@ -938,29 +938,43 @@ class DatacardMaker():
                             all_shapes.add("PDF")
 
                 # --- END OF PDF BLOCK ---
-                print(f'DEBUG: right before LO block. p = {p}')
                 if p == "tt":
-                    print(f"DEBUG: pp==tt")
+
                     ttLO_uncert = {}
                     if km_dist in self.ttLOuncert:
-                        print(f"DEBUG: km_dist in self.ttLOuncert")
-                        print(f"DEBUG: channels available: {self.ttLOuncert[km_dist]}")
                         if ch in self.ttLOuncert[km_dist]:
-                            print(f"DEBUG: ch in self.ttLOuncert[km_dist]")
+
+                            native_nominal = ch_hist[{'process': p, 'systematic': 'nominal'}].as_hist({}).values(flow=True)[0]
 
                             unc_info = self.ttLOuncert[km_dist][ch]
                             unc_up = np.array(unc_info["up"])
                             unc_down = np.array(unc_info["down"])
 
+                            # print(f"\n--- BIN ALIGNMENT DEBUG FOR {ch} ---")
+                            # print(f"Native nominal array (with flow) length: {len(native_nominal)}")
+                            # print(f"Native nominal values: {native_nominal}")
+                            # print(f"Your unc_up array length: {len(unc_up)}")
+                            # print(f"Your unc_up values: {unc_up}")
+                            # print(f"Slices passed to ROOT (Native nominal stripped [1:]): {native_nominal[1:]}")
+                            # print(f"Slices passed to ROOT (Your unc_up stripped [1:]): {unc_up[1:]}")
+                            
                             nominal_hist = ch_hist[
                                 {'process': p, 'systematic': 'nominal'}
                             ].as_hist({})
 
-                            for syst_name, vals in [
-                                ("LOtoNLOUp", unc_up),
-                                ("LOtoNLODown", unc_down)
+                            try:
+                                n_jets, _ = self.get_jet_mults(ch)
+                                syst_base_name = f"LOtoNLO{n_jets}j"
+                            except Exception:
+                                # Fallback safe-guard in case a channel format differs
+                                syst_base_name = "LOtoNLO"
+
+                            for fluctuation, vals in [
+                                ("Up", unc_up),
+                                ("Down", unc_down)
                             ]:
-                                hist_name = f"{p}_sm_{syst_name}"
+                                syst_fullname = f"{syst_base_name}{fluctuation}"
+                                hist_name = f"{p}_sm_{syst_fullname}"
                                 arr = [vals, np.zeros_like(vals)]
                                 f[hist_name] = to_hist(
                                     arr,
@@ -971,8 +985,8 @@ class DatacardMaker():
                                 if f"{p}_sm" not in text_card_info:
                                     text_card_info[f"{p}_sm"] = {"shapes": set(),"rate": -1}
 
-                                text_card_info[f"{p}_sm"]["shapes"].add("LOtoNLO")
-                                all_shapes.add("LOtoNLO")
+                                text_card_info[f"{p}_sm"]["shapes"].add(syst_base_name)
+                                all_shapes.add(syst_base_name)
 
 
                 proc_hist = ch_hist.integrate("process",[p])

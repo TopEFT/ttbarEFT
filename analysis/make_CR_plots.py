@@ -327,7 +327,8 @@ def make_CR_fig(year, h_data, h_mc, var, procs_to_group=None, err_p=None, err_m=
         )
 
     # General formatting
-    hep.cms.label("Work in progress", data=True, lumi=lumi_dict[year], com=13, loc=0, ax=ax)                   #if data=False adds "Simulation" to label
+    hep.cms.label("Private Work", data=True, lumi=lumi_dict[year], com=13, loc=0, ax=ax, fontsize=25)
+    # hep.cms.label("Work in progress", data=True, lumi=lumi_dict[year], com=13, loc=0, ax=ax)                   #if data=False adds "Simulation" to label
     # hep.cms.lumitext(f"(13 TeV)", ax=ax)                                    #TODO add lumi to this
     ax.ticklabel_format(axis='y', style="sci", scilimits=(-3, 3), useMathText=True)   # Scientific notation
     ax.get_yaxis().get_offset_text().set_position((-0.085, 1.05))           # Shift multiplier position out
@@ -452,7 +453,8 @@ def make_SR_MC_fig(year, h_mc, var, procs_to_group=None, err_p=None, err_m=None,
 
 
     # General formatting
-    hep.cms.label("Work in progress", data=True, lumi=lumi_dict[year], com=13, loc=0, ax=ax)                   #if data=False adds "Simulation" to label
+    hep.cms.label("Private Work", data=False, lumi=lumi_dict[year], com=13, loc=0, ax=ax, fontsize=25)
+    # hep.cms.label("Work in progress", data=True, lumi=lumi_dict[year], com=13, loc=0, ax=ax)                   #if data=False adds "Simulation" to label
     # hep.cms.lumitext(f"(13 TeV)", ax=ax)                                    #TODO add lumi to this
     ax.ticklabel_format(axis='y', style="sci", scilimits=(-3, 3), useMathText=True)   # Scientific notation
     ax.get_yaxis().get_offset_text().set_position((-0.085, 1.05))           # Shift multiplier position out
@@ -469,7 +471,7 @@ def make_SR_MC_fig(year, h_mc, var, procs_to_group=None, err_p=None, err_m=None,
     ax.set_ylabel("Events")
     ax.set_xmargin(0)                                                       # makes 0 on x-axis start at left edge
     handles, labels = ax.get_legend_handles_labels()
-    ax.legend(handles[::-1], labels[::-1], loc='upper right', fontsize=16)  # Makes colors on plot appear top to bottom same order as plot 
+    ax.legend(handles[::-1], labels[::-1], loc='upper right', fontsize=20)  # Makes colors on plot appear top to bottom same order as plot 
 
     rax.set_ylim([0.5, 1.5])                    # rax.set_ylim([0.5, 1.5])
     rax.set_yticks([0.5, 1.0, 1.5])             # rax.set_yticks([0.8, 1.0, 1.2, 1.4]) 
@@ -585,7 +587,8 @@ def make_MC_comp_fig(year, h_num, h_denom, var, procs_to_group=None, err_p=None,
         )
 
     # General formatting
-    hep.cms.label("Work in progress", data=False, lumi=lumi_dict[year], com=13, loc=0, ax=ax)                   #if data=False adds "Simulation" to label
+    hep.cms.label("Private Work", data=False, lumi=lumi_dict[year], com=13, loc=0, ax=ax, fontsize=25)
+    # hep.cms.label("Work in progress", data=False, lumi=lumi_dict[year], com=13, loc=0, ax=ax)                   #if data=False adds "Simulation" to label
     # hep.cms.lumitext(f"(13 TeV)", ax=ax)                                    #TODO add lumi to this
     ax.ticklabel_format(axis='y', style="sci", scilimits=(-3, 3), useMathText=True)   # Scientific notation
     ax.get_yaxis().get_offset_text().set_position((-0.085, 1.05))           # Shift multiplier position out
@@ -753,7 +756,8 @@ def make_3MC_comp_fig(year, h_num, h_num2, h_denom, var, procs_to_group=None, er
         )
 
     # General formatting
-    hep.cms.label("Work in progress", data=False, lumi=lumi_dict[year], com=13, loc=0, ax=ax)                   #if data=False adds "Simulation" to label
+    hep.cms.label("Private Work", data=False, lumi=lumi_dict[year], com=13, loc=0, ax=ax, fontsize=25)
+    # hep.cms.label("Work in progress", data=False, lumi=lumi_dict[year], com=13, loc=0, ax=ax)                   #if data=False adds "Simulation" to label
     # hep.cms.lumitext(f"(13 TeV)", ax=ax)                                    #TODO add lumi to this
     ax.ticklabel_format(axis='y', style="sci", scilimits=(-3, 3), useMathText=True)   # Scientific notation
     ax.get_yaxis().get_offset_text().set_position((-0.085, 1.05))           # Shift multiplier position out
@@ -1007,7 +1011,6 @@ def make_CR_plots_withsyst(year, hists_mc, hists_data, var_list=[], syst_list=[]
         h_mc_allch = hists_mc[var].as_hist({})
         h_data_allch = hists_data[var].as_hist({})
 
-        print(f"list(h_mc.axes['channel']): {list(h_mc_allch.axes['channel'])}")
         for ch in list(h_mc_allch.axes['channel']):
         # if "channel" in h_mc.axes.name:
             h_mc = h_mc_allch[{'channel':ch}]
@@ -1074,6 +1077,9 @@ def make_CR_plots_withsyst(year, hists_mc, hists_data, var_list=[], syst_list=[]
                 'ee_allj_0b': 'ee_0b',
                 'em_allj_0b': 'em_0b',
                 'mm_allj_0b': 'mm_0b',
+                'ee_allj_1b':'ee_1b',
+                'em_allj_1b':'em_1b',
+                'mm_allj_1b':'mm_1b',
             }
             plt.figtext(0.14, 0.84, plot_label[ch], fontsize=20, fontstyle='italic')  #0.72 
             # ax.set_title(plottitle)
@@ -1172,16 +1178,16 @@ def make_SR_MCplots_withsyst(year, hists_mc, var_list=[], syst_list=[], procs_to
                 ylog=ylog,
                 syst_label=syst_label)
 
-            rax.set_ylim([0.95, 1.05])
-            rax.set_yticks([0.95, 1.0, 1.05])
-            rax.axhline(y=0.975, color='black', linestyle='--', alpha=0.5)
-            rax.axhline(y=1.025, color='black', linestyle='--', alpha=0.5)
+            # rax.set_ylim([0.95, 1.05])
+            # rax.set_yticks([0.95, 1.0, 1.05])
+            # rax.axhline(y=0.975, color='black', linestyle='--', alpha=0.5)
+            # rax.axhline(y=1.025, color='black', linestyle='--', alpha=0.5)
 
-            if 'mm' in ch: 
-                rax.set_ylim([0.9999, 1.0001])
-                rax.set_yticks([0.9999, 1.0, 1.0001])
+            # if 'mm' in ch: 
+            #     rax.set_ylim([0.98, 1.02])
+            #     rax.set_yticks([0.98, 1.0, 1.02])
 
-            plt.figtext(0.14, 0.84, fig_syst_label, fontsize=20, fontstyle='italic')  #0.72 
+            # plt.figtext(0.14, 0.84, ch, fontsize=20, fontstyle='italic')  #0.72 
             # ax.set_title(plottitle)
             ax.set_title(ch, fontsize=20, pad=40)
 
@@ -1197,15 +1203,14 @@ def make_SR_MCplots_withsyst(year, hists_mc, var_list=[], syst_list=[], procs_to
             plt.close(fig)
 
 
-def run_CR_plots(args, hist_dict_MC, hist_dict_data):
+def run_CR_plots(args, hist_dict_MC, hist_dict_data, ylog=False, var_list=[]):
     outdir = f"{args.outdir}"
     if not os.path.exists(outdir):
         os.makedirs(outdir, exist_ok=True)
 
     for channel, ch_dict in hist_dict_MC.items():    
-        if channel != 'em':
-            continue
-        var_list = []
+        # if channel != 'em':
+        #     continue
         # if channel == 'em': 
             # var_list = ['njets', 'nbjets', 'l0eta', 'l0phi', 'j0pt', 'j0eta', 'j0phi', 'MET', 'mll']
         # else: 
@@ -1217,7 +1222,7 @@ def run_CR_plots(args, hist_dict_MC, hist_dict_data):
             var_list=var_list, 
             syst_list=[], 
             procs_to_group=process_grouping, 
-            ylog=False, 
+            ylog=ylog, 
             do_mcerr=True, 
             plottitle=args.title, 
             figtitle=args.outtitle,
@@ -1283,13 +1288,14 @@ def run_SR_MC_plots_variations(args, hist_dict_MC):
 
     for channel, ch_dict in hist_dict_MC.items():
         # if channel == 'em': continue
+        # if channel == 'ee': continue
         all_systs = get_shape_syst_lst(ch_dict['mllbb'].as_hist({}))
-        all_systs += ['PDF']
+        # all_systs += ['PDF']
         # all_systs = ['PDF']
         # var_list = ['mllbb', 'l0eta']
-        var_list = ['mllbb']
-        for syst in ['trigSF']:
-        # for syst in all_systs: 
+        var_list = ['mllbb', 'MET']
+        # for syst in ['trigSF']:
+        for syst in all_systs: 
             make_SR_MCplots_withsyst(
                 year=args.year, 
                 hists_mc=ch_dict, 
@@ -1379,10 +1385,11 @@ if __name__ == "__main__":
     # hist_dict_num2 = pickle.load(gzip.open("SMEFTsim_toppt_noLOcorr_0423.pkl.gz"))
     # run_LOtoNLO_mllbb_plots_3MC(args, hist_dict_MC, hist_dict_num2, hist_dict_data)
 
-    # run_SR_MC_plots(args, hist_dict_MC, mc_err=True)
-    # run_SR_MC_plots_variations(args, hist_dict_MC)
+    run_SR_MC_plots(args, hist_dict_MC, mc_err=True)
+    run_SR_MC_plots_variations(args, hist_dict_MC)
 
-    run_CR_plots(args, hist_dict_MC, hist_dict_data)
+    # run_CR_plots(args, hist_dict_MC, hist_dict_data)
+    # run_CR_plots(args, hist_dict_MC, hist_dict_data, ylog=True, var_list=['l0pt'])
 
     # for channel, ch_dict in hist_dict_MC.items():
         # plot all variables

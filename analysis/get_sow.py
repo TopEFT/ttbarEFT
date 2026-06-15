@@ -29,7 +29,7 @@ if __name__ == '__main__':
         
     for file in files: 
         print(f"FILENAME: {file} \n")
-        hists = pickle.load(gzip.open(file))['sow']
+        hists = pickle.load(gzip.open(file))['mtt']  # ['sow']
         # hists = utils.get_hist_from_pkl(file, allow_empty=False)
         for name in hists.keys():
             h_main=hists[name]

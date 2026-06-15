@@ -71,10 +71,12 @@ class AnalysisProcessor(processor.ProcessorABC):
         for name, info in axes.items():
             if 'variable' in info: 
                 dense_axis = hist.axis.Variable(info['variable'], name=name, label=info['label'])
-                sumw2_axis = hist.axis.Variable(info['variable'], name=name+'_sumw2', label=info['label'] + ' sum of w^2')
+                # sumw2_axis = hist.axis.Variable(info['variable'], name=name+'_sumw2', label=info['label'] + ' sum of w^2')
+            elif name == "l0pt":
+                dense_axis = hist.axis.Variable([28, 34, 39, 45, 52, 61, 71, 83, 97, 115, 134, 158, 188, 223, 268, 338, 400, 500], name='l0pt', label="$p_T$ (leading lepton) [GeV]")
             else:
                 dense_axis = hist.axis.Regular(*info['regular'], name=name, label=info['label'])
-                sumw2_axis = hist.axis.Regular(*info['regular'], name=name+'_sumw2', label=info['label'] + ' sum of w^2')
+                # sumw2_axis = hist.axis.Regular(*info['regular'], name=name+'_sumw2', label=info['label'] + ' sum of w^2')
 
             histograms[name] = HistEFT(
                 proc_axis, 
@@ -107,9 +109,22 @@ class AnalysisProcessor(processor.ProcessorABC):
                     raise Exception(f"Error: Cannot specify hist \'{hist_to_include}\', it is not defined in the processor.")
             self._hist_lst = hist_lst 
 
-        print(f"\n histograms.keys(): {histograms.keys()}")
-        print(f"\n hist_lst: {hist_lst}")
-        print(f"\n doSR: {self._doSR}")
+        cat_dict = None
+        with open(ttbarEFT_path("params/channels.yaml"), "r") as f:
+            cat_dict=yaml.safe_load(f)
+        if self._doSR:
+            # self._channels = cat_dict['SR_CHANNELS'][lep_cat]
+            self._channels = cat_dict['SR_CHANNELS_2j3j'][lep_cat]
+            # self._channels = cat_dict['SR_CHANNELS_mllbb'][lep_cat]
+        else: 
+            # self._channels = cat_dict['CR_CHANNELS_allb'][lep_cat]
+            # self._channels = cat_dict['CR_CHANNELS_0b'][lep_cat]
+            self._channels = cat_dict['CR_CHANNELS_1b'][lep_cat]
+
+
+        # print(f"\n histograms.keys(): {histograms.keys()}")
+        # print(f"\n hist_lst: {hist_lst}")
+        # print(f"\n doSR: {self._doSR}")
 
     @property
     def accumulator(self):
@@ -199,17 +214,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         print(f"\n\n")
 
         ######### Load Event Categories ##########
-        cat_dict = None
-        with open(ttbarEFT_path("params/channels.yaml"), "r") as f:
-            cat_dict=yaml.safe_load(f)
-        if self._doSR:
-            # channels = cat_dict['SR_CHANNELS_mllbb'][lep_cat]
-            channels = cat_dict['SR_CHANNELS'][lep_cat]
-            # channels = cat_dict['SR_CHANNELS_extra4j'][lep_cat]
-        else: 
-            channels = cat_dict['CR_CHANNELS_allb'][lep_cat]
-
-        print(f"\n channels: {channels}")
+        channels = self._channels
 
         ######### Initialize Objects #########
         met  = events.MET
@@ -235,10 +240,10 @@ class AnalysisProcessor(processor.ProcessorABC):
         ######### Lepton Selection ##########
         # add lepton scale factors and trigger efficiencies
         if not isData: 
-            tt_cor.AttachElectronSF(ele_good, year)    
-            tt_cor.AttachMuonSF(mu_good, year)    
-            tt_cor.AttachElecTrigEff(ele_good, year)
-            tt_cor.AttachMuonTrigEff(mu_good, year) 
+            ele_good = tt_cor.AttachElectronSF(ele_good, year)    
+            mu_good = tt_cor.AttachMuonSF(mu_good, year)    
+            ele_good = tt_cor.AttachElecTrigEff(ele_good, year)
+            mu_good = tt_cor.AttachMuonTrigEff(mu_good, year) 
 
         leps = ak.concatenate([ele_good, mu_good], axis=1)
         leps_sorted = leps[ak.argsort(leps.pt, axis=-1,ascending=False)] 
@@ -309,10 +314,7 @@ class AnalysisProcessor(processor.ProcessorABC):
             LOtoNLO_weights = tt_cor.GetNLO_Weight(events, dataset)
             NLOtoNNLO_weights = tt_cor.GetNNLO_EventWeight(events, dataset)
             weights_obj_base.add('ttbar_toppt', LOtoNLO_weights*NLOtoNNLO_weights*(sow/sow_toppt))
-
-            # LOtoNLO_weights = tt_cor.GetNLO_Weight(events, dataset)
-            # NLOtoNNLO_weights = tt_cor.GetNNLO_EventWeight(events, dataset)
-            # weights_obj_base.add('ttbar_toppt', NLOtoNNLO_weights*(sow/self._samples[dataset]["nSumOfWeights_NNLOpt"]))
+            # weights_obj_base.add('ttbar_toppt', NLOtoNNLO_weights*(sow/self._samples[dataset]["nSumOfWeights_NNLOpt"]))            
 
 
         # for Run2, Jet Corrections are applied to Data, only run this on MC
@@ -331,11 +333,6 @@ class AnalysisProcessor(processor.ProcessorABC):
             corrected_met = tt_cor.ApplyJetCorrections(year, corr_type='met', isData=isData, era=run_era).build(MET=raw_met, corrected_jets=cleanedJets)
 
         ######### The rest of the processor is inside this loop over systs that affect object kinematics  ###########
-        print(f"\n\n")
-        print(f"kinematic_variations: {kinematic_variations}")
-        print(f"")
-        print(f"\n\n")
-
         for kinematic_var in kinematic_variations: 
 
             if isData: 
@@ -365,7 +362,7 @@ class AnalysisProcessor(processor.ProcessorABC):
                     print(f"\n doing METunclust systmatic")
                     cleanedJets['isGood'] = tt_os.is_pres_jet(cleanedJets)
                     goodJets =  cleanedJets[cleanedJets.isGood]
-                    met = tt_cor.GetMETunclust(year, original_obj=corrected_met, syst_var=kinematic_var)
+                    met = tt_cor.GetMETunclust(events, year, original_obj=corrected_met, syst_var=kinematic_var)
 
                 else: 
                     correctedJets = tt_cor.ApplyJetSystematics(year=year, corr_type='jets', original_obj=cleanedJets, syst_var=kinematic_var)
@@ -481,12 +478,11 @@ class AnalysisProcessor(processor.ProcessorABC):
             selections.add("exactly_1j", (njets==1))
             selections.add("exactly_2j", (njets==2))
             selections.add("exactly_3j", (njets==3))
-            selections.add("exactly_4j", (njets==4))
 
             selections.add("atleast_1j", (njets>=1))
             selections.add("atleast_2j", (njets>=2))
+            selections.add("atleast_3j", (njets>=3))
             selections.add("atleast_4j", (njets>=4))
-            selections.add("atleast_5j", (njets>=5))
 
             ######### Fill dense axes variables ##########
             dense_axis_variables = {}
@@ -524,12 +520,7 @@ class AnalysisProcessor(processor.ProcessorABC):
                     wgt_var_lst = wgt_var_lst + event_weight_variations
 
 
-            print(f"\n wgt_var_lst: {wgt_var_lst}")
             for wgt_fluct in wgt_var_lst: 
-
-                if wgt_fluct == "nominal": 
-                    print(f"running nominal case\n")
-
                 if isData:
                     weight = np.ones_like(events.event)
                 elif (wgt_fluct == "nominal") or (wgt_fluct in obj_correction_syst_lst):
@@ -541,24 +532,17 @@ class AnalysisProcessor(processor.ProcessorABC):
                         continue        # if there is no up/down fluctuation for this category, don't fill a hist
 
                 for chan_id, chan_settings in channels.items():
-                    if wgt_fluct == "nominal": 
-                        print(f"running over channel: {chan_id} \n")
                     chan_name = chan_settings['name']
                     mask_list = chan_settings['masks']
 
                     cuts_list = ['jetvetomap', 'HEMvetomap']
-
                     if isData:
                         cuts_list.append('is_good_lumi')
-                    
                     cuts_list.append(lep_cat)
                     cuts_list.extend(mask_list)
 
                     event_selection_mask = selections.all(*(cuts_list))
                     eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
-
-                    if wgt_fluct == "nominal": 
-                        print(f"going into variable loop\n")
 
                     for dense_axis_name, dense_axis_vals in dense_axis_variables.items():
                         # if the category requires zero jets, don't fill jet histograms
@@ -574,6 +558,7 @@ class AnalysisProcessor(processor.ProcessorABC):
                             print(f"Skipping \"{dense_axis_name}\", it is not in the list of hists to include")
                             continue                       
 
+
                         # Fill the histos
                         axes_fill_info_dict = {
                             dense_axis_name : dense_axis_vals[event_selection_mask],
@@ -583,13 +568,48 @@ class AnalysisProcessor(processor.ProcessorABC):
                             "weight"        : weight[event_selection_mask],
                             "eft_coeff"     : eft_coeffs_cut,
                         }
-
-
-                        # print(f"\n filling hist: {dense_axis_name}")
                         hout[dense_axis_name].fill(**axes_fill_info_dict)
 
-                        if self._do_errors and wgt_fluct=='nominal': 
 
+                        if (dense_axis_name == 'mllbb') and (wgt_fluct == "nominal") and (self._doPDF) and (not isData):
+                            # if "TW_NoFullyHadronicDecays" not in histAxisName:
+                            if "TT01j2l" in histAxisName:
+                                pdf_mask = (ak.num(events.LHEPdfWeight) == 103)
+
+                                if not ak.any(pdf_mask):
+                                    continue
+
+                                norm_ratios = np.array([
+                                    (sow/self._samples[dataset][f"nSumOfWeights_LHEPDFweights{i}"]) for i in range(103)
+                                ])
+
+                                current_pdf_weights = ak.to_regular(events.LHEPdfWeight[pdf_mask])
+                                current_selection = event_selection_mask[pdf_mask]                      # apply event selection mask and pdf mask
+                                current_weight = weight[pdf_mask]
+                                current_mllbb = mllbb[pdf_mask]
+
+                                if eft_coeffs is not None:
+                                    current_eft = eft_coeffs[pdf_mask]
+                                    event_weights_SM = calc_eft_weights(current_eft, np.zeros(len(self._wc_names_lst)))
+                                    pdf_weights_unmasked = current_pdf_weights * norm_ratios * event_weights_SM[:, np.newaxis]
+                                else:
+                                    pdf_weights_unmasked = current_pdf_weights * norm_ratios
+
+                                pdf_weights = (pdf_weights_unmasked * current_weight[:, np.newaxis])[current_selection]
+                                pdf_index = ak.local_index(pdf_weights, axis=1)
+
+                                # Use [:, np.newaxis] to turn shape (nEvents,) into (nEvents, 1)
+                                mllbb_for_broadcast = current_mllbb[current_selection][:, np.newaxis]
+                                mllbb_stacked, index_stacked = ak.broadcast_arrays(mllbb_for_broadcast, pdf_index)
+                                hout['LHEPDFweights'].fill(
+                                    mllbb=ak.flatten(mllbb_stacked),
+                                    process=histAxisName,
+                                    channel=chan_name,
+                                    PDFindex=ak.flatten(index_stacked),
+                                    weight=ak.flatten(pdf_weights),
+                                )
+
+                        if self._do_errors and wgt_fluct=='nominal': 
                             if eft_coeffs is not None:
                                 event_weights_SM = calc_eft_weights(eft_coeffs,np.zeros(len(self._wc_names_lst)))
                                 sumw2 = np.square(weight*event_weights_SM)
@@ -604,7 +624,6 @@ class AnalysisProcessor(processor.ProcessorABC):
                                 'weight'                    : sumw2[event_selection_mask],
                                 'eft_coeff'                 : None,
                             }
-
                             hout[dense_axis_name].fill(**sumw2axes_fill_info_dict)
 
         return hout

@@ -1299,9 +1299,10 @@ if __name__ == "__main__":
 
     # run_LOtoNLO_mllbb_plots(args, hist_dict_MC, hist_dict_data)
 
-    # hist_dict_num2 = pickle.load(gzip.open("SMEFTsim_toppt_noLOcorr_0428.pkl.gz"))
-    hist_dict_num2 = pickle.load(gzip.open("SMEFTsim_toppt_norwgt.pkl.gz"))
-    run_LOtoNLO_mllbb_plots_3MC(args, hist_dict_MC, hist_dict_num2, hist_dict_data, "3MCcomp_")
+    # # hist_dict_num2 = pickle.load(gzip.open("SMEFTsim_toppt_noLOcorr_0428.pkl.gz"))
+    # hist_dict_num2 = pickle.load(gzip.open("SMEFTsim_toppt_norwgt.pkl.gz"))
+    hist_dict_num2 = pickle.load(gzip.open("SMEFTsim_toppt_norwgt_2j3j.pkl.gz"))
+    run_LOtoNLO_mllbb_plots_3MC(args, hist_dict_MC, hist_dict_num2, hist_dict_data, outtitle)
 
     # run_SR_MC_plots(args, hist_dict_MC)
     # run_SR_MC_plots(args, hist_dict_MC, mc_err=False)

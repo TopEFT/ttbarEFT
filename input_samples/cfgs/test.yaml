@@ -4,6 +4,7 @@ redirector: 'file:///project01/ndcms/hnelson2/' # access to files on vast
 jsonFiles:
   # - "../input_samples/sample_jsons/tests/ddr_test.json"
   # - "../input_samples/sample_jsons/tests/powheg_test.json"
-  - "../input_samples/sample_jsons/background_samples/central_UL/UL17_WJetsToLNu_ptSkim.json"
+  # - "../input_samples/sample_jsons/background_samples/central_UL/UL17_WJetsToLNu_ptSkim.json"
+  - "../input_samples/sample_jsons/data_samples/DoubleEG_B_ver1_HIPM_UL2016_ptSkim.json"
   # - "../input_samples/sample_jsons/tests/DoubleEG_test.json"
 

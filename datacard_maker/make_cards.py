@@ -142,7 +142,7 @@ def main():
         prepared_pkl,
         year_lst=[],         # Processes all years found in pkl
         do_nuisance=True,    # Set to False if you want to skip systematics entirely for now
-        do_mc_stat=True,
+        do_mc_stat=do_mc_stat,
         out_dir=out_dir,
         unblind=unblind,
         var_lst=var_lst+['LHEPDFweights']
