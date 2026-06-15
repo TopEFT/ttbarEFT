@@ -181,7 +181,7 @@ example usage
 python make_cards.py "../analysis/SR_ALL_2j3j_260519.pkl.gz" --out-dir "260520_FINAL" --do-mc-stat --do-nuisance --unblind
 ```
 
-# Running Combine
+# Combine
 Everything is based on the [py3Combine branch of the EFTFit repo](https://github.com/TopEFT/EFTFit/tree/py3Combine). I didn't try the "new fancy install script". A summary of the setup instructions that I used is below but this should be identical to that README.
 Then checkout ttbarEFT. 
 - The main two scripts (`Fitter/scripts/EFTFitter.py` and `Fitter/scripts/EFTPlotter.py`) have a lot of hard-coding for the WCs used in the multilepton analysis. 
