@@ -1,0 +1,17 @@
+{
+    "rate_uncertainties" : {
+        "lumi": 1.016,
+        "smxsec": {
+            "tt": 1.05,
+            "tW": 1.15,
+            "DY": 1.15, 
+            "Others": 1.25
+        }
+    },
+    "correlations" : {
+        "tt": {"smxsec": "tt"},
+        "tW": {"smxsec": "tW"},
+        "DY": {"smxsec": "DY"},
+        "Others": {"smxsec": "Others"}
+    }
+}

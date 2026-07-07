@@ -1,0 +1,48 @@
+{
+  "xsec": 77.343,
+  "old_xsec": 77.0803,
+  "year": "2017",
+  "treeName": "Events",
+  "histAxisName": "TT01j2l_UL17_mtt_0to700",
+  "options": "",
+  "era": "",
+  "WCnames": [
+    "cQd1",
+    "ctj1",
+    "cQj31",
+    "ctj8",
+    "ctd1",
+    "ctd8",
+    "ctGRe",
+    "ctGIm",
+    "cQj11",
+    "cQj18",
+    "ctu8",
+    "cQd8",
+    "ctu1",
+    "cQu1",
+    "cQj38",
+    "cQu8"
+  ],
+  "files": [
+    "/store/user/hnelson2/mc/ttbarEFT_Run2/UL17/postLHE/v3/NAOD_TTto2L2Nu_1Jets_smeft_MTT_0to700_v1/NAOD-00000_1156889.root",
+    "/store/user/hnelson2/mc/ttbarEFT_Run2/UL17/postLHE/v3/NAOD_TTto2L2Nu_1Jets_smeft_MTT_0to700_v1/NAOD-00000_908448.root"
+  ],
+  "nEvents": 13573075,
+  "nSumOfWeights": 1.88361406e+09,
+  "isData": false,
+  "path": [
+    "/store/user/hnelson2/mc/ttbarEFT_Run2/UL17/postLHE/v3/NAOD_TTto2L2Nu_1Jets_smeft_MTT_0to700_v1",
+    "/store/user/hnelson2/mc/ttbarEFT_Run2/UL17/postLHE/v3/NAOD_TTto2L2Nu_1Jets_smeft_MTT_0to700_v2"
+  ],
+  "nSumOfWeights_ISRUp": 1946912027.2103052,
+  "nSumOfWeights_ISRDown": 1806623611.5721602,
+  "nSumOfWeights_FSRUp": 1881229491.9700098,
+  "nSumOfWeights_FSRDown": 1881024408.8304179,
+  "nSumOfWeights_renormUp": 1578314815.8937314,
+  "nSumOfWeights_renormDown": 2289151758.889694,
+  "nSumOfWeights_factUp": 1768051078.773803,
+  "nSumOfWeights_factDown": 2009006005.5964165,
+  "nSumOfWeights_renormfactUp": 1481544183.8286889,
+  "nSumOfWeights_renormfactDown": 2441619127.462514
+}

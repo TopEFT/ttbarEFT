@@ -1,0 +1,134 @@
+{
+	"SR_axes": {
+	    "njets":{
+	        "regular": [6, 2, 8],
+	        "label": "njets"
+	    },
+	    "nbjets": {
+	    	"regular": [5, 0, 5],
+	    	"label": "nbjets"
+	    },
+	    "mll": {
+	    	"regular": [50, 0, 1000],
+	    	"label": "mll [GeV]"
+	    },
+		"mllbb": {
+			"variable": [40, 190, 220, 255, 290, 330, 375, 425, 485, 555, 635, 725, 825, 1000, 1300, 2000],
+			"label": "mllbb [GeV]"
+		},
+	    "ptll": {
+	    	"regular": [25, 0, 500],
+	    	"label": "$p_T(ll)$ [GeV]"
+	    },
+	    "ptllbb": {
+	    	"regular": [50, 0, 1000],
+	    	"label": "$p_T(llbb)$ [GeV]"
+	    },
+	    "l0pt": {
+        	"regular": [25, 0, 500],
+        	"label": "$p_T$ (leading lepton) [GeV]"
+    	},
+    	"l0eta": {
+    		"regular": [20, -3, 3],
+    		"label": "$\\eta$ (leading lepton)"
+    	},
+    	"l0phi": {
+    		"regular": [32, -4, 4],
+    		"label": "$\\phi$ (leading lepton)"
+    	},
+    	"lldphi": {
+    		"regular": [32, -4, 4],
+    		"label": "$\\Delta \\phi (ll)$"
+    	},
+    	"MET": {
+    		"regular": [15, 0, 300],
+    		"label": "MET [GeV]"
+    	},
+    	"j0pt": {
+    		"regular": [35, 0, 700],
+    		"label": "$p_T$ (leading jet) [GeV]"
+    	},
+      	"j0eta": {
+    		"regular": [24, -3, 3],
+    		"label": "$\\eta$ (leading jet)"
+    	},
+    	"j0phi": {
+    		"regular": [32, -4, 4],
+    		"label": "$\\phi$ (leading jet)"
+    	}
+	},
+	"CR_axes" : {
+	    "njets":{
+	        "regular": [8, 0, 8],
+	        "label": "njets"
+	    },
+	    "nleps": {
+	    	"regular": [5, 0, 5],
+	    	"label": "nleps"
+	    },
+	    "nbjets": {
+	    	"regular": [5, 0, 5],
+	    	"label": "nbjets"
+	    },
+	    "mll": {
+	    	"regular": [50, 0, 1000],
+	    	"label": "mll [GeV]"
+	    },
+		"mllZ": {
+			"regular": [40, 70, 110], 
+			"label": "mll (Z window) [GeV]"
+		},
+		"mllbb": {
+			"variable": [40, 160, 190, 220, 255, 290, 330, 375, 425, 485, 555, 635, 725, 825, 1000, 1300, 2000],
+			"label": "mllbb [GeV]"
+		},
+	    "ptll": {
+	    	"regular": [25, 0, 500],
+	    	"label": "$p_T(ll)$ [GeV]"
+	    },
+	    "l0pt": {
+        	"regular": [25, 0, 500],
+        	"label": "$p_T$ (leading lepton) [GeV]"
+    	},
+    	"l0eta": {
+    		"regular": [20, -3, 3],
+    		"label": "$\\eta$ (leading lepton)"
+    	},
+    	"l0phi": {
+    		"regular": [32, -4, 4],
+    		"label": "$\\phi$ (leading lepton)"
+    	},
+   	    "l1pt": {
+        	"regular": [24, 0, 500],
+        	"label": "$p_T$ (subleading lepton) [GeV]"
+    	},
+    	"l1eta": {
+    		"regular": [24, -3, 3],
+    		"label": "$\\eta$ (subleading lepton)"
+    	},
+    	"l1phi": {
+    		"regular": [32, -4, 4],
+    		"label": "$\\phi$ (subleading lepton)"
+    	},
+    	"j0pt": {
+    		"regular": [35, 0, 700],
+    		"label": "$p_T$ (leading jet) [GeV]"
+    	},
+    	"j0eta": {
+    		"regular": [24, -3, 3],
+    		"label": "$\\eta$ (leading jet)"
+    	},
+    	"j0phi": {
+    		"regular": [32, -4, 4],
+    		"label": "$\\phi$ (leading jet)"
+    	},	
+	    "mt2":{
+       		"variable": [0,10,20,30,40,50,60,70,80,90,100,110,120,140,160,180,220,500],
+        	"label": "$m_{T2}$ [GeV]"
+    	}, 
+    	"MET": {
+    		"regular": [15, 0, 300],
+    		"label": "MET [GeV]"
+    	}
+	}
+}

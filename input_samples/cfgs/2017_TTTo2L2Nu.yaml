@@ -1,0 +1,7 @@
+### 2017 Non-EFT MC Samples for Control Regions ###
+
+ceph:
+  redirector : 'file:///cms/cephfs/data/' 
+  # redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
+  jsonFiles: 
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_TTTo2L2Nu.json'

@@ -1,0 +1,16 @@
+### 2017 Non-EFT MC Samples for Control Regions ###
+
+# vast:
+  # redirector : 'file:///cms/cephfs/data/' # direct file access
+  # redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
+  # redirector: 'file:///project01/ndcms/hnelson2/' # access to files on vast
+    # jsonFiles: 
+    # - '../input_samples/sample_jsons/background_samples/central_UL/UL17_TTTo2L2Nu_ptSkim.json'
+
+ceph:
+  # redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
+  redirector : 'file:///cms/cephfs/data/' # direct file access
+  jsonFiles:
+    #  - '../input_samples/sample_jsons/background_samples/central_UL/UL18_TTTo2L2Nu.json'
+    # - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_TTTo2L2Nu.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTTo2L2Nu.json'

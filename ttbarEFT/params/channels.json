@@ -1,0 +1,30 @@
+{
+	"ttbar_CHANNELS":{
+		"ee": {
+			"jet_lst":
+				["=1", "=2", ">2"],
+			"bjet_lst": 
+				[]
+		},
+		"mm": {
+			"jet_lst":["=1", "=2", ">2"]
+		},
+		"em":{
+			"jet_lst":["=1", "=2", ">2"]
+		}	
+	},
+	"CR_CHANNELS":{
+		"lep_flav_lst": ["ee", "mm", "em"]	
+	},
+	"CR_CHANNELS_JETS":{
+		"ee":{
+			"jet_list": ["exactly_0j", "atleast_1j"]
+		}, 
+		"mm":{
+			"jet_list": ["exactly_0j", "atleast_1j"]
+		},
+		"em": {
+			"jet_lst": ["exactly_0j"],
+		}
+	}
+}

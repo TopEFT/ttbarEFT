@@ -1,0 +1,21 @@
+#Centrally produced ttbar dilep EFT samples 
+#created in mtt bins
+
+redirector : 'file:///cms/cephfs/data/' # direct file access
+  # redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
+
+jsonFiles:
+  - ../input_samples/sample_jsons/signal_samples/UL16APV_TT01j2l_mtt0to700.json    
+  - ../input_samples/sample_jsons/signal_samples/UL16APV_TT01j2l_mtt700to900.json
+  - ../input_samples/sample_jsons/signal_samples/UL16APV_TT01j2l_mtt900toInf.json
+  - ../input_samples/sample_jsons/signal_samples/UL16_TT01j2l_mtt0to700.json  
+  - ../input_samples/sample_jsons/signal_samples/UL16_TT01j2l_mtt700to900.json  
+  - ../input_samples/sample_jsons/signal_samples/UL16_TT01j2l_mtt900toInf.json 
+  - ../input_samples/sample_jsons/signal_samples/UL17_TT01j2l_mtt0to700.json   
+  - ../input_samples/sample_jsons/signal_samples/UL17_TT01j2l_mtt700to900.json
+  - ../input_samples/sample_jsons/signal_samples/UL17_TT01j2l_mtt900toInf.json 
+  - ../input_samples/sample_jsons/signal_samples/UL18_TT01j2l_mtt0to700.json     
+  - ../input_samples/sample_jsons/signal_samples/UL18_TT01j2l_mtt700to900.json
+  - ../input_samples/sample_jsons/signal_samples/UL18_TT01j2l_mtt900toInf.json
+
+

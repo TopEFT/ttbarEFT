@@ -1,0 +1,103 @@
+#Centrally produced ttbar dilep EFT samples 
+#created in mtt bins
+ceph:
+  # redirector : 'file:///cms/cephfs/data/' # direct file access
+  redirector: 'root://cmsxrootd.crc.nd.edu/' # access to ND files
+  jsonFiles:
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_TTTo2L2Nu.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTTo2L2Nu.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_TTTo2L2Nu.json'
+
+vast: 
+  redirector: 'file:///project01/ndcms/hnelson2/' # access to files on vast
+  jsonFiles:
+    ### Powheg ttbar ###
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_TTTo2L2Nu_ptSkim.json'
+    ### Data - 2016APV ###
+    - '../input_samples/sample_jsons/data_samples/DoubleEG_B_ver1_HIPM_UL2016_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/DoubleEG_B_ver2_HIPM_UL2016_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/DoubleEG_C_HIPM_UL2016_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/DoubleEG_D_HIPM_UL2016_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/DoubleEG_E_HIPM_UL2016_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/DoubleEG_F_HIPM_UL2016_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_B_ver1_HIPM_UL2016_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_B_ver2_HIPM_UL2016_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_C_HIPM_UL2016_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_D_HIPM_UL2016_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_E_HIPM_UL2016_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_F_HIPM_UL2016_ptSkim.json'
+    ### Data - 2016 ###
+    - '../input_samples/sample_jsons/data_samples/DoubleEG_F_UL2016_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/DoubleEG_G_UL2016_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/DoubleEG_H_UL2016_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_F_UL2016_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_G_UL2016_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_H_UL2016_ptSkim.json'
+    ### Data - 2017 ###
+    - '../input_samples/sample_jsons/data_samples/DoubleEG_B_UL2017_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/DoubleEG_C_UL2017_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/DoubleEG_D_UL2017_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/DoubleEG_E_UL2017_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/DoubleEG_F_UL2017_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_B_UL2017_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_C_UL2017_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_D_UL2017_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_E_UL2017_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_F_UL2017_ptSkim.json'
+    ### Data - 2018 ###
+    - '../input_samples/sample_jsons/data_samples/EGamma_A_UL2018_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/EGamma_B_UL2018_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/EGamma_C_UL2018_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/EGamma_D_UL2018_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_A_UL2018_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_B_UL2018_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_C_UL2018_ptSkim.json'
+    - '../input_samples/sample_jsons/data_samples/SingleMuon_D_UL2018_ptSkim.json'
+    ### MC - 2016APV ###
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_TW_antitop_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_TW_top_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_DY10to50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_DY50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_TTGJets_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_TTWJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_TTZToLLNuNu_M_10_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_WJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_WWTo2L2Nu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_WZTo3LNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16APV_ZZTo4L_ptSkim.json'
+    ### MC - 2016 ###
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TW_antitop_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TW_top_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_DY10to50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_DY50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTGJets_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTWJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_TTZToLLNuNu_M_10_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WWTo2L2Nu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_WZTo3LNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL16_ZZTo4L_ptSkim.json'
+    ### MC - 2017 ###
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_TW_antitop_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_TW_top_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_DY10to50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_DY50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_TTGJets_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_TTWJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_TTZToLLNuNu_M_10_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_WJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_WWTo2L2Nu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_WZTo3LNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL17_ZZTo4L_ptSkim.json'
+    ### MC - 2018 ###
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_TW_antitop_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_TW_top_5f_NoFullyHadronicDecays_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_DY10to50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_DY50_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_TTGJets_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_TTWJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_TTZToLLNuNu_M_10_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_WJetsToLNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_WWTo2L2Nu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_WZTo3LNu_ptSkim.json'
+    - '../input_samples/sample_jsons/background_samples/central_UL/UL18_ZZTo4L_ptSkim.json'

@@ -19,6 +19,10 @@ NanoAODSchema.warn_missing_crossrefs = False
 import hist
 from topcoffea.modules.histEFT import HistEFT
 import topcoffea.modules.eft_helper as efth
+import ttbarEFT.modules.corrections as tt_cor 
+import topcoffea.modules.corrections as tc_cor
+from ttbarEFT.modules.processor_tools import calc_eft_weights
+
 
 # Main analysis processor
 class AnalysisProcessor(processor.ProcessorABC):
@@ -35,14 +39,9 @@ class AnalysisProcessor(processor.ProcessorABC):
         print("\n\n")
 
         proc_axis = hist.axis.StrCategory([], name="process", growth=True)
-        chan_axis = hist.axis.StrCategory([], name="channel", growth=True)
+        weights_axis = hist.axis.Regular(bins=1, start=0, stop=2, name="SumOfWeights", label="SumOfWeights")
 
         self._histo_dict = {
-            "sow" :     HistEFT(
-                            proc_axis,
-                            hist.axis.Regular(bins=1, start=0, stop=2, name="sow", label="sum of weights for all events"), 
-                            wc_names=wc_names_lst, 
-                            label="Events"),
             "sow_norm": HistEFT(
                             proc_axis,
                             hist.axis.Regular(bins=1, start=0, stop=2, name="sow_norm", label="normalized sum of weights for all events"), 
@@ -53,7 +52,37 @@ class AnalysisProcessor(processor.ProcessorABC):
                             hist.axis.Regular(bins=1, start=0, stop=2, name="nEvents", label="number of events"), 
                             wc_names=wc_names_lst, 
                             label="Events"),
+
+            "SumOfWeights":                 HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
+            "SumOfWeights_ISRUp":           HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
+            "SumOfWeights_ISRDown":         HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
+            "SumOfWeights_FSRUp":           HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
+            "SumOfWeights_FSRDown":         HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
+
+            "SumOfWeights_renormUp":        HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
+            "SumOfWeights_renormDown":      HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
+            "SumOfWeights_factUp":          HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
+            "SumOfWeights_factDown":        HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
+            "SumOfWeights_renormfactUp":    HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
+            "SumOfWeights_renormfactDown":  HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
+            "SumOfWeights_hdampUp":         HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
+            "SumOfWeights_hdampDown":       HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
+            "SumOfWeights_toppt":           HistEFT(proc_axis, weights_axis, wc_names=wc_names_lst),
         }
+
+        self._histo_dict['sow_LHEPDFweights'] = hist.Hist(
+            proc_axis, 
+            weights_axis, 
+            hist.axis.Integer(0, 103, name="PDFindex", label="LHEPDFweight Index"),
+            storage=hist.storage.Double()
+        )
+
+        self._histo_dict["event_quality"] = hist.Hist(
+            proc_axis,
+            hist.axis.StrCategory(["total", "bad_pdf"], name="type"),
+            storage=hist.storage.Double()
+        )
+
 
     @property
     def columns(self):
@@ -73,10 +102,7 @@ class AnalysisProcessor(processor.ProcessorABC):
         # Extract the EFT quadratic coefficients and optionally use them to calculate the coefficients on the w**2 quartic function
         # eft_coeffs is never Jagged so convert immediately to numpy for ease of use.
         eft_coeffs = ak.to_numpy(events['EFTfitCoefficients']) if hasattr(events, "EFTfitCoefficients") else None
-        eft_w2_coeffs = efth.calc_w2_coeffs(eft_coeffs,self._dtype) if (self._do_errors and eft_coeffs is not None) else None
-
-        jets = events.GenJet
-        njets = ak.num(jets)
+        # eft_w2_coeffs = efth.calc_w2_coeffs(eft_coeffs,self._dtype) if (self._do_errors and eft_coeffs is not None) else None
 
         # Get nominal wgt
         counts = np.ones_like(events['event'])
@@ -84,43 +110,103 @@ class AnalysisProcessor(processor.ProcessorABC):
         if eft_coeffs is None:
             # Basically any central MC samples
             wgts = events["genWeight"]
+        
         norm = xsec/sow
 
+        # attach PS and Qscale weights to events object 
+        tc_cor.AttachPSWeights(events)
+        tt_cor.AttachScaleWeights(events)
 
-        ####### Fill Histogram #######
+        # get arrays of top pt reweights
+        LOtoNLO_weights = tt_cor.GetNLO_Weight(events, dataset)
+        NLOtoNNLO_weights = tt_cor.GetNNLO_EventWeight(events, dataset)
+
+        ### hdamp ###
+        hdampUp_weights = tt_cor.GetHdampReweight(events, dataset, var='up')
+        hdampDown_weights = tt_cor.GetHdampReweight(events, dataset, var='down')
+
+        ### LHEPdfWeights ###
+        if eft_coeffs is not None:
+            event_weights_SM = calc_eft_weights(eft_coeffs,np.zeros(len(self._wc_names_lst)))
+            pdf_weights = (events.LHEPdfWeight*wgts*event_weights_SM)
+        else: 
+            pdf_weights = (events.LHEPdfWeight*wgts)
+        pdf_index = ak.local_index(pdf_weights, axis=1)
+
+        counts_stacked, index_stacked = ak.broadcast_arrays(counts, pdf_index)
+
+
+        ####### Fill Histograms #######
         hout = self._histo_dict
-
-        sow_fill_info = {
-            "sow"       : counts, 
-            "process"   : hist_axis_name, 
-            "weight"    : wgts, 
-            "eft_coeff" : eft_coeffs,
-        }
 
         sow_norm_fill_info = {
             "sow_norm"  : counts, 
-            "process"   : hist_axis_name, 
+            "process"   : dataset, 
             "weight"    : wgts*norm, 
             "eft_coeff" : eft_coeffs,
         }
+        hout["sow_norm"].fill(**sow_norm_fill_info)
 
         # Here, weight = counts instead of wgts because this hist is just counting the number
         # of raw events in the file, not effected by the weighting of the event
         nevents_fill_info = {
             "nEvents"   : counts, 
-            "process"   : hist_axis_name, 
+            "process"   : dataset, 
             "weight"    : counts,
             "eft_coeff" : None,
         }
-
-        hout["sow"].fill(**sow_fill_info)
-        hout["sow_norm"].fill(**sow_norm_fill_info)
         hout["nEvents"].fill(**nevents_fill_info)
+
+        # Nominal
+        hout["SumOfWeights"].fill(process=dataset, SumOfWeights=counts, weight=wgts, eft_coeff=eft_coeffs) #, eft_err_coeff=eft_w2_coeffs)
+        
+        # Fill ISR/FSR histos
+        hout["SumOfWeights_ISRUp"].fill(process=dataset,   SumOfWeights=counts, weight=wgts*events.ISRUp,   eft_coeff=eft_coeffs) # , eft_err_coeff=eft_w2_coeffs)
+        hout["SumOfWeights_ISRDown"].fill(process=dataset, SumOfWeights=counts, weight=wgts*events.ISRDown, eft_coeff=eft_coeffs) # , eft_err_coeff=eft_w2_coeffs)
+        hout["SumOfWeights_FSRUp"].fill(process=dataset,   SumOfWeights=counts, weight=wgts*events.FSRUp,   eft_coeff=eft_coeffs) # , eft_err_coeff=eft_w2_coeffs)
+        hout["SumOfWeights_FSRDown"].fill(process=dataset, SumOfWeights=counts, weight=wgts*events.FSRDown, eft_coeff=eft_coeffs) # , eft_err_coeff=eft_w2_coeffs) 
+       
+        # Fill renorm/fact histos
+        hout["SumOfWeights_renormUp"].fill(process=dataset,       SumOfWeights=counts, weight=wgts*events.renormUp,       eft_coeff=eft_coeffs) # , eft_err_coeff=eft_w2_coeffs)
+        hout["SumOfWeights_renormDown"].fill(process=dataset,     SumOfWeights=counts, weight=wgts*events.renormDown,     eft_coeff=eft_coeffs) # , eft_err_coeff=eft_w2_coeffs)
+        hout["SumOfWeights_factUp"].fill(process=dataset,         SumOfWeights=counts, weight=wgts*events.factUp,         eft_coeff=eft_coeffs) # , eft_err_coeff=eft_w2_coeffs)
+        hout["SumOfWeights_factDown"].fill(process=dataset,       SumOfWeights=counts, weight=wgts*events.factDown,       eft_coeff=eft_coeffs) # , eft_err_coeff=eft_w2_coeffs)
+        hout["SumOfWeights_renormfactUp"].fill(process=dataset,   SumOfWeights=counts, weight=wgts*events.renormfactUp,   eft_coeff=eft_coeffs) # , eft_err_coeff=eft_w2_coeffs)
+        hout["SumOfWeights_renormfactDown"].fill(process=dataset, SumOfWeights=counts, weight=wgts*events.renormfactDown, eft_coeff=eft_coeffs) # , eft_err_coeff=eft_w2_coeffs)        
+        
+        hout["SumOfWeights_hdampUp"].fill(process=dataset, SumOfWeights=counts, weight=wgts*hdampUp_weights, eft_coeff=eft_coeffs)
+        hout["SumOfWeights_hdampDown"].fill(process=dataset, SumOfWeights=counts, weight=wgts*hdampDown_weights, eft_coeff=eft_coeffs)
+        hout["SumOfWeights_toppt"].fill(process=dataset, SumOfWeights=counts, weight=wgts * LOtoNLO_weights * NLOtoNNLO_weights, eft_coeff=eft_coeffs)
+
+
+        hout['sow_LHEPDFweights'].fill(
+            SumOfWeights=ak.flatten(counts_stacked),
+            process= dataset,
+            PDFindex=ak.flatten(index_stacked),
+            weight=ak.flatten(pdf_weights),
+        )
+
+        # # version of toppt for just the NNLO reweighting
+        # hout["SumOfWeights_toppt"].fill(process=dataset, SumOfWeights=counts, weight=wgts * NLOtoNNLO_weights, eft_coeff=eft_coeffs)
+
+        # # count how many events don't have the correct 103 LHEPdfWeights
+        # bad_pdf_mask = (ak.num(events.LHEPdfWeight) != 103)
+        # n_bad_events = ak.sum(bad_pdf_mask)
+        # n_total_events = len(events)
+
+        # # Fill the quality tracker
+        # hout["event_quality"].fill(
+        #     process=dataset,
+        #     type="total",
+        #     weight=n_total_events
+        # )
+        # hout["event_quality"].fill(
+        #     process=dataset,
+        #     type="bad_pdf",
+        #     weight=n_bad_events
+        # )
 
         return hout
 
-
     def postprocess(self, accumulator):
         return accumulator
-
-

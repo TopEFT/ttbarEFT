@@ -1,0 +1,1863 @@
+{
+    "schema_version": 2,
+    "description": "This json file contains different scale factors centrally derived by the Muon POG. Corrections are supplied for various reconstructions, working points, IDs, isolation cuts, and resonances (Z or JPsi). In general, the scale factors are factorized into ID*ISO*HLT, and the names follow the next convention: NUM_{NumeratorNAME}_DEN_{DenominatorNAME} where 'NumeratorNAME' can be 'TightID' and denominator can be 'TrackerMuons', for example. Nominal scale factors and uncertainties are provided. 'nominal', 'stat', 'syst', 'systup', and 'systdown' are provided for all the cases. Additional systematic uncertainties may be included such as 'massBin', 'AltSig', etc. Please note the different meanings of the input labels.    \n 'nominal'  : Nominal central scale factor value    \n 'systup'   : Combined statistical+systematic up boundary (Consistent with XPOG format)    \n 'systdown' : Combined statistical+systematic down boundary (Consistent with XPOG format)    \n 'stat'     : Statistical uncertainty    \n 'syst'     : Systematic uncertainty    \n",
+    "corrections": [
+        {
+            "name": "NUM_GlobalMuons_DEN_TrackerMuonProbes",
+            "description": "NUM_GlobalMuons_DEN_TrackerMuonProbes",
+            "version": 1,
+            "inputs": [
+                {
+                    "name": "abseta",
+                    "type": "real",
+                    "description": "Probe abseta"
+                },
+                {
+                    "name": "p",
+                    "type": "real",
+                    "description": "Probe p"
+                },
+                {
+                    "name": "scale_factors",
+                    "type": "string",
+                    "description": "Choose nominal scale factor or one of the uncertainties"
+                }
+            ],
+            "output": {
+                "name": "weight",
+                "type": "real",
+                "description": "Output scale factor (nominal) or uncertainty"
+            },
+            "data": {
+                "nodetype": "binning",
+                "input": "abseta",
+                "edges": [
+                    0.0,
+                    1.6,
+                    2.4
+                ],
+                "content": [
+                    {
+                        "nodetype": "binning",
+                        "input": "p",
+                        "edges": [
+                            50.0,
+                            100.0,
+                            150.0,
+                            200.0,
+                            300.0,
+                            400.0,
+                            600.0,
+                            1500.0,
+                            Infinity
+                        ],
+                        "content": [
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0005029852287394594
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.00022513027030401922
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9946767316559455
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.995179716884685
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.994173746427206
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.000494004692292733
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 4.788037198188988e-05
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.998800788326214
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9992947930185068
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9983067836339212
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 2.1625654311741016e-07
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0006750134576028403
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 6.626160719597207e-05
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 1.0000137254512496
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 1.0006887389088523
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9993387119936468
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 4.3489217826930826e-07
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0007541185467138654
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 9.863090095962868e-05
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9995845194795191
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 1.000338638026233
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9988304009328053
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0017027788189710644
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.00028384549694204786
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9992249431529346
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 1.0009277219719057
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9975221643339636
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.002842388101869708
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.0006177458021082161
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.99913895478771
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 1.0019813428895796
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9962965666858403
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.00966548422148791
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.0024552207571447715
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9931851169410526
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 1.0028506011625404
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9835196327195647
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.30714828845728864
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 9.790135613418904e-06
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.40641518439040425
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.713563472847693
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.0992668959331156
+                                    }
+                                ]
+                            }
+                        ],
+                        "flow": "error"
+                    },
+                    {
+                        "nodetype": "binning",
+                        "input": "p",
+                        "edges": [
+                            50.0,
+                            100.0,
+                            150.0,
+                            200.0,
+                            300.0,
+                            400.0,
+                            600.0,
+                            1500.0,
+                            Infinity
+                        ],
+                        "content": [
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 1.0
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 1.0
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 1.0
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0021963859779862253
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.00021770625517242292
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9938289032667473
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9960252892447335
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9916325172887611
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0007768864625726959
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 3.9627453878698926e-05
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9947943728760474
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9955712593386201
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9940174864134748
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0006765370363622035
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.0001208105132277093
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9897490649000416
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9904256019364037
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9890725278636794
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 8.899054578792587e-07
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0011336082600601272
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.00020936519094694184
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9877783620979351
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9889119703579953
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.986644753837875
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0015646292017510463
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.00021726449706060968
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9829373215770086
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9845019507787597
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9813726923752576
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0033087800137047763
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.0008812128846508727
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9785343460884148
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9818431261021197
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.97522556607471
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.06082191145009177
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.007977752905885704
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.8676030500458312
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9284249614959229
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.8067811385957394
+                                    }
+                                ]
+                            }
+                        ],
+                        "flow": "error"
+                    }
+                ],
+                "flow": "error"
+            }
+        },
+        {
+            "name": "NUM_GlobalMuons_DEN_TrackerMuonProbes_MCeff",
+            "description": "NUM_GlobalMuons_DEN_TrackerMuonProbes_MCeff",
+            "version": 1,
+            "inputs": [
+                {
+                    "name": "abseta",
+                    "type": "real",
+                    "description": "Probe abseta"
+                },
+                {
+                    "name": "p",
+                    "type": "real",
+                    "description": "Probe p"
+                },
+                {
+                    "name": "scale_factors",
+                    "type": "string",
+                    "description": "Choose nominal scale factor or one of the uncertainties"
+                }
+            ],
+            "output": {
+                "name": "weight",
+                "type": "real",
+                "description": "Output scale factor (nominal) or uncertainty"
+            },
+            "data": {
+                "nodetype": "binning",
+                "input": "abseta",
+                "edges": [
+                    0.0,
+                    1.6,
+                    2.4
+                ],
+                "content": [
+                    {
+                        "nodetype": "binning",
+                        "input": "p",
+                        "edges": [
+                            50.0,
+                            100.0,
+                            150.0,
+                            200.0,
+                            300.0,
+                            400.0,
+                            600.0,
+                            1500.0,
+                            Infinity
+                        ],
+                        "content": [
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.00042167268013848513
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.00022513027030401922
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9873216726801385
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.987743345360277
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9869
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0003841331381323476
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 4.788037198188988e-05
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9904841331381323
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9908682662762647
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9901
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 2.1625654311741016e-07
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.00041255395311567966
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 6.626160719597207e-05
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9905125539531157
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9909251079062313
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9901
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 4.3489217826930826e-07
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0003538978572055207
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 9.863090095962868e-05
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9899538978572056
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9903077957144111
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9896
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0004007602939569699
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.00028384549694204786
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.988400760293957
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9888015205879139
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.988
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0002517439940119548
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.0006177458021082161
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.988148256005988
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9884
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.987896512011976
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.00016094381506104316
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.0024552207571447715
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.985439056184939
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9856
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.985278112369878
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.00021519510884770998
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 9.790135613418904e-06
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9842151951088477
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9844303902176954
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.984
+                                    }
+                                ]
+                            }
+                        ],
+                        "flow": "error"
+                    },
+                    {
+                        "nodetype": "binning",
+                        "input": "p",
+                        "edges": [
+                            50.0,
+                            100.0,
+                            150.0,
+                            200.0,
+                            300.0,
+                            400.0,
+                            600.0,
+                            1500.0,
+                            Infinity
+                        ],
+                        "content": [
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 1.0
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 1.0
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 1.0
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0017739185479076491
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.00021770625517242292
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9992739185479077
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 1.0010478370958154
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9975
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0005945632627678554
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 3.9627453878698926e-05
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9976945632627678
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9982891265255357
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9971
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0004327272324206044
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.0001208105132277093
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9962327272324206
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9966654544648412
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9958
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 8.899054578792587e-07
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0005799495268009602
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.00020936519094694184
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.994179949526801
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.994759899053602
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9936
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0004548782750609659
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.00021726449706060968
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.993745121724939
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9942
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.993290243449878
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0003015376684457616
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.0008812128846508727
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9893984623315543
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9897
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9890969246631085
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0004449741657909234
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.007977752905885704
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9825449741657909
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9829899483315818
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9821
+                                    }
+                                ]
+                            }
+                        ],
+                        "flow": "error"
+                    }
+                ],
+                "flow": "error"
+            }
+        },
+        {
+            "name": "NUM_GlobalMuons_DEN_TrackerMuonProbes_DATAeff",
+            "description": "NUM_GlobalMuons_DEN_TrackerMuonProbes_DATAeff",
+            "version": 1,
+            "inputs": [
+                {
+                    "name": "abseta",
+                    "type": "real",
+                    "description": "Probe abseta"
+                },
+                {
+                    "name": "p",
+                    "type": "real",
+                    "description": "Probe p"
+                },
+                {
+                    "name": "scale_factors",
+                    "type": "string",
+                    "description": "Choose nominal scale factor or one of the uncertainties"
+                }
+            ],
+            "output": {
+                "name": "weight",
+                "type": "real",
+                "description": "Output scale factor (nominal) or uncertainty"
+            },
+            "data": {
+                "nodetype": "binning",
+                "input": "abseta",
+                "edges": [
+                    0.0,
+                    1.6,
+                    2.4
+                ],
+                "content": [
+                    {
+                        "nodetype": "binning",
+                        "input": "p",
+                        "edges": [
+                            50.0,
+                            100.0,
+                            150.0,
+                            200.0,
+                            300.0,
+                            400.0,
+                            600.0,
+                            1500.0,
+                            Infinity
+                        ],
+                        "content": [
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.00026589447456137894
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.00022513027030401922
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9820658944745614
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9823317889491228
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9818
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0003036669970267747
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 4.788037198188988e-05
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9892963330029733
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9896
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9889926660059465
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 2.1625654311741016e-07
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0005261491848870259
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 6.626160719597207e-05
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.990526149184887
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.991052298369774
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.99
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 4.3489217826930826e-07
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0006574087035282616
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 9.863090095962868e-05
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9895425912964717
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9902
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9888851825929434
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0016346935170464816
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.00028384549694204786
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9876346935170465
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.989269387034093
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.986
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0027974156811212403
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.0006177458021082161
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9872974156811213
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9900948313622425
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9845
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.009523404255319168
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.0024552207571447715
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9787234042553191
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9882468085106383
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9692
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.3023
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 9.790135613418904e-06
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.4
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.7023
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.09770000000000001
+                                    }
+                                ]
+                            }
+                        ],
+                        "flow": "error"
+                    },
+                    {
+                        "nodetype": "binning",
+                        "input": "p",
+                        "edges": [
+                            50.0,
+                            100.0,
+                            150.0,
+                            200.0,
+                            300.0,
+                            400.0,
+                            600.0,
+                            1500.0,
+                            Infinity
+                        ],
+                        "content": [
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 1.0
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 1.0
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 1.0
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.001307302533532062
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.00021770625517242292
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9931073025335321
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9944146050670641
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9918
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0005009373828271935
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 3.9627453878698926e-05
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9925009373828272
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9930018747656544
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.992
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0005204102011063805
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.0001208105132277093
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9860204102011064
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9865408204022128
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9855
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 8.899054578792587e-07
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.0009705578258086822
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.00020936519094694184
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9820294421741913
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.983
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9810588843483826
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.001489168278530073
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.00021726449706060968
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.97678916827853
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9782783365570601
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9753
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.003260377358490607
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.0008812128846508727
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.9681603773584906
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9714207547169812
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.9649
+                                    }
+                                ]
+                            },
+                            {
+                                "nodetype": "category",
+                                "input": "scale_factors",
+                                "content": [
+                                    {
+                                        "key": "massRange",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "stat",
+                                        "value": 0.05975901639344261
+                                    },
+                                    {
+                                        "key": "syst",
+                                        "value": 0.0
+                                    },
+                                    {
+                                        "key": "tagIso",
+                                        "value": 0.007977752905885704
+                                    },
+                                    {
+                                        "key": "nominal",
+                                        "value": 0.8524590163934426
+                                    },
+                                    {
+                                        "key": "systup",
+                                        "value": 0.9122180327868852
+                                    },
+                                    {
+                                        "key": "systdown",
+                                        "value": 0.7927
+                                    }
+                                ]
+                            }
+                        ],
+                        "flow": "error"
+                    }
+                ],
+                "flow": "error"
+            }
+        }
+    ]
+}

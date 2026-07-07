@@ -1,0 +1,29 @@
+{
+    "xsec": 1.0,
+    "year": "2017",
+    "treeName": "Events",
+    "histAxisName": "dataUL17",
+    "options": "",
+    "era": "",
+    "WCnames": [],
+    "files": [
+        "/store/user/hnelson2/TTbarskims/data/UL2017/v1/DoubleEG_D_UL2017/output_23.root",
+        "/store/user/hnelson2/TTbarskims/data/UL2017/v1/DoubleEG_D_UL2017/output_163.root",
+        "/store/user/hnelson2/TTbarskims/data/UL2017/v1/DoubleEG_D_UL2017/output_138.root",
+        "/store/user/hnelson2/TTbarskims/data/UL2017/v1/DoubleEG_D_UL2017/output_228.root",
+        "/store/user/hnelson2/TTbarskims/data/UL2017/v1/DoubleEG_D_UL2017/output_171.root",
+        "/store/user/hnelson2/TTbarskims/data/UL2017/v1/DoubleEG_D_UL2017/output_24.root",
+        "/store/user/hnelson2/TTbarskims/data/UL2017/v1/DoubleEG_D_UL2017/output_172.root",
+        "/store/user/hnelson2/TTbarskims/data/UL2017/v1/DoubleEG_D_UL2017/output_227.root",
+        "/store/user/hnelson2/TTbarskims/data/UL2017/v1/DoubleEG_D_UL2017/output_81.root",
+        "/store/user/hnelson2/TTbarskims/data/UL2017/v1/DoubleEG_D_UL2017/output_545.root",
+        "/store/user/hnelson2/TTbarskims/data/UL2017/v1/DoubleEG_D_UL2017/output_229.root",
+        "/store/user/hnelson2/TTbarskims/data/UL2017/v1/DoubleEG_D_UL2017/output_82.root",
+        "/store/user/hnelson2/TTbarskims/data/UL2017/v1/DoubleEG_D_UL2017/output_120.root",
+        "/store/user/hnelson2/TTbarskims/data/UL2017/v1/DoubleEG_D_UL2017/output_3.root"
+    ],
+    "nEvents": 25911432.0,
+    "nSumOfWeights": 25911432.0,
+    "isData": true,
+    "path": "/cms/cephfs/data/store/user/hnelson2/TTbarskims/data/UL2017/v1/DoubleEG_D_UL2017"
+}

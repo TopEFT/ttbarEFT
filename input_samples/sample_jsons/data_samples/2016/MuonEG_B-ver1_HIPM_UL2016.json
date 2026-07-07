@@ -1,0 +1,16 @@
+{
+  "xsec": 1.0,
+  "year": "2016APV",
+  "treeName": "Events",
+  "histAxisName": "dataUL16APV",
+  "options": "",
+  "WCnames": [],
+  "files": [
+    "/store/data/Run2016B/MuonEG/NANOAOD/ver1_HIPM_UL2016_MiniAODv2_NanoAODv9-v2/40000/35F15B35-E216-124E-AF91-281004953E9E.root"
+  ],
+  "nEvents": 225271.0,
+  "nGenEvents": 225271.0,
+  "nSumOfWeights": 225271.0,
+  "isData": true,
+  "path": "/MuonEG/Run2016B-ver1_HIPM_UL2016_MiniAODv2_NanoAODv9-v2/NANOAOD"
+}
