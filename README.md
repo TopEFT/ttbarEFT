@@ -312,3 +312,6 @@ plotter.BatchLLPlot1DEFT(basename_lst=['.testRandProf_prof_ctG'], wcs=['ctGRe', 
 - Copy of TOP-17-020: https://arxiv.org/pdf/1903.11144
 - Reza's NanoAOD analysis script: https://github.com/rgoldouz/EFTNanoAnalysis/blob/master/NanoAnalysis/src/MyAnalysis.cc
 - Reza's FCNC analysis repo: https://github.com/rgoldouz/FCNC/tree/main/NanoAnalysis
+
+# Lobster 
+My repo with the lobster scripts is here: https://github.com/hannahbnelson/mc_production
