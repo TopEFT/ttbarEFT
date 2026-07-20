@@ -1,170 +1,242 @@
 #!/usr/bin/env python
-import argparse, json, os, time
+import argparse, json, os, shutil, time, yaml
 
-from coffea import processor
 from coffea.nanoevents import NanoAODSchema
-from torch import cat, float64, Generator, save, tensor
-from torch.utils.data import random_split, TensorDataset
-import topcoffea.modules.utils as utils
+from dynamic_data_reduction import preprocess, CoffeaDynamicDataReduction
 
-def main():
-    parser = argparse.ArgumentParser(description='You can customize your run')
-    parser.add_argument('jsonFiles'        , nargs='?', help = 'Json file(s) containing files and metadata')
-    parser.add_argument('--executor','-x'  , default='work_queue', help = 'Which executor to use')
-    parser.add_argument('--prefix', '-r'   , nargs='?', default='', help = 'Prefix or redirector to look for the files')
-    parser.add_argument('--nworkers','-n' , default=8  , help = 'Number of workers')
-    parser.add_argument('--chunksize','-s', default=400000  , help = 'Number of events per chunk')
-    parser.add_argument('--nchunks','-c'  , default=None  , help = 'You can choose to run only a number of chunks')
-    parser.add_argument('--outname','-o'  , default='/scratch365/cmcgrad2/data', help = 'Name of the output file')
-    parser.add_argument('--treename'      , default='Events', help = 'Name of the tree inside the files')
-    parser.add_argument('--port', default='9123-9130', help = 'Specify the Work Queue port. An integer PORT or an integer range PORT_MIN-PORT_MAX.')
-    parser.add_argument('--processor', '-p', default='centralGen', help='Specify processor name (without .py)')
-    parser.add_argument('--dtype', '-d', default=float64, help='dtype used to build tensors')
+import numpy as np
+import ndcctools.taskvine as vine
+
+def check_preprocessed_data(input_data, preprocessed_data_path): 
     
+    if os.path.exists(preprocessed_data_path): 
+        preprocessed_data = read_json_file(preprocessed_data_path)
+
+        for sname in input_data.keys():
+            required_file_list = input_data[sname]['files'].keys()
+
+            # check that the dataset exists in the preprocessed data json
+            if sname in preprocessed_data.keys():
+                preprocessed_file_list = preprocessed_data[sname]['files'].keys()
+                check = (sorted(required_file_list) == sorted(preprocessed_file_list))
+
+            # if dataset doesn't exist, the jsons are not the same and the check fails
+            else: 
+                check = False
+
+    # if the preprocessed data json doesn't exist, check fails
+    else: 
+        check = False
+
+    return check
+
+def data_for_preprocessing(samplesdict):
+    data = {}
+    for sname, sample in samplesdict.items():
+        files_dict = {}
+        metadata = dict(sample)
+        del metadata['files']
+        for f in sample['files']:
+            fname = sample['redirector']+f
+            files_dict[fname] = {'object_path': 'Events'}
+
+        data[sname] = {'files': files_dict, 'metadata': metadata}
+    
+    return data
+
+
+def get_filename_from_path(filename):
+    full_file_name = os.path.basename(filename)
+    base, extension = os.path.splitext(full_file_name)
+    
+    return base
+
+def load_json_to_samplesdict(inputFile, prefix):
+    samplesdict = {}
+    json_dict = read_json_file(inputFile)
+    sample_name = get_filename_from_path(inputFile)
+    samplesdict[sample_name] = json_dict
+    samplesdict[sample_name]['redirector'] = prefix
+    
+    return samplesdict
+
+def read_json_file(filename):
+    with open(filename) as f:
+        return json.load(f)
+
+def read_yaml_file(filename): 
+    with open(filename) as f: 
+        return yaml.safe_load(f)
+    
+if __name__ == '__main__':
+    known_executors = ['iterative', 'ddr']
+    
+    parser = argparse.ArgumentParser(description='You can customize your run')
+    parser.add_argument('inputFile'        , nargs='?', help = 'Json or yaml file(s) containing files and metadata')
+    parser.add_argument('--executor','-x'  , default='ddr', help = 'Which executor to use')
+    parser.add_argument('--prefix', '-r'   , nargs='?', default='', help = 'Prefix or redirector to look for the files')
+    parser.add_argument('--chunksize','-s', default=100000  , help = 'Number of events per chunk')
+    parser.add_argument('--nchunks','-c'  , default=None  , help = 'You can choose to run only a number of chunks')
+    parser.add_argument('--outname','-o'  , default='histos', help = 'Name of the output file with histograms')
+    parser.add_argument('--treename'      , default='Events', help = 'Name of the tree inside the files')
+    parser.add_argument('--wc-list', action='extend', nargs='+', help = 'Specify a list of Wilson coefficients to use in filling histograms.')
+    parser.add_argument('--port', default='9123-9130', help = 'Specify the Work Queue port. An integer PORT or an integer range PORT_MIN-PORT_MAX.')
+    parser.add_argument('--processor', '-p', default='tensor_processor', help='Specify processor name (without .py)')
+    parser.add_argument('--dtype', '-d', default=np.float32, help='dtype used to build tensors')
+
     args        = parser.parse_args()
-    jsonFiles   = args.jsonFiles
+    inputFile   = args.inputFile
     executor    = args.executor
     prefix      = args.prefix
-    nworkers    = int(args.nworkers)
     chunksize   = int(args.chunksize)
     nchunks     = int(args.nchunks) if not args.nchunks is None else args.nchunks
     outname     = args.outname
     treename    = args.treename
+    wc_lst      = args.wc_list if args.wc_list is not None else []
     proc        = args.processor
+    ports       = args.port
     dtype       = args.dtype
 
     proc_file = proc+'.py'
     print("\n running with processor: ", proc_file, '\n')
+    
+    if proc == 'tensor_processor':
+        import tensor_processor
+        analysis_processor = tensor_processor
+    elif proc == 'centralGen':
+        import centralGen
+        analysis_processor = centralGen
+    elif proc == 'partons':
+        import partons
+        analysis_processor = partons
 
-    if executor == "work_queue":
-        port = list(map(int, args.port.split('-')))
+    isJson = inputFile.endswith('.json')
+    isYaml = (inputFile.endswith('.yaml')) or (inputFile.endswith('.yml'))
+
+    ### Check json or yaml ###
+    if not isJson and not isYaml:
+        raise ValueError(f"Expects a .json, .yaml, or .yml for the input file. inputFile ={inputFile}")
+    
+    # Check if we have valid options
+    if executor not in known_executors:
+        raise Exception(f"The \"{executor}\" executor is not known. Please specify an executor from the known executors ({known_executors}). Exiting.")
+
+    ### Fill Samples Dictionary ### 
+    samplesdict = {}
+
+    if isJson: 
+        samplesdict.update(load_json_to_samplesdict(inputFile, prefix))
+
+    elif isYaml: 
+        yaml_dict = read_yaml_file(inputFile)
+        if 'jsonFiles' in yaml_dict.keys(): 
+            redirector = yaml_dict['redirector']
+            jsonFiles = yaml_dict['jsonFiles']
+
+            for f in jsonFiles: 
+                samplesdict.update(load_json_to_samplesdict(f, redirector))
+
+        else: 
+            for item in yaml_dict: 
+                redirector = yaml_dict[item]['redirector']
+                jsonFiles = yaml_dict[item]['jsonFiles']
+
+                for f in jsonFiles: 
+                    samplesdict.update(load_json_to_samplesdict(f, redirector))
+    
+    ### Fill WC list ### 
+    if len(wc_lst) == 0:
+        for k in samplesdict.keys():
+            for wc in samplesdict[k]['WCnames']:
+                if wc not in wc_lst:
+                    wc_lst.append(wc)
+    if len(wc_lst) > 0: 
+        print(f"Wilson Coefficients: {wc_lst}")
+    else: 
+        print(f"Wilson Coefficients: NONE SPECIFIED")
+
+    # Run the processor and get the output
+    tstart = time.time()
+
+    ### RUN PROCESSOR USING VINE REDUCE ###
+    if executor == 'ddr':
+        # construct port range
+        port = list(map(int, ports.split('-')))
         if len(port) < 1:
             raise ValueError("At least one port value should be specified.")
         if len(port) > 2:
             raise ValueError("More than one port range was specified.")
         if len(port) == 1:
-            port.append(port[0])
+            port.append(port[0])  # convert single values into a range of one element
 
-    samplesdict = {}
-    allInputFiles = []
+        # create TaskVine Manager
+        mgr = vine.Manager(
+            port=port, 
+            name=f"{os.environ['USER']}-ddr-coffea",
+        )
+        mgr.tune("hungry-minimum", 1)
+        mgr.enable_monitoring(watchdog=False)
 
-    def LoadJsonToSampleName(jsonFile, prefix):
-        sampleName = jsonFile if not '/' in jsonFile else jsonFile[jsonFile.rfind('/')+1:]
-        if sampleName.endswith('.json'): sampleName = sampleName[:-5]
-        with open(jsonFile) as jf:
-            samplesdict[sampleName] = json.load(jf)
-            samplesdict[sampleName]['redirector'] = prefix
+        print(f'manager: {f"{os.environ['USER']}-ddr-coffea"}')
+        # get X509 proxy file
+        x509_proxy = f"/tmp/x509up_u{os.getuid()}"
+        if not os.path.exists(x509_proxy):
+            print(f"Warning: X509 proxy file {x509_proxy} does not exist. Setting to None.")
+            x509_proxy = None
+        else: 
+            shutil.copy(x509_proxy, "./proxy.pem")
 
-    if isinstance(jsonFiles, str) and ',' in jsonFiles:
-        jsonFiles = jsonFiles.replace(' ', '').split(',')
-    elif isinstance(jsonFiles, str):
-        jsonFiles = [jsonFiles]
-
-    for jsonFile in jsonFiles:
-        if os.path.isdir(jsonFile):
-            if not jsonFile.endswith('/'): jsonFile+='/'
-            for f in os.path.listdir(jsonFile):
-                if f.endswith('.json'): allInputFiles.append(jsonFile+f)
-        else:
-            allInputFiles.append(jsonFile)
         
-    for f in allInputFiles:
-        if not os.path.isfile(f):
-            raise Exception(f'[ERROR] Input file {f} not found!')
-        if f.endswith('.json'):
-            LoadJsonToSampleName(f, prefix)
-         # Open cfg files
-        else:
-            with open(f) as fin:
-                print(' >> Reading json from cfg file...')
-                lines = fin.readlines()
-                for l in lines:
-                    if '#' in l:
-                        l=l[:l.find('#')]
-                    l = l.replace(' ', '').replace('\n', '')
-                    if l == '': continue
-                    if ',' in l:
-                        l = l.split(',')
-                        for nl in l:
-                            if not os.path.isfile(l):
-                                prefix = nl
-                            else:
-                                LoadJsonToSampleName(nl, prefix)
-                    else:
-                        if not os.path.isfile(l):
-                            prefix = l
-                        else:
-                            LoadJsonToSampleName(l, prefix)
+        # check for and create preprocessed data
+        input_data = data_for_preprocessing(samplesdict)
+        preprocessed_data_path = f"{os.path.splitext(inputFile)[0]}_preprocessed.json"  # name for preprocessed data 
+        # bool, checks if existing preprocessed json exists and has identical file list as input_data
+        preprocessed_json_exists = check_preprocessed_data(input_data, preprocessed_data_path) 
 
-    flist = {}
-    for sname in samplesdict.keys():
-        redirector = samplesdict[sname]['redirector']
-        flist[sname] = [f'{prefix}{f}' for f in samplesdict[sname]['files']]
+#        print(f'using {input_data}')
+        # use existing preprocessed json if available 
+        if preprocessed_json_exists: 
+            preprocessed_data = read_json_file(preprocessed_data_path)
+            print(f"\n\nPreprocessed data json already exists. Using file: {preprocessed_data_path}")
 
-    wc_set = ()
-    for item in samplesdict:
-        for i, file_name in enumerate(samplesdict[item]['files']):
-            if prefix:
-                wc_lst = utils.get_list_of_wc_names(f'{prefix}/{file_name}')
-            else:
-                wc_lst = utils.get_list_of_wc_names(file_name)
-            if i==0:
-                wc_set = set(wc_lst)
-            else:
-                if set(wc_lst) != wc_set:
-                   raise Exception("ERROR: Not all files have same WC list")
+        # create preprocessed dataset if not already available
+        else: 
+            print("\n\nPreprocessing data with TaskVine...")
+            preprocessed_data = preprocess(
+                manager=mgr,
+                data=input_data,
+                tree_name="Events",
+                timeout=30,
+                max_retries=20,
+                show_progress=True,
+                batch_size=5,
+                x509_proxy=x509_proxy,
+            )
 
-    if executor == "work_queue":
-        executor_args = {
-            'master_name': '{}-workqueue-coffea'.format(os.environ['USER']),
-            'port': port,
-            'debug_log': 'debug.log',
-            'transactions_log': 'tr.log',
-            'stats_log': 'stats.log',
-            'tasks_accum_log': 'tasks.log',
-            'environment_file': '/scratch365/cmcgrad2/environments/ttbarEFT.tar.gz',
-            'extra_input_files' : [proc_file],
-            'retries': 5,
-            'compression': 9,
-            'resource_monitor': True,
-            'resources_mode': 'auto',
-            'chunks_per_accum': 25,
-            'chunks_accum_in_mem': 2,
-            'fast_terminate_workers': 0,
-            'verbose': True,
-            'print_stdout': True,
-        }
+        ### Dynamic Data Reduction ### 
+        print(f"\n\nProcessing data with VineReduce...")
+        ddr = CoffeaDynamicDataReduction(
+            mgr, #taskvine manager,
+            data = preprocessed_data,
+            processors = {
+                "ee": analysis_processor.AnalysisProcessor(samplesdict, 'ee', outname, wc_names_lst=wc_lst, do_errors=False, doPDF=False, doSR=True, syst_list=[]),
+                "mm": analysis_processor.AnalysisProcessor(samplesdict, 'mm', outname, wc_names_lst=wc_lst, do_errors=False, doPDF=False, doSR=True, syst_list=[]),
+                "em": analysis_processor.AnalysisProcessor(samplesdict, 'em', outname, wc_names_lst=wc_lst, do_errors=False, doPDF=False, doSR=True, syst_list=[]),
+            },
+            extra_files = [proc_file, "proxy.pem"], 
+            schema=NanoAODSchema,
+            max_task_retries= 20, # default=10
+            step_size=800000, #equivalent to chunksize, default=100k
+            resources_processing={"cores": 1},
+            resources_accumulating={"cores": 1},
+            results_directory=outname,
+            verbose=True,
+            x509_proxy=x509_proxy,
+        )
+        ddr.environment_variables["X509_USER_PROXY"] = "proxy.pem"
+        output = ddr.compute()
 
-    tstart = time.time()
-
-    if executor == "futures":
-        exec_instance = processor.FuturesExecutor(workers=nworkers)
-        runner = processor.Runner(exec_instance, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks)
-    elif executor ==  "work_queue":
-        executor = processor.WorkQueueExecutor(**executor_args)
-        runner = processor.Runner(executor, schema=NanoAODSchema, chunksize=chunksize, maxchunks=nchunks, skipbadfiles=False, xrootdtimeout=180)
-
-    if proc == 'ml_data':
-        import ml_data
-        processor_instance = ml_data.AnalysisProcessor(samplesdict, dtype)
-    elif proc == 'centralGen':
-        import centralGen
-        processor_instance = centralGen.AnalysisProcessor(samplesdict, dtype, wc_lst, outname)
-
-    runner(flist, treename, processor_instance)
-
-    dt = time.time() - tstart
-
-    if executor == "work_queue":
-        print(f'Processed {nevts_total} events in {dt:.2f} seconds ({nevts_total/dt:.2f} evts/sec).')
-    elif executor == "futures":
-        print(f'Processing time: {dt:.2f} with {nworkers} ({dt*nworkers:.2f} cpu overall)')
-    
-    print("Done!")
-    
-if __name__ == '__main__':
-    profile = False
-    if profile:
-        cProfile.run('main()', filename='profile.txt')
-    else:
-        main()
+        print(f"Computing done!")
+        
+    tend = time.time()
+    print(f"\n\nTotal processing time: {tend-tstart}")
