@@ -24,7 +24,7 @@
 			"jet_list": ["exactly_0j", "atleast_1j"]
 		},
 		"em": {
-			"jet_lst": ["exactly_0j"],
+			"jet_lst": ["exactly_0j"]
 		}
 	}
 }

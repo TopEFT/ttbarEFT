@@ -1,30 +1,40 @@
 #!/usr/bin/env python
 import copy
+import coffea
 import numpy as np
 import awkward as ak
-
-import coffea, os, random, torch, time
+import json
+import hist
+import yaml
+import time
+import random
+import torch
+import os
 
 # from mt2 import mt2
 
 from coffea import processor
 from coffea.analysis_tools import PackedSelection
+from coffea.nanoevents.methods import vector
 from coffea.lumi_tools import LumiMask
 
 # silence warnings due to using NanoGEN instead of full NanoAOD
-from coffea.nanoevents import NanoAODSchema
+from coffea.nanoevents import NanoEventsFactory, NanoAODSchema
 
 from topcoffea.modules.paths import topcoffea_path
+from topcoffea.modules.histEFT import HistEFT
 import topcoffea.modules.eft_helper as efth
 import topcoffea.modules.corrections as tc_cor
 import topcoffea.modules.event_selection as tc_es
 
 from ttbarEFT.modules.paths import ttbarEFT_path
-from ttbarEFT.modules.analysis_tools import get_lumi
+from ttbarEFT.modules.analysis_tools import make_mt2, get_lumi
 import ttbarEFT.modules.object_selection as tt_os
 import ttbarEFT.modules.event_selection as tt_es
 import ttbarEFT.modules.corrections as tt_cor 
+from ttbarEFT.modules.processor_tools import calc_eft_weights
 from ttbarEFT.modules.processor_tools import get_syst_lists
+
 from ttbarEFT.modules.analysis_tools import TensorAccumulator
 
 from topcoffea.modules.get_param_from_jsons import GetParam
@@ -44,16 +54,28 @@ class AnalysisProcessor(processor.ProcessorABC):
         self._do_errors = do_errors
         self._doPDF = doPDF
 
-        self._outname = outname
-
         self._doCR = not doSR
         self._doSR = doSR
 
         self._syst_list = syst_list
         self._dtype = dtype 
+        self._outname = outname
 
-        os.makedirs(f'{outname}/training',   mode=0o755, exist_ok=True)
-        os.makedirs(f'{outname}/validation', mode=0o755, exist_ok=True)
+        self._accumulator = {}
+
+        cat_dict = None
+        with open(ttbarEFT_path("params/channels.yaml"), "r") as f:
+            cat_dict=yaml.safe_load(f)
+        if self._doSR:
+            self._region = 'SR_CHANNELS_2j3j'
+            # os.makedirs(f'{outname}/{self._region}/{lep_cat}', mode=0o755, exist_ok=True)
+            self._channels = cat_dict[self._region][lep_cat]
+        else: 
+            self._region = 'CR_CHANNELS_1b'
+            # os.makedirs(f'{outname}/{self._region}/{lep_cat}', mode=0o755, exist_ok=True)
+            self._channels = cat_dict[self._region][lep_cat]
+            
+        print(f"\nProcessor Settings for {lep_cat}: ")
 
     @property
     def accumulator(self):
@@ -65,14 +87,15 @@ class AnalysisProcessor(processor.ProcessorABC):
 
     def process(self, events):
 
-        out = TensorAccumulator(torch.tensor([]))
-
         # Dataset parameters
         dataset         = events.metadata['dataset']
         isData          = self._samples[dataset]['isData']
+        histAxisName    = self._samples[dataset]['histAxisName']
         year            = self._samples[dataset]['year']
         xsec            = self._samples[dataset]['xsec']
         sow             = self._samples[dataset]['nSumOfWeights']
+
+        print(f'available keys \n\t{self._samples[dataset].keys()}')
 
         if not isData: 
             # if 'sow_ISRUp' in self._samples[dataset].keys(): 
@@ -86,11 +109,12 @@ class AnalysisProcessor(processor.ProcessorABC):
             sow_factDown        = self._samples[dataset]["nSumOfWeights_factDown"       ]
             sow_renormfactUp    = self._samples[dataset]["nSumOfWeights_renormfactUp"   ]
             sow_renormfactDown  = self._samples[dataset]["nSumOfWeights_renormfactDown" ]
-            sow_hdampUp         = self._samples[dataset]["nSumOfWeights_hdampUp"        ]
-            sow_hdampDown       = self._samples[dataset]["nSumOfWeights_hdampDown"      ]
-            sow_toppt           = self._samples[dataset]["nSumOfWeights_toppt"          ]
+            sow_hdampUp         = self._samples[dataset]["nSumOfWeights_hdampUp"        ]  # FIXME KEY DOES NOT EXIST IN FILES
+            sow_hdampDown       = self._samples[dataset]["nSumOfWeights_hdampDown"      ]  # FIXME KEY DOES NOT EXIST IN FILES
+            sow_toppt           = self._samples[dataset]["nSumOfWeights_toppt"          ]  # FIXME KEY DOES NOT EXIST IN FILES
 
         print(f"\n\n")
+        print(f"histAxisName: {histAxisName}")
         print(f"dataset: {dataset}")
         print(f"year: {year}")
         print(f"xsec: {xsec}")
@@ -137,6 +161,13 @@ class AnalysisProcessor(processor.ProcessorABC):
         obj_correction_syst_lst = tt_cor.get_supported_jet_systematics(year, isData=isData, era=run_era)
         obj_correction_syst_lst += ['METunclustUp', 'METunclustDown']
         event_weight_variations, kinematic_variations = get_syst_lists(year=year, isData=isData, syst_list=self._syst_list, run_era=None)
+        # kinematic_variations += ['METunclustUp', 'METunclustDown']
+
+        # print(f"\n\n")
+        # print(f"list of systematics to run over: \n\tevent_weight_variations = {event_weight_variations}, \n\tkinematic_variations = {kinematic_variations}")
+        # print(f"\n\n")
+
+        channels = self._channels
 
         ######### Initialize Objects #########
         met  = events.MET
@@ -188,12 +219,11 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         ######## Create objects for dense axes ##########
         leps_sorted = ak.pad_none(leps_sorted, 2)
-        pMask = leps_sorted.pdgId < 0
-        nMask = leps_sorted.pdgId > 0
         l0 = leps_sorted[:,0]
         l1 = leps_sorted[:,1]
-        lp = leps_sorted[pMask, 0]
-        ln = leps_sorted[nMask, 0]
+
+        ptll = (l0+l1).pt
+        mll = (l0+l1).mass
 
 
         ######### Selection Masks that aren't dependent on object corrections #########
@@ -230,11 +260,11 @@ class AnalysisProcessor(processor.ProcessorABC):
             weights_obj_base.add('ISR', events.nom, events.ISRUp*(sow/sow_ISRUp), events.ISRDown*(sow/sow_ISRDown))
             weights_obj_base.add('FSR', events.nom, events.FSRUp*(sow/sow_FSRUp), events.FSRDown*(sow/sow_FSRDown))
 
-            weights_obj_base.add('hdamp', events.nom, (tt_cor.GetHdampReweight(events, dataset, var='up')*(sow/sow_hdampUp)), (tt_cor.GetHdampReweight(events, dataset, var='down')*(sow/sow_hdampDown)))
+            weights_obj_base.add('hdamp', events.nom, (tt_cor.GetHdampReweight(events, dataset, var='up')*(sow/sow_hdampUp)), (tt_cor.GetHdampReweight(events, dataset, var='down')*(sow/sow_hdampDown))) # FIXME MISSING ONYX FILE
             
             LOtoNLO_weights = tt_cor.GetNLO_Weight(events, dataset)
             NLOtoNNLO_weights = tt_cor.GetNNLO_EventWeight(events, dataset)
-            weights_obj_base.add('ttbar_toppt', LOtoNLO_weights*NLOtoNNLO_weights*(sow/sow_toppt))
+            # weights_obj_base.add('ttbar_toppt', LOtoNLO_weights*NLOtoNNLO_weights*(sow/sow_toppt))  # FIXME sow_toppt BRANCH IS MISSING FROM ROOT FILES
 
         # for Run2, Jet Corrections are applied to Data, only run this on MC
         if not isData:
@@ -272,12 +302,12 @@ class AnalysisProcessor(processor.ProcessorABC):
 
                 weights_obj_base_for_kinematic_syst = copy.deepcopy(weights_obj_base)
 
-                if kinematic_var == 'nominal': 
+                if kinematic_var == 'nominal':
                     cleanedJets['isGood'] = tt_os.is_pres_jet(cleanedJets)
                     goodJets =  cleanedJets[cleanedJets.isGood]
                     met = corrected_met
 
-                elif 'METunclust' in kinematic_var: #  (kinematic_var == 'METunclustUp') or (kinematic_var == 'METunclustDown'):
+                elif 'METunclust' in kinematic_var:
                     print(f"\n doing METunclust systmatic")
                     cleanedJets['isGood'] = tt_os.is_pres_jet(cleanedJets)
                     goodJets =  cleanedJets[cleanedJets.isGood]
@@ -297,7 +327,7 @@ class AnalysisProcessor(processor.ProcessorABC):
                 njets = ak.num(goodJets)
                 jets_sorted = goodJets[ak.argsort(goodJets.pt, axis=-1,ascending=False)]
                 jets_sorted = ak.pad_none(jets_sorted, 1)
-                j0 = jets_sorted[:,0]                                       # ht = ak.sum(goodJets.pt,axis=-1)
+                j0 = jets_sorted[:,0]
                 isBtagJetsMedium = (goodJets.btagDeepFlavB > btagwpm)
                 nbtagsm = ak.num(goodJets[isBtagJetsMedium])
 
@@ -352,8 +382,17 @@ class AnalysisProcessor(processor.ProcessorABC):
             bjets_sorted = bjets[ak.argsort(bjets.pt, axis=-1,ascending=False)] 
             bjets_padded = ak.pad_none(bjets_sorted, 2)
 
-            b0 = ak.fill_none(bjets_padded[:, 0], 0)
-            b1 = ak.fill_none(bjets_padded[:, 1], 0)
+            def get_sum_pt(obj_list):
+                total_px = 0
+                total_py = 0
+
+                for obj in obj_list:
+                    px = obj.pt * np.cos(obj.phi)
+                    py = obj.pt * np.sin(obj.phi)
+
+                    total_px = total_px + px
+                    total_py = total_py + py
+                return np.sqrt(px**2 + py**2)
 
             def get_sum_mass(obj_list):
                 # Manually calculate px, py, pz, and energy for each object
@@ -367,7 +406,6 @@ class AnalysisProcessor(processor.ProcessorABC):
                     px = obj.pt * np.cos(obj.phi)
                     py = obj.pt * np.sin(obj.phi)
                     pz = obj.pt * np.sinh(obj.eta)
-                    # Energy = sqrt(p^2 + m^2)
                     p2 = px**2 + py**2 + pz**2
                     energy = np.sqrt(p2 + obj.mass**2)
                     
@@ -376,14 +414,8 @@ class AnalysisProcessor(processor.ProcessorABC):
                     total_pz = total_pz + pz
                     total_e  = total_e + energy
                 
-                # Invariant mass: M = sqrt(E^2 - p^2)
                 m2 = total_e**2 - (total_px**2 + total_py**2 + total_pz**2)
                 return np.sqrt(np.maximum(0, m2))
-
-            # Use the function for your 4-object system
-            mllbb = get_sum_mass([ln, lp, b0, b1])
-            mll   = get_sum_mass([ln, lp])
-            mbb   = get_sum_mass([b0, b1])
 
             ######## HEM veto ########
             HEM_veto_mask, HEM_event_weight = tt_es.getHemMask(events, year, isData, jets=goodJets)
@@ -427,55 +459,109 @@ class AnalysisProcessor(processor.ProcessorABC):
             selections.add("atleast_3j", (njets>=3))
             selections.add("atleast_4j", (njets>=4))
 
-            ######### Fill dense axes variables ##########
-            features = torch.from_numpy(np.concatenate([
-                [ln.pt.to_numpy()],
-                [lp.pt.to_numpy()],
-                [l0.pt.to_numpy()],
-                [l1.pt.to_numpy()],
-                [ln.eta.to_numpy()],
-                [lp.eta.to_numpy()],
-                [l0.eta.to_numpy()],
-                [l1.eta.to_numpy()],
-                [(ln+lp).pt.to_numpy()],
-                [mll.to_numpy()], 
-                [ln.delta_phi(lp).to_numpy()],
-                [abs(ln.eta - lp.eta).to_numpy()],
-                [b0.pt.to_numpy()],
-                [b1.pt.to_numpy()],
-                [b0.eta.to_numpy()],
-                [b1.eta.to_numpy()],
-                [(b0+b1).pt.to_numpy()],
-                [mbb.to_numpy()],
-                # [b0.delta_phi(b1).to_numpy()],
-                # [abs(b0.eta - b1.eta).to_numpy()],
-                # [b0.delta_phi(lp).to_numpy()],
-                # [abs(b0.eta - lp.eta).to_numpy()],
-                # [b0.delta_phi(ln).to_numpy()],
-                # [abs(b0.eta - ln.eta).to_numpy()],
-                # [b1.delta_phi(lp).to_numpy()],
-                # [abs(b1.eta - lp.eta).to_numpy()],
-                # [b1.delta_phi(ln).to_numpy()],
-                # [abs(b1.eta - ln.eta).to_numpy()],
-                [mllbb.to_numpy()],
-                [njets.to_numpy()],
-                [np.concatenate([[(b0+b1).pt.to_numpy()],
-                                 [(l0+l1).pt.to_numpy()],
-                                 [(l0 + b0).pt.to_numpy()]],
-                                 axis=0).max(0)],
-            ]).astype(self._dtype).T)
+            wgt_var_lst = ["nominal"]
+            if self._syst_list and not isData: #if systematics were provided and it's MC create list of variations 
+                if (kinematic_var != "nominal"):
+                    # in this case, we are dealing with systs that change the kinematics of objects
+                    # we don't want to loop over up/down weight variations here
+                    wgt_var_lst = [kinematic_var]
+                else: 
+                    # in this case we want to loop over the up/down event weight variations
+                    wgt_var_lst = wgt_var_lst + event_weight_variations
 
-        fit_coefs = torch.from_numpy(eft_coeffs * norm)
+            for wgt_fluct in wgt_var_lst: 
 
-        training, validation = torch.utils.data.random_split(torch.utils.data.TensorDataset(features, fit_coefs), [0.8, 0.2], generator=torch.Generator().manual_seed(42))
+                outname = f'{self._outname}/{self._region}/{wgt_fluct}'
+                if not os.path.exists(outname):
+                    os.makedirs(outname, exist_ok=True)
+                if not os.path.exists(f'{outname}/to_train'):
+                    os.makedirs(f'{outname}/to_train', exist_ok=True)
+                if not os.path.exists(f'{outname}/validation'):
+                    os.makedirs(f'{outname}/validation', exist_ok=True)
 
-        torch.save(torch.utils.data.TensorDataset(training[:][0], training[:][1]), f'{self._outname}/training/{int(time.time())}{random.randint(1000000,9999999)}.p')
-        torch.save(torch.utils.data.TensorDataset(validation[:][0], validation[:][1]), f'{self._outname}/validation/{int(time.time())}{random.randint(1000000,9999999)}.p')
+                if isData:
+                    weight = np.ones_like(events.event)
+                elif (wgt_fluct == "nominal") or (wgt_fluct in obj_correction_syst_lst):
+                    weight = weights_obj_base_for_kinematic_syst.weight(None) 
+                else: 
+                    if wgt_fluct in weights_obj_base_for_kinematic_syst.variations:
+                        weight = weights_obj_base_for_kinematic_syst.weight(wgt_fluct)
+                    else: 
+                        continue        # if there is no up/down fluctuation for this category, don't fill a hist
 
-        output = {'out':  out}
+                for chan_id, chan_settings in channels.items():
+                    chan_name = chan_settings['name']
+                    mask_list = chan_settings['masks']
 
-        return output
+                    cuts_list = ['jetvetomap', 'HEMvetomap']
+                    if isData:
+                        cuts_list.append('is_good_lumi')
+                    cuts_list.append(lep_cat)
+                    cuts_list.extend(mask_list)
+
+                    event_selection_mask = selections.all(*(cuts_list))
+                    eft_coeffs_cut = eft_coeffs[event_selection_mask] if eft_coeffs is not None else None
+
+                    selected_leps = leps_sorted[event_selection_mask]
+                    
+                    negative_leps = selected_leps[selected_leps.pdgId > 0]
+                    positive_leps = selected_leps[selected_leps.pdgId < 0]
+
+                    ln = negative_leps[:, 0]
+                    lp = positive_leps[:, 0]
+                    l0 = selected_leps[:,0]
+                    l1 = selected_leps[:,0]
+                    b0 = bjets_sorted[event_selection_mask, 0]
+                    b1 = bjets_sorted[event_selection_mask, 1]
+                    if len(njets) != len(event_selection_mask):
+                        print(f'cannot filted njets for channel {chan_id}')
+                        continue
+
+                    njets = njets[event_selection_mask]
+                    mll   = get_sum_mass([ln, lp])
+                    mbb   = get_sum_mass([b0, b1])
+                    mllbb = get_sum_mass([ln, lp, b0, b1])
+
+                    kinematics =[
+                        [ln.pt.to_numpy()],
+                        [ln.eta.to_numpy()],
+                        [lp.pt.to_numpy()],
+                        [lp.eta.to_numpy()],
+                        [l0.pt.to_numpy()],
+                        [l0.eta.to_numpy()],
+                        [l1.pt.to_numpy()],
+                        [l1.eta.to_numpy()],
+                        [(ln + lp).pt.to_numpy()],
+                        [mll.to_numpy()],
+                        [abs(ln.phi - lp.phi).to_numpy()],
+                        [abs(ln.eta - lp.eta).to_numpy()],
+                        [b0.pt.to_numpy()],
+                        [b0.eta.to_numpy()],
+                        [b1.pt.to_numpy()],
+                        [b1.eta.to_numpy()],
+                        [get_sum_pt([b0, b1]).to_numpy()],
+                        [mbb.to_numpy()],
+                        [mllbb.to_numpy()],
+                        [njets.to_numpy()],
+                        [ak.max(ak.concatenate([[get_sum_pt([b0, b1])], [get_sum_pt([l0, l1])], [get_sum_pt([l0, b0])]]), axis=0).to_numpy()],
+                    ]
+
+                    kinematic_ids = [
+                        [l0.pdgId.to_numpy()],
+                        [l1.pdgId.to_numpy()],
+                        [njets.to_numpy()]
+                    ]
+
+                    kinematics = torch.from_numpy(np.concatenate(kinematics).astype(self._dtype).T)
+                    kinematic_ids = torch.from_numpy(np.concatenate(kinematic_ids).T)
+                    eft_coeffs_cut = torch.from_numpy(eft_coeffs_cut)
+
+                    to_train, validation = torch.utils.data.random_split(torch.utils.data.TensorDataset(kinematics, eft_coeffs_cut, kinematic_ids), [0.8, 0.2], generator=torch.Generator().manual_seed(42))
+
+                    torch.save(torch.utils.data.TensorDataset(to_train[:][0],   to_train[:][1],   to_train[:][2]),   f'{outname}/to_train/{int(time.time())}{random.randint(1000000,9999999)}.p')
+                    torch.save(torch.utils.data.TensorDataset(validation[:][0], validation[:][1], validation[:][2]), f'{outname}/validation/{int(time.time())}{random.randint(1000000,9999999)}.p')
+
+        return hout
         
     def postprocess(self, accumulator):
         return accumulator
-

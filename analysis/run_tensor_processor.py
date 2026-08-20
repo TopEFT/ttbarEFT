@@ -83,6 +83,10 @@ if __name__ == '__main__':
     parser.add_argument('--port', default='9123-9130', help = 'Specify the Work Queue port. An integer PORT or an integer range PORT_MIN-PORT_MAX.')
     parser.add_argument('--processor', '-p', default='tensor_processor', help='Specify processor name (without .py)')
     parser.add_argument('--dtype', '-d', default=np.float32, help='dtype used to build tensors')
+    parser.add_argument('--doerr',              action='store_true', default=True, help='Specify if statistical errors should be saved for nominal case')
+    parser.add_argument('--doSR',               action='store_true', default=True, help='Specify if the SR channels & hists should be run over, else defaults to CR')
+    parser.add_argument('--doPDF',              action='store_true', default=True, help='Specify if the PDF uncert should be done')
+    parser.add_argument('--syst-list',          default='all', action='extend', nargs='+', help='Specify if systematic variations should be calculated and saved')
 
     args        = parser.parse_args()
     inputFile   = args.inputFile
@@ -96,6 +100,10 @@ if __name__ == '__main__':
     proc        = args.processor
     ports       = args.port
     dtype       = args.dtype
+    doerr       = args.doerr
+    doSR        = args.doSR
+    doPDF       = args.doPDF
+    syst_list   = args.syst_list
 
     proc_file = proc+'.py'
     print("\n running with processor: ", proc_file, '\n')
@@ -177,7 +185,7 @@ if __name__ == '__main__':
         mgr.tune("hungry-minimum", 1)
         mgr.enable_monitoring(watchdog=False)
 
-        print(f'manager: {f"{os.environ['USER']}-ddr-coffea"}')
+        print(f'manager: {os.environ["USER"]}-ddr-coffea')
         # get X509 proxy file
         x509_proxy = f"/tmp/x509up_u{os.getuid()}"
         if not os.path.exists(x509_proxy):
@@ -207,9 +215,9 @@ if __name__ == '__main__':
                 data=input_data,
                 tree_name="Events",
                 timeout=30,
-                max_retries=20,
+                max_retries=5,
                 show_progress=True,
-                batch_size=5,
+                batch_size=20,
                 x509_proxy=x509_proxy,
             )
 
@@ -219,13 +227,13 @@ if __name__ == '__main__':
             mgr, #taskvine manager,
             data = preprocessed_data,
             processors = {
-                "ee": analysis_processor.AnalysisProcessor(samplesdict, 'ee', outname, wc_names_lst=wc_lst, do_errors=False, doPDF=False, doSR=True, syst_list=[]),
-                "mm": analysis_processor.AnalysisProcessor(samplesdict, 'mm', outname, wc_names_lst=wc_lst, do_errors=False, doPDF=False, doSR=True, syst_list=[]),
-                "em": analysis_processor.AnalysisProcessor(samplesdict, 'em', outname, wc_names_lst=wc_lst, do_errors=False, doPDF=False, doSR=True, syst_list=[]),
+                "ee": analysis_processor.AnalysisProcessor(samplesdict, 'ee', outname, wc_names_lst=wc_lst, do_errors=doerr, doPDF=doPDF, doSR=doSR, syst_list=syst_list),
+                "mm": analysis_processor.AnalysisProcessor(samplesdict, 'mm', outname, wc_names_lst=wc_lst, do_errors=doerr, doPDF=doPDF, doSR=doSR, syst_list=syst_list),
+                "em": analysis_processor.AnalysisProcessor(samplesdict, 'em', outname, wc_names_lst=wc_lst, do_errors=doerr, doPDF=doPDF, doSR=doSR, syst_list=syst_list),
             },
             extra_files = [proc_file, "proxy.pem"], 
             schema=NanoAODSchema,
-            max_task_retries= 20, # default=10
+            max_task_retries= 1, # default=10
             step_size=800000, #equivalent to chunksize, default=100k
             resources_processing={"cores": 1},
             resources_accumulating={"cores": 1},
