@@ -34,6 +34,7 @@ import ttbarEFT.modules.event_selection as tt_es
 import ttbarEFT.modules.corrections as tt_cor 
 from ttbarEFT.modules.processor_tools import calc_eft_weights
 from ttbarEFT.modules.processor_tools import get_syst_lists
+from ttbarEFT.modules.processor_tools import get_sum_pt
 
 from ttbarEFT.modules.analysis_tools import TensorAccumulator
 
@@ -419,18 +420,6 @@ class AnalysisProcessor(processor.ProcessorABC):
             bjets_sorted = bjets[ak.argsort(bjets.pt, axis=-1,ascending=False)] 
             bjets_padded = ak.pad_none(bjets_sorted, 2)
 
-            def get_sum_pt(obj_list):
-                total_px = 0
-                total_py = 0
-
-                for obj in obj_list:
-                    px = obj.pt * np.cos(obj.phi)
-                    py = obj.pt * np.sin(obj.phi)
-
-                    total_px = total_px + px
-                    total_py = total_py + py
-                return np.sqrt(px**2 + py**2)
-
             def get_sum_mass(obj_list):
                 # Manually calculate px, py, pz, and energy for each object
                 total_px = 0
@@ -570,7 +559,7 @@ class AnalysisProcessor(processor.ProcessorABC):
                         [l1.eta.to_numpy()],
                         [(ln + lp).pt.to_numpy()],
                         [mll.to_numpy()],
-                        [abs(ln.phi - lp.phi).to_numpy()],
+                        [abs((ln.phi - lp.phi + np.pi) % (2 * np.pi) - np.pi).to_numpy()],
                         [abs(ln.eta - lp.eta).to_numpy()],
                         [b0.pt.to_numpy()],
                         [b0.eta.to_numpy()],
