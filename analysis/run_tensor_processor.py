@@ -86,7 +86,7 @@ if __name__ == '__main__':
     parser.add_argument('--doerr',              action='store_true', default=True, help='Specify if statistical errors should be saved for nominal case')
     parser.add_argument('--doSR',               action='store_true', default=True, help='Specify if the SR channels & hists should be run over, else defaults to CR')
     parser.add_argument('--doPDF',              action='store_true', default=True, help='Specify if the PDF uncert should be done')
-    parser.add_argument('--syst-list',          default='all', action='extend', nargs='+', help='Specify if systematic variations should be calculated and saved')
+    parser.add_argument('--syst-list',          default=None, action='extend', nargs='+', help='Specify if systematic variations should be calculated and saved')
 
     args        = parser.parse_args()
     inputFile   = args.inputFile
@@ -111,6 +111,9 @@ if __name__ == '__main__':
     if proc == 'tensor_processor':
         import tensor_processor
         analysis_processor = tensor_processor
+    elif proc  == 'powheg':
+        import powheg_processor
+        analysis_processor =  powheg_processor
     elif proc == 'centralGen':
         import centralGen
         analysis_processor = centralGen
@@ -181,6 +184,7 @@ if __name__ == '__main__':
         mgr = vine.Manager(
             port=port, 
             name=f"{os.environ['USER']}-ddr-coffea",
+            run_info_path = "/groups/klannon/cmcgrad2/vine-run-info/"
         )
         mgr.tune("hungry-minimum", 1)
         mgr.enable_monitoring(watchdog=False)
@@ -215,7 +219,7 @@ if __name__ == '__main__':
                 data=input_data,
                 tree_name="Events",
                 timeout=30,
-                max_retries=5,
+                max_retries=10,
                 show_progress=True,
                 batch_size=20,
                 x509_proxy=x509_proxy,
@@ -235,10 +239,10 @@ if __name__ == '__main__':
             schema=NanoAODSchema,
             max_task_retries= 1, # default=10
             step_size=800000, #equivalent to chunksize, default=100k
-            resources_processing={"cores": 1},
-            resources_accumulating={"cores": 1},
+            resources_processing={"cores": 2},
+            resources_accumulating={"cores":2},
             results_directory=outname,
-            verbose=True,
+            verbose=False,
             x509_proxy=x509_proxy,
         )
         ddr.environment_variables["X509_USER_PROXY"] = "proxy.pem"

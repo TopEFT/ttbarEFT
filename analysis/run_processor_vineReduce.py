@@ -231,8 +231,7 @@ if __name__ == '__main__':
         # create TaskVine Manager
         mgr = vine.Manager(
             port=port, 
-            name=f"{os.environ['USER']}-vineReduce-{timestamp}",
-            run_info_path = "/project01/ndcms/hnelson2/vine-run-info/"
+            name=f"{os.environ['USER']}-ddr-coffea",
         )
         mgr.tune("hungry-minimum", 1)
         mgr.enable_monitoring(watchdog=False)

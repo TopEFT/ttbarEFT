@@ -20,6 +20,7 @@ class AnalysisProcessor(processor.ProcessorABC):
 
         makedirs(f'{outname}/train',       mode=0o755, exist_ok=True)
         makedirs(f'{outname}/test',        mode=0o755, exist_ok=True)
+#        makedirs(f'{outname}/validation',  mode=0o755, exist_ok=True)
         
     def accumulator(self):
         return self._accumulator
@@ -65,32 +66,40 @@ class AnalysisProcessor(processor.ProcessorABC):
                 eft_coeffs[negQuad, interference[i]:quadratic[i] + 1] = 0
 
         features = from_numpy(concatenate([[leps.pt[:,0].to_numpy()], #leading lepton
-                                           [leps.eta[:,0].to_numpy()],
-                                           [leps.phi[:,0].to_numpy()],
+#                                           [leps.eta[:,0].to_numpy()],
+#                                           [leps.phi[:,0].to_numpy()],
                                            [leps.pt[:,1].to_numpy()], #sub-leading lepton
-                                           [leps.eta[:,1].to_numpy()],
-                                           [leps.phi[:,1].to_numpy()],
+#                                           [leps.eta[:,1].to_numpy()],
+#                                           [leps.phi[:,1].to_numpy()],
                                            [leps.pt[nMask][:,0].to_numpy()], #leading negative lepton0
-                                           [leps.eta[nMask][:,0].to_numpy()],
-                                           [leps.phi[nMask][:,0].to_numpy()],
+#                                           [leps.eta[nMask][:,0].to_numpy()],
+#                                           [leps.phi[nMask][:,0].to_numpy()],
                                            [leps.pt[pMask][:,0].to_numpy()], #leading positive lepton 
-                                           [leps.eta[pMask][:,0].to_numpy()],
-                                           [leps.phi[pMask][:,0].to_numpy()],
+#                                           [leps.eta[pMask][:,0].to_numpy()],
+#                                           [leps.phi[pMask][:,0].to_numpy()],
                                            [dilep.pt.to_numpy()], #dilep system
                                            [dilep.mass.to_numpy()],
                                            [leps[nMask][:,0].delta_phi(leps[pMask][:,0]).to_numpy()],       # ln_lp
                                            [abs(leps[nMask][:,0].eta - leps[pMask][:,0].eta).to_numpy()],   # ln_lp
                                            [jets.pt[:,0].to_numpy()], #leading jet
-                                           [jets.eta[:,0].to_numpy()],
-                                           [jets.phi[:,0].to_numpy()],
+#                                           [jets.eta[:,0].to_numpy()],
+#                                           [jets.phi[:,0].to_numpy()],
                                            [jets.pt[:,1].to_numpy()], #sub-leading jet
-                                           [jets.eta[:,1].to_numpy()],
-                                           [jets.phi[:,1].to_numpy()],
+#                                           [jets.eta[:,1].to_numpy()],
+#                                           [jets.phi[:,1].to_numpy()],
                                            [dijet.pt.to_numpy()], #dijet system
                                            [dijet.mass.to_numpy()],
                                            [jets[:,0].delta_phi(jets[:,1]).to_numpy()], #                  j1_j2
                                            [abs(jets[:,0].eta - jets[:,1].eta).to_numpy()], #              j1_j2
-                                           [(dilep + dijet).mass.to_numpy()], # psuedo mtt
+                                           [jets[:,0].delta_phi(leps[pMask][:,0]).to_numpy()], #           j1_lp
+                                           [abs(jets[:,0].eta - leps[pMask][:,0].eta).to_numpy()], #       j1_lp
+                                           [jets[:,0].delta_phi(leps[nMask][:,0]).to_numpy()], #           j1_ln
+                                           [abs(jets[:,0].eta - leps[nMask][:,0].eta).to_numpy()], #       j1_ln
+                                           [jets[:,1].delta_phi(leps[pMask][:,0]).to_numpy()], #           j2_lp
+                                           [abs(jets[:,1].eta - leps[pMask][:,0].eta).to_numpy()], #       j2_lp
+                                           [jets[:,1].delta_phi(leps[nMask][:,0]).to_numpy()], #           j2_ln
+                                           [abs(jets[:,1].eta - leps[nMask][:,0].eta).to_numpy()], #       j2_ln
+                                           [(dilep + dijet).mass.to_numpy()], # other kinematics
                                            [num(jets).to_numpy()],  #                                      nJets
                                            [concatenate([[dijet.pt.to_numpy()], #lj0pt
                                                          [dilep.pt.to_numpy()], 
@@ -104,10 +113,15 @@ class AnalysisProcessor(processor.ProcessorABC):
             
         fit_coefs = from_numpy(eft_coeffs)
 
-        train, test = random_split(TensorDataset(features[massMask], fit_coefs[massMask]), [0.75, 0.25], generator=Generator().manual_seed(42))
+ #       train, test, validation, _ = random_split(TensorDataset(features[massMask], fit_coefs[massMask], nQuarks[massMask]), 
+ #                                              [0.25, 0.15, 0.15, 0.45], generator=Generator().manual_seed(42))
+        train, test, _ = random_split(TensorDataset(features[massMask], fit_coefs[massMask]), 
+                                               [0.5, 0.1, 0.4], generator=Generator().manual_seed(42))
+        _ = None
 
-        save(TensorDataset(train[:][0], train[:][1]), f'{self._outname}/train/{int(time())}{randint(1000000,9999999)}.p')
+        save(TensorDataset(train[:][0], train[:][1]),  f'{self._outname}/train/{int(time())}{randint(1000000,9999999)}.p')
         save(TensorDataset(test[:][0],  test[:][1]),  f'{self._outname}/test/{int(time())}{randint(1000000,9999999)}.p')
+#        save(TensorDataset(validation[:][0], validation[:][1], validation[:][2]),  f'{self._outname}/validation/{int(time())}{randint(1000000,9999999)}.p')
 
         output = {'out':  out}
 
